@@ -1,0 +1,29 @@
+# Rime build/runtime artifacts
+build/
+deploy/
+*.userdb/
+*.userdb.txt
+*.prism.bin
+*.prism.txt
+*.table.bin
+*.table.txt
+*.reverse.bin
+
+# Local sync/runtime files
+sync/
+installation.yaml
+user.yaml
+*.log
+LOCK
+CURRENT
+MANIFEST-*
+*.ldb
+
+# Tool caches
+.cache/
+.tmp/
+__pycache__/
+
+# Editor/agent local state
+.claude/
+.agents/tasks/
