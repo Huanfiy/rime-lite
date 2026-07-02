@@ -4,50 +4,10 @@
 #@/db_type	tabledb
 #
 # rime-lite 个人固定短语（词汇<Tab>编码<Tab>权重，权重可省略）
-# 迁移自 rime-ice 工程 custom_phrase.txt（2026-07-02），词条区整体保留，仅重写本头部注释。
+# 迁移自 rime-ice 工程 custom_phrase.txt（2026-07-02），删除明显非领域示例词。
 # 由方案中 custom_phrase/initial_quality: 99 提升权重，词条排在候选首位。
 #
 # 此行之后不能写注释
-
-噷	hm
-呣	m
-呒	m
-
-有	u	3
-又	u	2
-由	u	1
-
-一	i	4
-以	i	3
-已	i	2
-亦	i	1
-
-一个	ig
-有个	ug
-是一个	sig
-有一个	uig
-有一个	uyig
-有一个	uyige
-有没有	umu
-有没有	umeiu
-又有	uu
-又又又	uuu
-又双叒叕	uuuu
-
-go	go
-Golang	golang
-Hugo	hugo
-goto	goto
-domain	domain
-TODO	todo
-Dota	dota
-main	main
-Amazon	amazon
-NASA	nasa
-gone	gone
-Go程	gocheng
-code	code
-SOHO	soho
 
 智能 B 柱	znbz
 身份验证	sfyz
