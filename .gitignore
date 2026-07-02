@@ -14,6 +14,14 @@ sync/
 installation.yaml
 user.yaml
 *.log
+
+# glog 日志（librime 工具 / 探针，命名如 rime.xxx.host.user.log.INFO.<date>.<pid>）
+*.log.INFO.*
+*.log.WARNING.*
+*.log.ERROR.*
+*.INFO
+*.WARNING
+*.ERROR
 LOCK
 CURRENT
 MANIFEST-*
@@ -27,3 +35,6 @@ __pycache__/
 # Editor/agent local state
 .claude/
 .agents/tasks/
+
+# 1-ref 归档的参考材料不受运行态忽略规则影响
+!docs/1-ref/**
