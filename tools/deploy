@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+# rime-lite 部署脚本（软链接切换模式，见 docs/3-sol/architecture.md §6 / D-11）
+#
+# 模型：fcitx5 的 Rime 用户目录 ~/.local/share/fcitx5/rime 是一个软链接，
+#       指向当前激活工程的配置目录。rime-lite 与 rime-ice 为平级工程，
+#       切换 = 重指链接，互不修改对方文件。
+#
+# 行为约定：
+#   - 只创建 / 重指软链接，不复制文件；遇到真实目录一律停止，不覆盖、不删除。
+#   - 首次运行做一次性环境转换：若 ~/.local/share/fcitx5 本身是指向同步目录的
+#     软链接，转换为真实目录，并对其余条目（addon、themes 等）逐项建立软链接，
+#     原目录内容不受影响。
+#   - 切换后需重启 fcitx5（fcitx5 -rd 或注销重登）生效，脚本不代为执行。
+#
+# 用法:
+#   tools/deploy              激活本工程（仓库 rime/ 目录）
+#   tools/deploy --to <dir>   激活其他工程（如切回 rime-ice:
+#                             --to /home/huan/sync/rime-ice）
+#   tools/deploy --status     查看当前激活的工程
+#   tools/deploy --yes        跳过确认
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+FX_DIR="$HOME/.local/share/fcitx5"
+LINK="$FX_DIR/rime"
+DEST="$REPO_DIR/rime"
+ASSUME_YES=0
+STATUS_ONLY=0
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --to)     DEST="$(readlink -f "${2:?--to 需要参数}")"; shift 2 ;;
+    --status) STATUS_ONLY=1; shift ;;
+    --yes)    ASSUME_YES=1; shift ;;
+    *) echo "用法: tools/deploy [--to <dir>] [--status] [--yes]" >&2; exit 2 ;;
+  esac
+done
+
+current() {
+  if [ -L "$LINK" ]; then
+    readlink -f "$LINK"
+  elif [ -e "$LINK" ]; then
+    echo "<真实目录（非软链接）: $LINK>"
+  else
+    echo "<未设置>"
+  fi
+}
+
+if [ "$STATUS_ONLY" -eq 1 ]; then
+  echo "当前激活: $(current)"
+  exit 0
+fi
+
+confirm() {
+  [ "$ASSUME_YES" -eq 1 ] && return 0
+  read -r -p "$1 [y/N] " ans
+  case "$ans" in
+    y|Y) ;;
+    *) echo "已取消，未做任何修改。"; exit 1 ;;
+  esac
+}
+
+[ -d "$DEST" ] || { echo "错误: 目标工程目录不存在: $DEST" >&2; exit 1; }
+[ -f "$DEST/default.yaml" ] || { echo "错误: $DEST 不是 Rime 配置目录（缺 default.yaml）" >&2; exit 1; }
+
+# 一次性环境转换：~/.local/share/fcitx5 若是软链接，换成真实目录 + 逐项软链接
+if [ -L "$FX_DIR" ]; then
+  share_target="$(readlink -f "$FX_DIR")"
+  echo "检测到 $FX_DIR 是软链接 -> $share_target"
+  echo "将做一次性转换（$share_target 的内容不受影响）:"
+  echo "  1. 删除该软链接，原地创建真实目录"
+  echo "  2. 对其中除 rime 外的条目逐项建立软链接:"
+  shopt -s nullglob dotglob
+  for e in "$share_target"/*; do
+    name="$(basename "$e")"
+    [ "$name" = "rime" ] && continue
+    echo "       $name -> $e"
+  done
+  confirm "继续?"
+  rm "$FX_DIR"
+  mkdir "$FX_DIR"
+  for e in "$share_target"/*; do
+    name="$(basename "$e")"
+    [ "$name" = "rime" ] && continue
+    ln -s "$e" "$FX_DIR/$name"
+  done
+  shopt -u nullglob dotglob
+  echo "转换完成。"
+fi
+
+if [ -e "$LINK" ] && [ ! -L "$LINK" ]; then
+  echo "错误: $LINK 是真实目录，本脚本不删除真实目录，请先人工处理。" >&2
+  exit 1
+fi
+
+echo "当前激活: $(current)"
+echo "切换到:   $DEST"
+confirm "继续?"
+ln -sfn "$DEST" "$LINK"
+
+echo "完成。当前激活: $(readlink -f "$LINK")"
+echo "请重启 fcitx5 生效（fcitx5 -rd 或注销重登），脚本不代为执行。"
