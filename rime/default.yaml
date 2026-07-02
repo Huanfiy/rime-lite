@@ -16,7 +16,7 @@ config_version: '2026-07-02'
 
 # 方案列表
 schema_list:
-  - schema: huan_pinyin   # 主方案：最小全拼
+  - schema: pinyin        # 主方案：最小全拼
   - schema: melt_eng      # 独立英文方案
 
 

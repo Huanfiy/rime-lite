@@ -1,7 +1,7 @@
 # ------- vendor 记录 -------
 # 来源: rime-ice 工程 cn_dicts/8105.dict.yaml (/home/huan/sync/fcitx5/share/rime)
 # vendor 日期: 2026-07-02
-# 本地修改: 无（内部 name: 8105 保持不变，import 路径为 char-lib/8105）
+# 本地修改: 无（内部 name: 8105 保持不变，import 路径为 cn_dicts/8105）
 # ---------------------------
 # Rime dictionary
 # encoding: utf-8

@@ -9,8 +9,8 @@
 #   - translators 仅保留：标点、拼音、custom_phrase、melt_eng
 
 schema:
-  schema_id: huan_pinyin
-  name: 拼音 lite
+  schema_id: pinyin
+  name: pinyin
   version: "2026-07-02"
   author:
     - huan
@@ -79,7 +79,7 @@ speller:
 
 # 主翻译器，拼音
 translator:
-  dictionary: huan_pinyin
+  dictionary: pinyin
   enable_user_dict: true   # 本机学习缓存（userdb），不进 Git，见 architecture.md §7
   initial_quality: 1.2     # 拼音权重高于 melt_eng
   preedit_format:
