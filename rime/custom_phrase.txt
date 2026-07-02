@@ -1,0 +1,301 @@
+# Rime table
+# coding: utf-8
+#@/db_name	custom_phrase.txt
+#@/db_type	tabledb
+#
+# rime-lite 个人固定短语（词汇<Tab>编码<Tab>权重，权重可省略）
+# 迁移自 rime-ice 工程 custom_phrase.txt（2026-07-02），词条区整体保留，仅重写本头部注释。
+# 由方案中 custom_phrase/initial_quality: 99 提升权重，词条排在候选首位。
+#
+# 此行之后不能写注释
+
+噷	hm
+呣	m
+呒	m
+
+有	u	3
+又	u	2
+由	u	1
+
+一	i	4
+以	i	3
+已	i	2
+亦	i	1
+
+一个	ig
+有个	ug
+是一个	sig
+有一个	uig
+有一个	uyig
+有一个	uyige
+有没有	umu
+有没有	umeiu
+又有	uu
+又又又	uuu
+又双叒叕	uuuu
+
+go	go
+Golang	golang
+Hugo	hugo
+goto	goto
+domain	domain
+TODO	todo
+Dota	dota
+main	main
+Amazon	amazon
+NASA	nasa
+gone	gone
+Go程	gocheng
+code	code
+SOHO	soho
+
+智能 B 柱	znbz
+身份验证	sfyz
+
+STM32	stm	90
+ESP32	esp	85
+Arduino	arduino	80
+EEPROM	ee	70
+SRAM	sr	75
+DRAM	dr	65
+ROM	ro	60
+UART	ua	90
+SPI	sp	85
+I2C	i2	80
+CAN	ca	75
+WiFi	wi	85
+蓝牙	lan ya	80
+Bluetooth	bl	75
+Zigbee	zi	65
+LoRa	lo	60
+NFC	nf	55
+Modbus	mo	55
+USB	us	75
+SATA	sa	45
+HDMI	hd	40
+MQTT	mq	80
+HTTP	ht	85
+HTTPS	https	80
+TCP	tc	90
+UDP	ud	75
+DHCP	dh	60
+DNS	dn	65
+FTP	ft	55
+SSH	ss	60
+SNMP	sn	50
+CoAP	co	45
+WebSocket	we	55
+JSON	js	70
+XML	xm	60
+YAML	ya	50
+Protobuf	pr	45
+GPS	gp	75
+LED	le	85
+LCD	lc	80
+OLED	ol	75
+PWM	pw	80
+DAC	da	75
+ADC	ad	85
+IDE	id	80
+JTAG	jt	65
+SWD	sw	60
+PlatformIO	pio	75
+OpenOCD	openocd	75
+FreeRTOS	fr	75
+FreeRTOS	freertos	75
+PCB	pc	80
+LDO	ld	70
+BMS	bm	55
+IoT	io	85
+OTA	ot	58
+PID	pi	70
+FFT	ff	55
+CNN	cn	50
+OpenCV	opencv	75
+OCR	oc	52
+AES	ae	50
+PLC	plc	75
+SCADA	sc	55
+HMI	hmi	80
+DCS	dc	50
+OBD	ob	50
+ECU	ec	55
+SLAM	sl	45
+ROS	ros	75
+MPPT	mp	45
+
+Cortex-M0	m0	65
+Cortex-M3	m3	70
+Cortex-M4	m4	75
+Cortex-M7	m7	68
+Cortex-A7	a7	60
+Cortex-A8	a8	58
+Cortex-A9	a9	62
+Cortex-A15	a15	55
+Cortex-A53	a53	60
+Cortex-A72	a72	58
+Intel x86	intel-x86	55
+Intel Atom	intel-atom	48
+Qualcomm	qualcomm	50
+Snapdragon	snapdragon	52
+MediaTek	mediatek	48
+Renesas	renesas	45
+Freescale	freescale	45
+Atmel	atmel	48
+Microchip	microchip	50
+Cypress	cypress	42
+Silicon Labs	silicon-labs	40
+Nordic	nordic	45
+Espressif	espressif	48
+E-ink	eink	45
+Type-C	typec	58
+Telnet	telnet	45
+MessagePack	messagepack	40
+Binary	binary	50
+Hex	hex	55
+Base64	base64	48
+Unicode	unicode	45
+Thunderbolt	thunderbolt	35
+DisplayPort	displayport	35
+Touchscreen	touchscreen	55
+ThreadX	threadx	50
+Contiki	contiki	40
+NuttX	nuttx	42
+VxWorks	vxworks	50
+Xenomai	xenomai	35
+Code Composer	codecomposer	40
+Eclipse	eclipse	50
+QtCreator	qtcreator	45
+J-Link	jlink	55
+Segger	segger	40
+Atmel Studio	atmel-studio	50
+GPIO	gpio	100
+DMA	dma	95
+RTC	rtc	90
+IRQ	irq	90
+ISR	isr	90
+NVIC	nvic	90
+SysTick	systick	90
+HAL	hal	90
+BSP	bsp	90
+SDK	sdk	85
+MCU	mcu	95
+CPU	cpu	90
+RTOS	rtos	85
+IIC	iic	85
+USART	usart	85
+RS485	rs485	85
+RS232	rs232	80
+TTL	ttl	80
+MOSFET	mosfet	80
+QSPI	qspi	75
+SDIO	sdio	75
+SDMMC	sdmmc	75
+CANFD	canfd	75
+BLE	ble	75
+PHY	phy	75
+MAC	mac	70
+LAN	lan	70
+WAN	wan	70
+CRC	crc	85
+DMA2D	dma2d	70
+FPU	fpu	70
+MPU	mpu	70
+NPU	npu	70
+GDB	gdb	75
+LLDB	lldb	60
+GCC	gcc	75
+CMake	cmake	75
+Makefile	makefile	75
+Kconfig	kconfig	65
+Devicetree	devicetree	65
+Device Tree	devicetree2	60
+占空比	zkb	100
+高电平时间	gdpsj	100
+低电平时间	ddpsj	100
+高电平有效	gdpyx	100
+低电平有效	ddpyx	100
+输入捕获	srbh	100
+输出比较	scbj	100
+比较匹配	bjpp	100
+预分频	yfp	100
+自动重装载	zdzzz	100
+死区时间	sqsj	100
+推挽输出	twsc	100
+开漏输出	klsc	100
+上升沿	ssy	100
+下降沿	xjy	100
+采样时间	cysj	100
+采样周期	cyzq	100
+波特率	btl	100
+通用输入输出	tysrsc	100
+上拉电阻	sldz	100
+下拉电阻	xldz	100
+浮空输入	fksr	100
+模拟输入	mnsr	100
+复用功能	fygn	100
+预分频器	yfpq	100
+自动重装载寄存器	zdzzzjcq	100
+重装载值	czz	100
+捕获比较	bhbj	100
+捕获比较寄存器	bhbjjcq	100
+影子寄存器	yzjcq	100
+计数器溢出	jsqyc	100
+中心对齐	zxdq	100
+边沿对齐	bydq	100
+向上计数	xsjs	100
+向下计数	xxjs	100
+互补输出	hbsc	100
+边沿触发	bycf	100
+电平触发	dpcf	100
+建立时间	jlsj	100
+保持时间	bcsj	100
+采样率	cyl	100
+过采样	gcy	100
+外部中断	wbzd	100
+中断优先级	zdyxj	100
+中断向量表	zdxlb	100
+中断服务函数	zdfwhs	100
+中断服务程序	zdfwcx	100
+临界区	ljq	100
+原子操作	yzcz	100
+互斥锁	hcs	100
+信号量	xhl	100
+消息队列	xxdl	100
+任务调度	rwdd	100
+任务栈	rwz	100
+上下文切换	sxwqh	100
+优先级反转	yxjfz	100
+时钟树	szs	100
+时钟源	szy	100
+系统时钟	xtsz	100
+总线时钟	zxsz	100
+总线频率	zxpl	100
+外部晶振	wbjz	100
+内部时钟	nbsz	100
+锁相环	sxh	100
+低功耗模式	dghms	100
+睡眠模式	smms	100
+停止模式	tzms	100
+待机模式	djms	100
+硬件抽象层	yjccc	100
+板级支持包	bjzcb	100
+片上外设	psws	100
+独立看门狗	dlkmg	100
+窗口看门狗	ckkmg	100
+看门狗	kmg	100
+喂狗	wg	100
+调试串口	dsck	100
+日志级别	rzjb	100
+状态机	ztj	100
+环形缓冲区	hxhcq	100
+接收缓冲区	jshcq	100
+发送缓冲区	fshcq	100
+回调函数	hths	100
+函数指针	hszz	100
+空指针	kzz	100
+野指针	yzz	100
+内存泄漏	ncxl	100
+栈溢出	zyc	100
+堆溢出	dyc	100
+断言	dy	100

@@ -1,0 +1,44 @@
+# Rime dictionary
+# encoding: utf-8
+#
+# rime-lite 主词库入口：仅负责 import，自身不含拼音词条。
+# 新增词库时只修改本文件的 import_tables 列表（见 docs/3-sol/architecture.md §4.3）。
+# 文末大写字母区段迁移自 rime-ice 工程 rime_ice_huan.dict.yaml（2026-07-02）。
+
+---
+name: huan_pinyin
+version: "2026-07-02"
+import_tables:
+  - char-lib/8105   # 《通用规范汉字表》字表
+  - char-lib/base   # 基础词库
+...
+
+# 大写字母
+# 可在拼音方案下直接输入大写字母（Shift + 字母），大写字母参与造句。
+# 示例：输入 `zuogeDNAjiance` 得到 `做个DNA检测`
+A	A
+B	B
+C	C
+D	D
+E	E
+F	F
+G	G
+H	H
+I	I
+J	J
+K	K
+L	L
+M	M
+N	N
+O	O
+P	P
+Q	Q
+R	R
+S	S
+T	T
+U	U
+V	V
+W	W
+X	X
+Y	Y
+Z	Z

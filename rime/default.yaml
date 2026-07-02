@@ -1,0 +1,146 @@
+# Rime default settings
+# encoding: utf-8
+#
+# rime-lite 全局配置
+# 依据 docs/3-sol/architecture.md §4.1，参考 rime-ice 工程 default.yaml 裁剪（2026-07-02）。
+# 裁剪说明：
+#   - 移除 navigator 段（需 librime >= 1.16.0；本机 fcitx5-rime 5.1.4 使用 librime 1.10.0，该段无效）
+#   - 移除 punctuator/digit_separators（需 librime >= 1.13.0）
+#   - 移除简繁、Emoji、Lua 相关的开关记忆与快捷键
+#   - 移除以词定字、小键盘映射等依赖 Lua 功能的 key_binder 项
+
+
+# 要比共享目录同名文件的 config_version 大才可生效
+config_version: '2026-07-02'
+
+
+# 方案列表
+schema_list:
+  - schema: huan_pinyin   # 主方案：最小全拼
+  - schema: melt_eng      # 独立英文方案
+
+
+# 菜单
+menu:
+  page_size: 5
+
+
+# 方案选单
+switcher:
+  caption: 「方案选单」
+  hotkeys:
+    - F4
+    - Control+Shift+grave
+  save_options:
+    - ascii_punct
+    - full_shape
+  fold_options: true
+  abbreviate_options: true
+  option_list_separator: ' / '
+
+
+# 中西文切换
+ascii_composer:
+  good_old_caps_lock: true
+  switch_key:
+    Caps_Lock: clear
+    Shift_L: commit_code
+    Shift_R: noop
+    Control_L: noop
+    Control_R: noop
+
+
+# 标点符号（映射为单个值则直接上屏，映射为列表则进入复选）
+punctuator:
+  full_shape:
+    ' ' : { commit: '　' }
+    ',' : { commit: ， }
+    '.' : { commit: 。 }
+    '<' : [ 《, 〈, «, ‹ ]
+    '>' : [ 》, 〉, », › ]
+    '/' : [ ／, ÷ ]
+    '?' : { commit: ？ }
+    ';' : { commit: ； }
+    ':' : { commit: ： }
+    '''' : { pair: [ '‘', '’' ] }
+    '"' : { pair: [ '“', '”' ] }
+    '\' : [ 、, ＼ ]
+    '|' : [ ·, ｜, '§', '¦' ]
+    '`' : ｀
+    '~' : ～
+    '!' : { commit: ！ }
+    '@' : [ ＠, ☯ ]
+    '#' : [ ＃, ⌘ ]
+    '%' : [ ％, '°', '℃' ]
+    '$' : [ ￥, '$', '€', '£', '¥', '¢', '¤' ]
+    '^' : { commit: …… }
+    '&' : ＆
+    '*' : [ ＊, ·, ・, ×, ※, ❂ ]
+    '(' : （
+    ')' : ）
+    '-' : －
+    '_' : ——
+    '+' : ＋
+    '=' : ＝
+    '[' : [ 「, 【, 〔, ［ ]
+    ']' : [ 」, 】, 〕, ］ ]
+    '{' : [ 『, 〖, ｛ ]
+    '}' : [ 』, 〗, ｝ ]
+  half_shape:
+    ',' : '，'
+    '.' : '。'
+    '<' : '《'
+    '>' : '》'
+    '/' : '/'
+    '?' : '？'
+    ';' : '；'
+    ':' : '：'
+    '''' : { pair: [ '‘', '’' ] }
+    '"' : { pair: [ '“', '”' ] }
+    '\' : '、'
+    '|' : '|'
+    '`' : '·'
+    '~' : '~'
+    '!' : '！'
+    '@' : '@'
+    '#' : '#'
+    '%' : '%'
+    '$' : '¥'
+    '^' : '……'
+    '&' : '&'
+    '*' : '*'
+    '(' : '（'
+    ')' : '）'
+    '-' : '-'
+    '_' : ——
+    '+' : '+'
+    '=' : '='
+    '[' : '【'
+    ']' : '】'
+    '{' : '「'
+    '}' : '」'
+
+
+# 特定规则的输入码（不上屏处理）
+recognizer:
+  patterns:
+    email: "^[A-Za-z][-_.0-9A-Za-z]*@.*$"                            # email @ 之后不上屏
+    url: "^(www[.]|https?:|ftp[.:]|mailto:|file:).*$|^[a-z]+[.].+$"  # URL
+    underscore: "^[A-Za-z]+_.*"                                      # 下划线不上屏
+
+
+# 快捷键
+key_binder:
+  bindings:
+    # Tab / Shift+Tab 切换光标至下 / 上一个拼音
+    - { when: composing, accept: Shift+Tab, send: Shift+Left }
+    - { when: composing, accept: Tab, send: Shift+Right }
+    # Alt + ←/→ 切换光标至下 / 上一个拼音
+    - { when: composing, accept: Alt+Left, send: Shift+Left }
+    - { when: composing, accept: Alt+Right, send: Shift+Right }
+    # 翻页 - =
+    - { when: has_menu, accept: minus, send: Page_Up }
+    - { when: has_menu, accept: equal, send: Page_Down }
+    # 切换中英标点
+    - { when: always, toggle: ascii_punct, accept: Control+Shift+3 }
+    - { when: always, toggle: ascii_punct, accept: Control+Shift+numbersign }

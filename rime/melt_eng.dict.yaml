@@ -1,0 +1,17 @@
+# ------- vendor 记录 -------
+# 来源: rime-ice 工程 melt_eng.dict.yaml (/home/huan/sync/fcitx5/share/rime)
+# vendor 日期: 2026-07-02
+# 本地修改: 移除 import_tables 中的 en_dicts/en_ext（首版仅挂英文主词库）
+# ---------------------------
+# Rime dictionary
+# encoding: utf-8
+#
+# 挂载英文输入方案的词库
+#
+
+---
+name: melt_eng
+version: "2023-05-09"
+import_tables:
+  - en_dicts/en     # 英文主词库
+...
