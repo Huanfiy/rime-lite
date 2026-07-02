@@ -10,7 +10,7 @@
 
 schema:
   schema_id: pinyin
-  name: pinyin
+  name: 拼音
   version: "2026-07-02"
   author:
     - huan
