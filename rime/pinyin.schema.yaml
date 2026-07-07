@@ -2,7 +2,7 @@
 # encoding: utf-8
 #
 # rime-lite 主方案：最小全拼
-# 依据 docs/3-sol/architecture.md §4.2，参考 rime-ice 工程 rime_ice.schema.yaml 裁剪（2026-07-02）。
+# 依据 docs/design/architecture.md §4.2，参考 rime-ice 工程 rime_ice.schema.yaml 裁剪（2026-07-02）。
 # 相对 rime-ice 的取舍：
 #   - 零 Lua、零 OpenCC filter（无 Emoji、无简繁切换、无置顶 / 降频）
 #   - speller 保留超级简拼与 v/ü 转换，不引入模糊音与自动纠错

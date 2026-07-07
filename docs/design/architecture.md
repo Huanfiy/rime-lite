@@ -5,7 +5,7 @@
 | --------- | ---------------------------------------------------------------------------------------- |
 | 创建日期      | 2026-07-02                                                                               |
 | 状态        | 已拍板，作为首版实施依据                                                                             |
-| 决策推导      | [2026-07-01 架构评审待确认事项](../2-exp/analysis/2026-07-01-architecture-open-questions.md)      |
+| 决策推导      | [2026-07-01 架构评审待确认事项](../notes/analysis/2026-07-01-architecture-open-questions.md)      |
 | 原始计划      | `.agents/plans/2026-06-25-rime-lite-project-plan.md`（已移出工作区，git 历史 `d764656` 可查）         |
 | vendor 来源 | rime-ice 工程，现位于 `/home/huan/sync/rime-ice`（vendor 当日位于 `/home/huan/sync/fcitx5/share/rime`，2026-07-02 迁出） |
 | 部署目标      | `/home/huan/.local/share/fcitx5/rime`                                                    |
@@ -35,7 +35,7 @@
 
 ## 2. 决策记录
 
-2026-07-01 评审已确认的结论（推导过程见 [2-exp 评审文档](../2-exp/analysis/2026-07-01-architecture-open-questions.md)）：
+2026-07-01 评审已确认的结论（推导过程见 [notes 评审文档](../notes/analysis/2026-07-01-architecture-open-questions.md)）：
 
 
 | 编号   | 决策                                                                       |
@@ -69,7 +69,7 @@
 | D-13 | 个人领域词库合并挂载（阶段 2） | rime-ice 的 `embedded` 与 `embedded_huan` 合并为单一 `cn_dicts/embedded.dict.yaml`（同词同音去重取高权重，552 条）；`mydict.dict.yaml` 原样迁移（3 条）；均经 `pinyin.dict.yaml` 的 `import_tables` 挂载 |
 | D-14 | userdb 晋升标准（阶段 3） | 分析源为 rime-ice 两份 userdb 导出（D-2，git 历史 `6438887`）；按（词、拼音）合并两份 c 值，门槛 c_total ≥ 3；排除 c ≤ 0、单字、已收录词（base / 8105 / embedded / mydict / custom_phrase / A–Z 词条）；人工剔除组句残留与错词；晋升词条以 `# ========== userdb 晋升 (日期) ==========` 分区追加至目标词库，统一权重 100 |
 | D-15 | 词库长期维护流程 SOP 化 | 日常加词与周期性晋升按 [lexicon-sop.md](lexicon-sop.md) 执行；晋升分析源自 rime-ice 归档导出扩展为现役 `pinyin.userdb` 导出（Rime 原生同步产物为主路径）；候选分析固化为 `tools/userdb-candidates`（机械筛选，D-14 规则），人工审定环节不可省略 |
-| D-16 | 记录与清理规则落档 | 信息治理规则见根目录 [housekeeping.md](../../housekeeping.md)：工作区只保留当前事实与未决过程，历史由 git 承担；记录门槛、清理触发点 / 判据 / 方式及既有先例见该文件 |
+| D-16 | 记录与清理规则落档 | 信息治理规则见根目录 [docs-rules.md](../../docs-rules.md)：工作区只保留当前事实与未决过程，历史由 git 承担；记录门槛、清理触发点 / 判据 / 方式及既有先例见该文件 |
 
 
 未决事项：OQ-2（AI daemon 延迟模型与 Lua socket 可行性）不阻塞首版，前置动作为独立的 socket 能力探针，见第 8 节。

@@ -6,7 +6,7 @@
 | 创建日期 | 2026-07-01                                                                                                          |
 | 评审对象 | `[.agents/plans/2026-06-25-rime-lite-project-plan.md](../../../.agents/plans/2026-06-25-rime-lite-project-plan.md)` |
 | 参考项目 | `/home/huan/sync/fcitx5/share/rime`(现用 rime-ice 工程)                                                                 |
-| 状态   | 已确认决策保留在"确认结论";已废弃项不再进入待确认列表;其余事项进入阶段 1 前需拍板;拍板后把结论搬入 `[../../3-sol](../../3-sol)`                                  |
+| 状态   | 已确认决策保留在"确认结论";已废弃项不再进入待确认列表;其余事项进入阶段 1 前需拍板;拍板后把结论搬入 `[../../design](../../design)`                                  |
 | 结论摘要 | 核心三原则(源/产物分离、热路径最小化、插件化)方向正确;输入学习采用"静态源进 Git、本机即时学习用 Rime userdb、定期导出后审核晋升"架构;主要剩余风险在"AI daemon"抽象                  |
 
 
@@ -21,7 +21,7 @@
 - 个人词库:阶段 1/2 使用 Rime 原生格式(`custom_phrase.txt` + `dict.yaml`);暂不引入 YAML → dict 构建层。
 - 多机同步:Git 同步工程源;Rime 原生同步仅作运行态备份与迁移输入。
 
-2026-07-02 拍板新增(结论已落档 [../../3-sol/architecture.md](../../3-sol/architecture.md)):
+2026-07-02 拍板新增(结论已落档 [../../design/architecture.md](../../design/architecture.md)):
 
 - 英文输入:挂载 `melt_eng` 与 `en_dicts/en`,推翻 OQ-9 原倾向;理由:日常英文输入量不可忽略,仅靠固定词条不可接受。
 - Emoji:数据来源维持 OQ-8 结论(vendor rime-ice opencc);首版最小配置暂不挂载。
@@ -76,13 +76,13 @@
 
 **倾向**:直接 vendor rime-ice 的 opencc emoji 文件,不改成"结构化源再生成",无收益。
 
-**状态**:已拍板(2026-07-02)。数据来源按倾向确认;首版最小配置暂不挂载 Emoji,列为扩展挂载点,见 [3-sol/architecture.md](../../3-sol/architecture.md) D-9。
+**状态**:已拍板(2026-07-02)。数据来源按倾向确认;首版最小配置暂不挂载 Emoji,列为扩展挂载点,见 [design/architecture.md](../../design/architecture.md) D-9。
 
 ### OQ-9 首版英文输入范围
 
 **倾向**:仅保留固定英文技术词(走 `fixed_phrase`),不挂 `melt_eng` 大型英文词库与 `cn_en` 混输(与计划 5.2 一致)。需确认日常英文输入量是否可接受。
 
-**状态**:已拍板(2026-07-02),推翻倾向——挂载 `melt_eng` 与 `en_dicts/en`(`cn_en` 混输词库维持不引入)。理由:日常英文输入量不可忽略,仅靠固定词条不可接受。见 [3-sol/architecture.md](../../3-sol/architecture.md) D-7。
+**状态**:已拍板(2026-07-02),推翻倾向——挂载 `melt_eng` 与 `en_dicts/en`(`cn_en` 混输词库维持不引入)。理由:日常英文输入量不可忽略,仅靠固定词条不可接受。见 [design/architecture.md](../../design/architecture.md) D-7。
 
 ### OQ-10 多机同步主路径
 
@@ -102,6 +102,6 @@
 
 1. 逐项拍板未确认事项(P0 优先)。
 2. OQ-2 的 socket 可行性探针可独立于其他决策先行。
-3. 拍板结论搬入 `[../../3-sol](../../3-sol)`,本文件保留推导过程。(2026-07-02 已完成:[architecture.md](../../3-sol/architecture.md),覆盖除 OQ-2 外全部事项)
+3. 拍板结论搬入 `[../../design](../../design)`,本文件保留推导过程。(2026-07-02 已完成:[architecture.md](../../design/architecture.md),覆盖除 OQ-2 外全部事项)
 4. 依结论回改 `[.agents/plans/2026-06-25-rime-lite-project-plan.md](../../../.agents/plans/2026-06-25-rime-lite-project-plan.md)`(尤其目录结构与阶段划分)。
 

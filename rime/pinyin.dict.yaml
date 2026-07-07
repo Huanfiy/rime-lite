@@ -2,7 +2,7 @@
 # encoding: utf-8
 #
 # rime-lite 主词库入口：仅负责 import，自身不含拼音词条。
-# 新增词库时只修改本文件的 import_tables 列表（见 docs/3-sol/architecture.md §4.3）。
+# 新增词库时只修改本文件的 import_tables 列表（见 docs/design/architecture.md §4.3）。
 # 文末大写字母区段迁移自 rime-ice 工程 rime_ice_huan.dict.yaml（2026-07-02）。
 
 ---

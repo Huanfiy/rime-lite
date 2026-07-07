@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# rime-lite userdb 晋升候选分析工具（只读，见 docs/3-sol/architecture.md D-14）
+# rime-lite userdb 晋升候选分析工具（只读，见 docs/design/architecture.md D-14）
 #
 # 模型：周期性把 Rime userdb 导出为文本（rime_dict_manager -b / 原生同步产物
 #       sync/<installation_id>/pinyin.userdb.txt，格式「拼音<Tab>词<Tab>c=.. d=.. t=..」），

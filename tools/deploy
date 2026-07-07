@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# rime-lite 部署脚本（软链接切换模式，见 docs/3-sol/architecture.md §6 / D-11）
+# rime-lite 部署脚本（软链接切换模式，见 docs/design/architecture.md §6 / D-11）
 #
 # 模型：fcitx5 的 Rime 用户目录 ~/.local/share/fcitx5/rime 是一个软链接，
 #       指向当前激活工程的配置目录。rime-lite 与 rime-ice 为平级工程，

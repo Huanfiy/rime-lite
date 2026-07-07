@@ -2,7 +2,7 @@
 # encoding: utf-8
 #
 # rime-lite 全局配置
-# 依据 docs/3-sol/architecture.md §4.1，参考 rime-ice 工程 default.yaml 裁剪（2026-07-02）。
+# 依据 docs/design/architecture.md §4.1，参考 rime-ice 工程 default.yaml 裁剪（2026-07-02）。
 # 裁剪说明：
 #   - 移除 navigator 段（需 librime >= 1.16.0；本机 fcitx5-rime 5.1.4 使用 librime 1.10.0，该段无效）
 #   - 移除 punctuator/digit_separators（需 librime >= 1.13.0）

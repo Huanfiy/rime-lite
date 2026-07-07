@@ -100,7 +100,7 @@ rime_deployer --build /tmp/rime-staging /usr/share/rime-data
 
 ### 3.6 提交
 
-词库改动与文档回写分笔提交，按仓库 commit 约定。本轮筛选口径（阈值、剔除数、晋升数）记入提交说明或 3-sol 文档，便于回溯。
+词库改动与文档回写分笔提交，按仓库 commit 约定。本轮筛选口径（阈值、剔除数、晋升数）记入提交说明或 design 文档，便于回溯。
 
 ## 4. 多机协同
 
