@@ -42,6 +42,7 @@
 - D-13：rime-ice 的 embedded 与 embedded_huan 合并为单一 `cn_dicts/embedded.dict.yaml`；mydict 原样迁移（阶段 2）。
 - D-14：userdb 晋升标准——按（词、拼音）合并 c 值、门槛 c_total ≥ 3、排除已收录词与单字、人工剔除组句残留与错词、统一权重 100、带日期分区追加（阶段 3）。
 - D-15：词库长期维护按 [docs/3-sol/lexicon-sop.md](docs/3-sol/lexicon-sop.md) 执行；晋升分析源自 rime-ice 归档导出扩展为现役 `pinyin.userdb` 导出。
+- D-16：记录与清理规则见 [housekeeping.md](housekeeping.md)——工作区只保留当前事实与未决过程，历史由 git 承担。
 
 ## 阶段与验证状态
 

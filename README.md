@@ -36,10 +36,11 @@ tools/deploy --to <dir> [--yes]    # 切换到其他工程（如 rime-ice）
 ```text
 rime-lite/
 ├── fact.md              # 事实清单：已决事项与当前状态速查
+├── housekeeping.md      # 记录与清理规则（信息治理）
 ├── README.md
 ├── docs/                # 文档三层：1-ref 参考输入 / 2-exp 探索过程 / 3-sol 拍板结论
 │   └── 3-sol/
-│       ├── architecture.md   # 架构设计与决策记录（D-1 ~ D-15）
+│       ├── architecture.md   # 架构设计与决策记录（D-n 编号）
 │       └── lexicon-sop.md    # 词库维护 SOP（加词、晋升、验证、提交）
 ├── rime/                # 部署单元 = Rime 用户目录内容
 │   ├── default.yaml
@@ -62,3 +63,4 @@ rime-lite/
 - 加词、userdb 晋升、验证、提交的完整流程：[docs/3-sol/lexicon-sop.md](docs/3-sol/lexicon-sop.md)。
 - 当前事实与决策速查：[fact.md](fact.md)。
 - 架构设计与决策推导：[docs/3-sol/architecture.md](docs/3-sol/architecture.md)。
+- 记录与清理规则：[housekeeping.md](housekeeping.md)。
