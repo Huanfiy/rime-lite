@@ -2,6 +2,8 @@
 # 来源: rime-ice 工程 /home/huan/sync/rime-ice/cn_dicts/mydict.dict.yaml
 # vendor 日期: 2026-07-07
 # 本地修改: 原样迁移
+#           2026-07-07 追加 userdb 晋升词条(来源: docs/1-ref/rime-ice/ 两份导出,
+#           筛选标准 c_total>=3、排除已收录词与组句残留)。
 # ---------------------------
 # Rime dictionary
 # encoding: utf-8
@@ -20,3 +22,48 @@ use_preset_vocabulary: false
 智能B柱	zhi neng B zhu
 智能 B 柱	zhi neng B zhu
 身份验证	shen fen yan zheng
+
+# ========== userdb 晋升 (2026-07-07) ==========
+落档	luo dang	100
+富芮坤	fu rui kun	100
+物奇	wu qi	100
+概率性	gai lv xing	100
+实车	shi che	100
+根因	gen yin	100
+立创	li chuang	100
+划选	hua xuan	100
+对侧	dui ce	100
+罗小黑	luo xiao hei	100
+搬瓦工	ban wa gong	100
+点昀	dian yun	100
+产线	chan xian	100
+大概率	da gai lv	100
+晟阳	sheng yang	100
+威哥	wei ge	100
+禅道	chan dao	100
+顶仓	ding cang	100
+颜文字	yan wen zi	100
+下一版	xia yi ban	100
+全流程	quan liu cheng	100
+小版本	xiao ban ben	100
+未绑定	wei bang ding	100
+老范	lao fan	100
+苗总	miao zong	100
+萝莉控	luo li kong	100
+软件组	ruan jian zu	100
+非预期	fei yu qi	100
+不对外	bu dui wai	100
+亚丝娜	ya si na	100
+公益站	gong yi zhan	100
+同版本	tong ban ben	100
+大版本	da ban ben	100
+扇形图	shan xing tu	100
+手绘风	shou hui feng	100
+拆车	chai che	100
+拓竹	tuo zhu	100
+桐人	tong ren	100
+童欢	tong huan	100
+纯软	chun ruan	100
+胡总	hu zong	100
+腾讯云	teng xun yun	100
+车钥匙	che yao shi	100

@@ -4,6 +4,8 @@
 # vendor 日期: 2026-07-07
 # 本地修改: 合并两份来源的全部词条;同 (词, 拼音) 去重取较高权重;
 #           保留来源分区注释,先 embedded 原有分区,后追加 embedded_huan 分区(去重后)。
+#           2026-07-07 追加 userdb 晋升词条(来源: docs/1-ref/rime-ice/ 两份导出,
+#           筛选标准 c_total>=3、排除已收录词与组句残留)。
 # ---------------------------
 # Rime dictionary
 # encoding: utf-8
@@ -653,3 +655,55 @@ CISC	cisc	55
 片上外设	pian shang wai she	100
 独立看门狗	du li kan men gou	100
 窗口看门狗	chuang kou kan men gou	100
+
+# ========== userdb 晋升 (2026-07-07) ==========
+热唤醒	re huan xing	100
+对端	dui duan	100
+落盘	luo pan	100
+透传	tou chuan	100
+片间	pian jian	100
+中键	zhong jian	100
+大模型	da mo xing	100
+验签	yan qian	100
+工作流	gong zuo liu	100
+放卡	fang ka	100
+高阻态	gao zu tai	100
+后处理	hou chu li	100
+流控	liu kong	100
+片内	pian nei	100
+裸片	luo pian	100
+选卡	xuan ka	100
+出流	chu liu	100
+双分区	shuang fen qu	100
+开流	kai liu	100
+掌静脉	zhang jing mai	100
+交互灯	jiao hu deng	100
+从机	cong ji	100
+加解串	jia jie chuan	100
+对时	dui shi	100
+开漏	kai lou	100
+无卡	wu ka	100
+防冲突	fang chong tu	100
+低优先级	di you xian ji	100
+倒排	dao pai	100
+加串器	jia chuan qi	100
+微帧	wei zhen	100
+扫卡	sao ka	100
+排针	pai zhen	100
+无服务器	wu fu wu qi	100
+检卡	jian ka	100
+灯板	deng ban	100
+片外	pian wai	100
+电源树	dian yuan shu	100
+硬复位	ying fu wei	100
+红外灯	hong wai deng	100
+解算	jie suan	100
+主电源	zhu dian yuan	100
+云服务器	yun fu wu qi	100
+向量表	xiang liang biao	100
+广播包	guang bo bao	100
+设备证书	she bei zheng shu	100
+软复位	ruan fu wei	100
+长短按	chang duan an	100
+零偏	ling pian	100
+预编辑	yu bian ji	100
