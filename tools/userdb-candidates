@@ -1,0 +1,333 @@
+#!/usr/bin/env python3
+# rime-lite userdb 晋升候选分析工具（只读，见 docs/3-sol/architecture.md D-14）
+#
+# 模型：周期性把 Rime userdb 导出为文本（rime_dict_manager -b / 原生同步产物
+#       sync/<installation_id>/pinyin.userdb.txt，格式「拼音<Tab>词<Tab>c=.. d=.. t=..」），
+#       本工具读入一份或多份导出，按 D-14 规则机械筛选出晋升候选，
+#       供人工审定后再手工写入词库。工具不修改词库与配置文件，
+#       输出仅写往 stdout 或 --output 指定路径。
+#
+# 规则（与 2026-07 首轮晋升 D-14 一致）：
+#   1. 丢弃 c<=0 的条目（被删词 / 无效记录）；
+#   2. 多份来源按 (词, 拼音) 合并，c 求和；
+#   3. 排除：单个 CJK 字、已收录词（对照排除集）、纯 ASCII 且与拼音串
+#      （去空格）相同的词（英文原样上屏的学习记录）；
+#   4. 合并计数 c_total < --min-count（默认 3）的过滤。
+#
+# 对照排除集（词级，自动从仓库 rime/ 读取，相对本脚本定位仓库根）：
+#   cn_dicts/base、cn_dicts/8105、cn_dicts/embedded、cn_dicts/mydict、
+#   custom_phrase.txt、pinyin.dict.yaml
+#
+# bucket / flag 为机械启发式建议，仅供人工审定参考，不是最终归属：
+#   bucket: 含拉丁字母或数字 → custom_phrase；命中领域关键词 → embedded；
+#           其余 → mydict
+#   flag:   疑似组句残留 → fragment?
+#
+# 用法:
+#   tools/userdb-candidates 导出1.txt [导出2.txt ...]      候选 TSV 打印到 stdout
+#   tools/userdb-candidates -o out.tsv 导出.txt            候选写入文件
+#   tools/userdb-candidates --min-count 5 导出.txt         调整合并计数阈值
+#   tools/userdb-candidates --repo-root <dir> 导出.txt     指定仓库根（复现历史
+#                                                          轮次 / 在仓库副本上运行）
+#   漏斗统计（各环节计数）始终输出到 stderr。
+import argparse
+import os
+import re
+import sys
+from collections import defaultdict
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+DEFAULT_REPO_ROOT = os.path.dirname(HERE)
+
+# 排除集来源（相对仓库根）
+EXCLUDE_DICT_YAMLS = [
+    "rime/cn_dicts/base.dict.yaml",
+    "rime/cn_dicts/8105.dict.yaml",
+    "rime/cn_dicts/embedded.dict.yaml",
+    "rime/cn_dicts/mydict.dict.yaml",
+    "rime/pinyin.dict.yaml",
+]
+EXCLUDE_CUSTOM_PHRASE = "rime/custom_phrase.txt"
+
+C_RE = re.compile(r"\bc=(-?\d+)\b")
+LATIN_DIGIT_RE = re.compile(r"[A-Za-z0-9]")
+
+# 嵌入式 / 编程 / AI 领域特征子串（命中任一即建议 embedded 桶）
+EMBEDDED_KEYWORDS = [
+    # 硬件 / 单片机
+    "寄存器", "中断", "电平", "时钟", "总线", "外设", "引脚", "管脚", "固件",
+    "单片机", "嵌入式", "芯片", "串口", "波特率", "烧录", "上拉", "下拉",
+    "占空比", "定时器", "计数器", "看门狗", "复位", "上电", "掉电", "功耗",
+    "电压", "电流", "电阻", "电容", "电感", "晶振", "原理图", "焊接", "示波器",
+    "万用表", "传感器", "执行器", "舵机", "继电器", "射频", "天线", "采样",
+    "滤波", "脉冲", "标定", "校准", "量产", "飞线", "封装引", "偏移量",
+    "主频", "分频", "倍频", "低功耗", "休眠模式", "唤醒源",
+    # 软件 / 编程
+    "编译", "调度", "协议", "驱动", "缓存", "缓冲", "算法", "函数", "指针",
+    "线程", "进程", "内核", "操作系统", "信号量", "互斥", "回调", "异步",
+    "轮询", "汇编", "指令", "架构", "堆栈", "队列", "链表", "数组", "变量",
+    "常量", "宏定义", "字节", "结构体", "枚举", "字段", "索引", "遍历",
+    "递归", "迭代", "继承", "多态", "实例化", "序列化", "初始化", "配置项",
+    "代码", "程序", "脚本", "接口", "模块", "组件", "框架", "仓库", "分支",
+    "构建", "重构", "调试", "断点", "日志", "报错", "崩溃", "内存", "闪存",
+    "存储器", "数据库", "服务器", "客户端", "路由", "网关", "端口", "报文",
+    "校验", "加密", "解密", "哈希", "密钥", "编码", "解码", "压缩包",
+    "虚拟机", "容器", "版本号", "语法", "注释", "编辑器", "命令行", "脚手架",
+    "测试用例", "单元测试", "联调", "移植", "适配层", "工程", "需求文档",
+    "字符串", "布尔", "浮点", "整型", "赋值", "形参", "实参", "返回值",
+    "编译器", "链接器", "断言", "溢出", "越界", "死锁", "竞态", "时序",
+    # AI
+    "模型", "部署", "训练", "推理", "神经网络", "卷积", "数据集", "标注",
+    "特征值", "聚类", "梯度", "损失函数", "优化器", "过拟合", "大模型",
+    "提示词", "微调", "向量", "算力", "智能体", "语料",
+]
+
+# 组句残留启发式：特征子串（词长 >=4 才判）；虚词/人称/指代开头、
+# 语气词或「下/说」结尾（词长 >=3 才判，避免误伤双字词）。
+# 在 2026-07 首轮 143 条候选上实测：命中人工判定组句残留 26/50，
+# 对 93 条晋升词零误报。
+FRAG_SUBSTR = ["的时候", "的话", "这样的", "然后再", "了一下", "一下子就"]
+FRAG_START = "的了就都还很才把被按对给让从跟与但而并所使我你他她它这那哪该本谁"
+FRAG_END = "的了着吗呢吧啊么呀下说"
+
+
+# ---------- 解析 ----------
+
+def parse_userdb(path):
+    """解析 userdb 导出文本（拼音<Tab>词<Tab>c=.. d=.. t=..）。
+
+    返回 (entries, raw, dropped)：entries 为 list[(word, pinyin, c)]，
+    raw 为非空行数（含注释头），dropped 为 c<=0 丢弃数。
+    """
+    entries = []
+    raw = 0
+    dropped = 0
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.rstrip("\n")
+            if not line:
+                continue
+            raw += 1
+            if line.startswith("#"):
+                continue
+            parts = line.split("\t")
+            if len(parts) < 3:
+                continue
+            pinyin = parts[0].strip()
+            word = parts[1].strip()
+            m = C_RE.search(parts[2])
+            if not m:
+                continue
+            c = int(m.group(1))
+            if c <= 0:
+                dropped += 1
+                continue
+            entries.append((word, pinyin, c))
+    return entries, raw, dropped
+
+
+def parse_dict_yaml_words(path):
+    """dict.yaml：跳过 `...` 之前的 YAML 头，表体取第一列词。"""
+    words = set()
+    in_body = False
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.rstrip("\n")
+            if not in_body:
+                if line.strip() == "...":
+                    in_body = True
+                continue
+            if not line.strip() or line.lstrip().startswith("#"):
+                continue
+            words.add(line.split("\t")[0].strip())
+    return words
+
+
+def parse_custom_phrase_words(path):
+    words = set()
+    with open(path, encoding="utf-8") as f:
+        for line in f:
+            line = line.rstrip("\n")
+            if not line.strip() or line.startswith("#"):
+                continue
+            words.add(line.split("\t")[0].strip())
+    return words
+
+
+def load_exclude_words(repo_root):
+    """从仓库 rime/ 读取词级排除集；缺文件即报错退出（排除集不完整会产出错误候选）。"""
+    words = set()
+    for rel in EXCLUDE_DICT_YAMLS:
+        path = os.path.join(repo_root, rel)
+        if not os.path.isfile(path):
+            sys.exit(f"错误: 排除集文件不存在: {path}")
+        words |= parse_dict_yaml_words(path)
+    path = os.path.join(repo_root, EXCLUDE_CUSTOM_PHRASE)
+    if not os.path.isfile(path):
+        sys.exit(f"错误: 排除集文件不存在: {path}")
+    words |= parse_custom_phrase_words(path)
+    return words
+
+
+# ---------- 判定 ----------
+
+def is_cjk(ch):
+    cp = ord(ch)
+    return (
+        0x4E00 <= cp <= 0x9FFF
+        or 0x3400 <= cp <= 0x4DBF
+        or 0xF900 <= cp <= 0xFAFF
+        or 0x20000 <= cp <= 0x3134F
+    )
+
+
+def bucket_of(word):
+    if LATIN_DIGIT_RE.search(word):
+        return "custom_phrase"
+    for kw in EMBEDDED_KEYWORDS:
+        if kw in word:
+            return "embedded"
+    return "mydict"
+
+
+def flag_of(word):
+    if len(word) >= 4:
+        for s in FRAG_SUBSTR:
+            if s in word:
+                return "fragment?"
+    if len(word) >= 3 and (word[0] in FRAG_START or word[-1] in FRAG_END):
+        return "fragment?"
+    return ""
+
+
+def source_label(path):
+    """来源列名：文件名去掉 .userdb.txt / .txt 后缀。"""
+    name = os.path.basename(path)
+    for suffix in (".userdb.txt", ".txt"):
+        if name.endswith(suffix):
+            return name[: -len(suffix)]
+    return name
+
+
+# ---------- 主流程 ----------
+
+def main():
+    ap = argparse.ArgumentParser(
+        prog="userdb-candidates",
+        description="Rime userdb 晋升候选分析（只读）：从 userdb 导出文本机械筛选"
+                    "晋升候选，bucket/flag 仅为启发式建议，人工审定后再入库。",
+    )
+    ap.add_argument("userdb", nargs="+", metavar="userdb导出.txt",
+                    help="userdb 导出文本路径（拼音<Tab>词<Tab>c=.. d=.. t=..），可多份")
+    ap.add_argument("-o", "--output", metavar="FILE",
+                    help="候选 TSV 输出文件（默认打印到 stdout）")
+    ap.add_argument("--min-count", type=int, default=3, metavar="N",
+                    help="合并计数 c_total 阈值，低于该值过滤（默认 3）")
+    ap.add_argument("--repo-root", default=DEFAULT_REPO_ROOT, metavar="DIR",
+                    help="仓库根目录，排除集从 <DIR>/rime/ 读取"
+                         "（默认相对本脚本定位；用于历史复现或仓库副本）")
+    args = ap.parse_args()
+
+    if args.min_count < 1:
+        ap.error("--min-count 必须 >= 1")
+
+    # 逐份解析导出
+    labels = [source_label(p) for p in args.userdb]
+    if len(set(labels)) != len(labels):
+        labels = [f"{lb}#{i + 1}" for i, lb in enumerate(labels)]
+    per_source = []  # (label, entries, raw, dropped)
+    for path, label in zip(args.userdb, labels):
+        if not os.path.isfile(path):
+            sys.exit(f"错误: 导出文件不存在: {path}")
+        entries, raw, dropped = parse_userdb(path)
+        per_source.append((label, entries, raw, dropped))
+
+    # 按 (词, 拼音) 合并，逐来源分列求和
+    n_sources = len(per_source)
+    merged = defaultdict(lambda: [0] * n_sources)
+    for idx, (_, entries, _, _) in enumerate(per_source):
+        for w, p, c in entries:
+            merged[(w, p)][idx] += c
+
+    exclude_words = load_exclude_words(args.repo_root)
+
+    # 漏斗筛选
+    n_single_cjk = 0
+    n_excluded = 0
+    n_ascii_pinyin = 0
+    n_threshold = 0
+    candidates = []  # (word, pinyin, c_total, *c_per_source, bucket, flag)
+    for (w, p), cs in merged.items():
+        if len(w) == 1 and is_cjk(w):
+            n_single_cjk += 1
+            continue
+        if w in exclude_words:
+            n_excluded += 1
+            continue
+        if w.isascii() and w == p.replace(" ", ""):
+            n_ascii_pinyin += 1
+            continue
+        c_total = sum(cs)
+        if c_total < args.min_count:
+            n_threshold += 1
+            continue
+        candidates.append((w, p, c_total, *cs, bucket_of(w), flag_of(w)))
+
+    candidates.sort(key=lambda x: (-x[2], x[0]))
+
+    # 候选 TSV → stdout 或 --output
+    header = ["word", "pinyin", "c_total"] + [f"c_{lb}" for lb in labels] \
+        + ["bucket", "flag"]
+    out = open(args.output, "w", encoding="utf-8") if args.output else sys.stdout
+    try:
+        out.write("\t".join(header) + "\n")
+        for row in candidates:
+            out.write("\t".join(str(x) for x in row) + "\n")
+    finally:
+        if args.output:
+            out.close()
+
+    # 漏斗统计 → stderr
+    bucket_counts = defaultdict(int)
+    flag_counts = defaultdict(int)
+    for row in candidates:
+        bucket_counts[row[-2]] += 1
+        if row[-1]:
+            flag_counts[row[-1]] += 1
+
+    err = sys.stderr
+    err.write("userdb 晋升候选分析 — 漏斗统计\n")
+    err.write("=" * 44 + "\n")
+    for (label, entries, raw, dropped), path in zip(per_source, args.userdb):
+        err.write(f"{path}\n")
+        err.write(f"  非空行数(含注释): {raw}  c<=0 丢弃: {dropped}"
+                  f"  有效条目: {len(entries)}\n")
+    err.write(f"按 (词, 拼音) 合并后条目数: {len(merged)}\n")
+    err.write(f"排除集词数(仓库根 {args.repo_root}): {len(exclude_words)}\n")
+    err.write(f"单个 CJK 字符排除数: {n_single_cjk}\n")
+    err.write(f"对照集词级排除数: {n_excluded}\n")
+    err.write(f"纯 ASCII 与拼音相同排除数: {n_ascii_pinyin}\n")
+    err.write(f"c_total < {args.min_count} 阈值过滤数: {n_threshold}\n")
+    err.write(f"最终候选数: {len(candidates)}\n")
+    err.write("各桶数量(启发式建议):\n")
+    for b in ("custom_phrase", "embedded", "mydict"):
+        err.write(f"  {b}: {bucket_counts.get(b, 0)}\n")
+    err.write("flag 统计(启发式建议):\n")
+    if flag_counts:
+        for k in sorted(flag_counts):
+            err.write(f"  {k}: {flag_counts[k]}\n")
+    else:
+        err.write("  (无)\n")
+
+    # 数据质量提示：候选集内同词多拼音
+    by_word = defaultdict(set)
+    for row in candidates:
+        by_word[row[0]].add(row[1])
+    multi = {w: ps for w, ps in by_word.items() if len(ps) > 1}
+    err.write(f"候选集内同词多拼音的词数: {len(multi)}\n")
+    for w, ps in sorted(multi.items()):
+        err.write(f"  {w}: {' | '.join(sorted(ps))}\n")
+
+
+if __name__ == "__main__":
+    main()
