@@ -2,7 +2,7 @@
 # 来源: rime-ice 工程 /home/huan/sync/rime-ice/cn_dicts/mydict.dict.yaml
 # vendor 日期: 2026-07-07
 # 本地修改: 原样迁移
-#           2026-07-07 追加 userdb 晋升词条(来源: docs/1-ref/rime-ice/ 两份导出,
+#           2026-07-07 追加 userdb 晋升词条(来源: rime-ice userdb 最终导出, git 历史 6438887,
 #           筛选标准 c_total>=3、排除已收录词与组句残留)。
 # ---------------------------
 # Rime dictionary

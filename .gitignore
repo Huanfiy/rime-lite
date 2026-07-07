@@ -36,5 +36,3 @@ __pycache__/
 .claude/
 .agents/tasks/
 
-# 1-ref 归档的参考材料不受运行态忽略规则影响
-!docs/1-ref/**

@@ -28,7 +28,7 @@
 ## 已决事项（详情见 [docs/3-sol/architecture.md](docs/3-sol/architecture.md) §2）
 
 - D-1：不自建输入事件层；userdb 仅作本机学习缓存，稳定词条走「导出 → 审核 → 晋升静态词库 → Git」。
-- D-2：首轮晋升分析源仅限 rime-ice 两份导出（已归档 `docs/1-ref/rime-ice/`），只筛高价值词条。
+- D-2：首轮晋升分析源仅限 rime-ice 两份导出（已消费并移出工作区，git 历史 `6438887` 可查），只筛高价值词条。
 - D-3：不保留置顶 / 隐藏 / 降频规则层。
 - D-4：中文基础词库为项目内副本，构建与部署不依赖外部 rime-ice 路径。
 - D-5：个人词库用 Rime 原生格式（`custom_phrase.txt` + `dict.yaml`），不引入 YAML → dict 构建层。
