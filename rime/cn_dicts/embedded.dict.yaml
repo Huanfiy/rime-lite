@@ -1,0 +1,655 @@
+# ------- vendor 记录 -------
+# 来源: rime-ice 工程 /home/huan/sync/rime-ice/cn_dicts/embedded.dict.yaml
+#       与 /home/huan/sync/rime-ice/cn_dicts/embedded_huan.dict.yaml
+# vendor 日期: 2026-07-07
+# 本地修改: 合并两份来源的全部词条;同 (词, 拼音) 去重取较高权重;
+#           保留来源分区注释,先 embedded 原有分区,后追加 embedded_huan 分区(去重后)。
+# ---------------------------
+# Rime dictionary
+# encoding: utf-8
+#
+# ------- 嵌入式领域词库 -------
+#
+# 词库组成:
+# - embedded: LLM 生成的嵌入式领域词库(权重 100~35 不等)
+# - embedded_huan: 手工维护的嵌入式软件词汇(权重均 100)
+
+---
+name: embedded
+version: "2026-07-07"
+sort: by_weight
+use_preset_vocabulary: false
+...
+
+
+# ========== 核心系统词汇 (超高频) ==========
+嵌入式系统	qian ru shi xi tong	100
+嵌入式	qian ru shi	95
+微控制器	wei kong zhi qi	90
+单片机	dan pian ji	85
+处理器	chu li qi	80
+芯片	xin pian	85
+固件	gu jian	75
+驱动程序	qu dong cheng xu	70
+实时系统	shi shi xi tong	65
+操作系统	cao zuo xi tong	80
+
+# ========== 主流芯片平台 (超高频) ==========
+ARM	arm	95
+树莓派	shu mei pai	75
+FPGA	fpga	70
+DSP	dsp	65
+RISC	risc	60
+CISC	cisc	55
+
+# ========== 存储器件 (超高频) ==========
+闪存	shan cun	80
+存储器	cun chu qi	70
+缓存	huan cun	65
+堆栈	dui zhan	60
+寄存器	ji cun qi	75
+地址总线	di zhi zong xian	55
+
+# ========== 通信协议 (超高频) ==========
+串口	chuan kou	85
+以太网	yi tai wang	70
+蓝牙	lan ya	80
+
+# ========== 传感器 (高频) ==========
+温度传感器	wen du chuan gan qi	75
+湿度传感器	shi du chuan gan qi	70
+压力传感器	ya li chuan gan qi	65
+加速度计	jia su du ji	70
+陀螺仪	tuo luo yi	65
+超声波	chao sheng bo	60
+红外线	hong wai xian	65
+光敏传感器	guang min chuan gan qi	55
+磁力计	ci li ji	50
+气体传感器	qi ti chuan gan qi	55
+烟雾传感器	yan wu chuan gan qi	50
+火焰传感器	huo yan chuan gan qi	45
+声音传感器	sheng yin chuan gan qi	50
+振动传感器	zhen dong chuan gan qi	48
+距离传感器	ju li chuan gan qi	52
+位移传感器	wei yi chuan gan qi	45
+角度传感器	jiao du chuan gan qi	43
+流量传感器	liu liang chuan gan qi	40
+液位传感器	ye wei chuan gan qi	38
+酸碱度传感器	suan jian du chuan gan qi	35
+心率传感器	xin lv chuan gan qi	40
+血氧传感器	xue yang chuan gan qi	38
+指纹传感器	zhi wen chuan gan qi	45
+人体红外	ren ti hong wai	48
+霍尔传感器	huo er chuan gan qi	50
+编码器	bian ma qi	55
+雨滴传感器	yu di chuan gan qi	35
+土壤湿度传感器	tu rang shi du chuan gan qi	38
+光照传感器	guang zhao chuan gan qi	42
+紫外线传感器	zi wai xian chuan gan qi	35
+颜色传感器	yan se chuan gan qi	40
+重力传感器	zhong li chuan gan qi	45
+电流传感器	dian liu chuan gan qi	48
+电压传感器	dian ya chuan gan qi	50
+
+# ========== 显示器件 (高频) ==========
+数码管	shu ma guan	60
+点阵屏	dian zhen ping	55
+墨水屏	mo shui ping	45
+真空荧光屏	zhen kong ying guang ping	30
+段式液晶	duan shi ye jing	40
+字符液晶	zi fu ye jing	45
+图形液晶	tu xing ye jing	42
+彩色液晶	cai se ye jing	50
+触摸屏	chu mo ping	60
+电阻式触摸	dian zu shi chu mo	40
+电容式触摸	dian rong shi chu mo	45
+七段显示器	qi duan xian shi qi	45
+
+# ========== 执行器件 (高频) ==========
+蜂鸣器	feng ming qi	70
+继电器	ji dian qi	75
+舵机	duo ji	65
+步进电机	bu jin dian ji	70
+直流电机	zhi liu dian ji	60
+交流电机	jiao liu dian ji	55
+无刷电机	wu shua dian ji	58
+有刷电机	you shua dian ji	52
+电磁阀	dian ci fa	50
+气缸	qi gang	45
+液压缸	ye ya gang	40
+加热器	jia re qi	48
+制冷器	zhi leng qi	45
+风扇	feng shan	55
+水泵	shui beng	50
+扬声器	yang sheng qi	52
+振动马达	zhen dong ma da	45
+电磁铁	dian ci tie	48
+电磁锁	dian ci suo	42
+电动推杆	dian dong tui gan	40
+
+# ========== 模拟器件 (高频) ==========
+运算放大器	yun suan fang da qi	55
+比较器	bi jiao qi	50
+仪表放大器	yi biao fang da qi	40
+差分放大器	cha fen fang da qi	38
+电压跟随器	dian ya gen sui qi	35
+滤波器	lv bo qi	50
+低通滤波	di tong lv bo	45
+高通滤波	gao tong lv bo	43
+带通滤波	dai tong lv bo	40
+带阻滤波	dai zu lv bo	38
+有源滤波	you yuan lv bo	42
+无源滤波	wu yuan lv bo	40
+开关电容	kai guan dian rong	35
+采样保持	cai yang bao chi	40
+电压基准	dian ya ji zhun	38
+温度补偿	wen du bu chang	35
+
+# ========== 开发工具 (高频) ==========
+编译器	bian yi qi	75
+调试器	tiao shi qi	70
+仿真器	fang zhen qi	65
+烧录器	shao lu qi	70
+在线调试	zai xian tiao shi	50
+离线调试	li xian tiao shi	45
+单步调试	dan bu tiao shi	55
+断点调试	duan dian tiao shi	60
+变量监视	bian liang jian shi	48
+内存查看	nei cun cha kan	45
+寄存器查看	ji cun qi cha kan	50
+反汇编	fan hui bian	45
+
+# ========== 测试仪器 (高频) ==========
+示波器	shi bo qi	75
+万用表	wan yong biao	70
+逻辑分析仪	luo ji fen xi yi	60
+频谱分析仪	pin pu fen xi yi	45
+网络分析仪	wang luo fen xi yi	40
+信号发生器	xin hao fa sheng qi	50
+函数发生器	han shu fa sheng qi	48
+任意波发生器	ren yi bo fa sheng qi	42
+脉冲发生器	mai chong fa sheng qi	45
+电源分析仪	dian yuan fen xi yi	40
+电子负载	dian zi fu zai	38
+直流电源	zhi liu dian yuan	50
+可编程电源	ke bian cheng dian yuan	45
+绝缘测试仪	jue yuan ce shi yi	35
+接地电阻仪	jie di dian zu yi	30
+耐压测试仪	nai ya ce shi yi	32
+功率计	gong lv ji	40
+相位计	xiang wei ji	35
+频率计	pin lv ji	38
+数字存储示波器	shu zi cun chu shi bo qi	48
+模拟示波器	mo ni shi bo qi	42
+混合信号示波器	hun he xin hao shi bo qi	40
+
+# ========== 实时系统 (高频) ==========
+中断	zhong duan	85
+中断服务程序	zhong duan fu wu cheng xu	100
+定时器	ding shi qi	80
+看门狗	kan men gou	65
+任务调度	ren wu tiao du	70
+多线程	duo xian cheng	65
+信号量	xin hao liang	60
+互斥量	hu chi liang	55
+消息队列	xiao xi dui lie	60
+内存管理	nei cun guan li	65
+抢占式调度	qiang zhan shi tiao du	50
+协作式调度	xie zuo shi tiao du	45
+时间片轮转	shi jian pian lun zhuan	48
+优先级调度	you xian ji tiao du	55
+任务切换	ren wu qie huan	52
+上下文切换	shang xia wen qie huan	100
+任务栈	ren wu zhan	100
+任务控制块	ren wu kong zhi kuai	48
+就绪队列	jiu xu dui lie	40
+阻塞队列	zu sai dui lie	42
+睡眠队列	shui mian dui lie	38
+死锁	si suo	50
+优先级反转	you xian ji fan zhuan	100
+饥饿现象	ji e xian xiang	40
+临界区	lin jie qu	100
+原子操作	yuan zi cao zuo	100
+自旋锁	zi xuan suo	45
+条件变量	tiao jian bian liang	42
+事件标志	shi jian biao zhi	40
+
+# ========== 硬件设计 (高频) ==========
+电路板	dian lu ban	75
+原理图	yuan li tu	70
+布线	bu xian	65
+焊接	han jie	60
+
+# ========== 电子元器件 (高频) ==========
+电阻	dian zu	70
+电容	dian rong	75
+电感	dian gan	65
+二极管	er ji guan	70
+三极管	san ji guan	65
+场效应管	chang xiao ying guan	55
+晶闸管	jing zha guan	45
+变压器	bian ya qi	50
+保险丝	bao xian si	48
+熔断器	rong duan qi	45
+开关	kai guan	55
+按键	an jian	60
+旋转编码器	xuan zhuan bian ma qi	48
+电位器	dian wei qi	52
+热敏电阻	re min dian zu	50
+光敏电阻	guang min dian zu	48
+压敏电阻	ya min dian zu	45
+钽电容	tan dian rong	42
+铝电解电容	lv dian jie dian rong	45
+陶瓷电容	tao ci dian rong	48
+薄膜电容	bao mo dian rong	40
+可变电容	ke bian dian rong	38
+空心电感	kong xin dian gan	35
+铁氧体电感	tie yang ti dian gan	40
+磁珠	ci zhu	45
+共模电感	gong mo dian gan	42
+肖特基二极管	xiao te ji er ji guan	48
+齐纳二极管	qi na er ji guan	45
+稳压二极管	wen ya er ji guan	50
+发光二极管	fa guang er ji guan	55
+光电二极管	guang dian er ji guan	45
+变容二极管	bian rong er ji guan	35
+
+# ========== 电源管理 (高频) ==========
+电源管理	dian yuan guan li	75
+低功耗	di gong hao	70
+休眠模式	xiu mian mo shi	65
+待机模式	dai ji mo shi	100
+电压调节器	dian ya tiao jie qi	65
+开关电源	kai guan dian yuan	70
+升压转换器	sheng ya zhuan huan qi	50
+降压转换器	jiang ya zhuan huan qi	52
+反激转换器	fan ji zhuan huan qi	45
+正激转换器	zheng ji zhuan huan qi	42
+推挽转换器	tui wan zhuan huan qi	40
+半桥转换器	ban qiao zhuan huan qi	38
+全桥转换器	quan qiao zhuan huan qi	40
+电荷泵	dian he beng	42
+线性稳压器	xian xing wen ya qi	48
+开关稳压器	kai guan wen ya qi	50
+基准电压	ji zhun dian ya	45
+电压监控	dian ya jian kong	48
+过压保护	guo ya bao hu	52
+欠压保护	qian ya bao hu	50
+过流保护	guo liu bao hu	55
+过温保护	guo wen bao hu	48
+软启动	ruan qi dong	45
+功率因数	gong lv yin shu	40
+
+# ========== 电池技术 (高频) ==========
+锂电池	li dian chi	70
+充电器	chong dian qi	65
+电池管理	dian chi guan li	60
+镍氢电池	nie qing dian chi	45
+镍镉电池	nie ge dian chi	40
+铅酸电池	qian suan dian chi	50
+超级电容	chao ji dian rong	48
+燃料电池	ran liao dian chi	35
+太阳能电池	tai yang neng dian chi	45
+电池容量	dian chi rong liang	55
+电池电压	dian chi dian ya	52
+充电电流	chong dian dian liu	50
+放电电流	fang dian dian liu	48
+充电周期	chong dian zhou qi	45
+电池寿命	dian chi shou ming	50
+电池平衡	dian chi ping heng	42
+电池保护板	dian chi bao hu ban	48
+电量计	dian liang ji	45
+库仑计	ku lun ji	40
+
+# ========== 物联网 (超高频) ==========
+物联网	wu lian wang	80
+云计算	yun ji suan	65
+边缘计算	bian yuan ji suan	60
+阿里云IoT	a li yun I o T	48
+腾讯云IoT	teng xun yun I o T	45
+百度云IoT	bai du yun I o T	42
+华为云IoT	hua wei yun I o T	48
+设备影子	she bei ying zi	40
+数字孪生	shu zi luan sheng	45
+远程监控	yuan cheng jian kong	52
+远程控制	yuan cheng kong zhi	50
+固件升级	gu jian sheng ji	55
+设备管理	she bei guan li	55
+设备认证	she bei ren zheng	50
+数据上报	shu ju shang bao	48
+命令下发	ming ling xia fa	45
+设备孪生	she bei luan sheng	40
+
+# ========== 算法和控制 (高频) ==========
+数字滤波	shu zi lv bo	60
+卡尔曼滤波	ka er man lv bo	50
+低通滤波器	di tong lv bo qi	48
+高通滤波器	gao tong lv bo qi	45
+带通滤波器	dai tong lv bo qi	42
+滑动平均	hua dong ping jun	50
+中值滤波	zhong zhi lv bo	48
+巴特沃斯滤波	ba te wo si lv bo	40
+切比雪夫滤波	qie bi xue fu lv bo	38
+自适应滤波	zi shi ying lv bo	42
+比例控制	bi li kong zhi	48
+积分控制	ji fen kong zhi	45
+微分控制	wei fen kong zhi	42
+模糊控制	mo hu kong zhi	45
+神经网络控制	shen jing wang luo kong zhi	40
+遗传算法	yi chuan suan fa	38
+粒子群算法	li zi qun suan fa	35
+蚁群算法	yi qun suan fa	32
+
+# ========== 人工智能 (高频) ==========
+机器学习	ji qi xue xi	65
+神经网络	shen jing wang luo	60
+模式识别	mo shi shi bie	55
+图像处理	tu xiang chu li	60
+语音识别	yu yin shi bie	55
+数据采集	shu ju cai ji	70
+深度学习	shen du xue xi	58
+卷积神经网络	juan ji shen jing wang luo	52
+强化学习	qiang hua xue xi	45
+监督学习	jian du xue xi	48
+无监督学习	wu jian du xue xi	45
+半监督学习	ban jian du xue xi	40
+迁移学习	qian yi xue xi	42
+特征提取	te zheng ti qu	48
+特征选择	te zheng xuan ze	45
+数据预处理	shu ju yu chu li	50
+数据标注	shu ju biao zhu	45
+训练集	xun lian ji	48
+测试集	ce shi ji	45
+验证集	yan zheng ji	42
+过拟合	guo ni he	45
+欠拟合	qian ni he	42
+正则化	zheng ze hua	40
+
+# ========== 图像视觉 ==========
+计算机视觉	ji suan ji shi jue	55
+图像分割	tu xiang fen ge	50
+目标检测	mu biao jian ce	52
+目标跟踪	mu biao gen zong	48
+人脸识别	ren lian shi bie	58
+手势识别	shou shi shi bie	48
+文字识别	wen zi shi bie	50
+条码识别	tiao ma shi bie	45
+二维码识别	er wei ma shi bie	50
+边缘检测	bian yuan jian ce	48
+形态学处理	xing tai xue chu li	40
+噪声抑制	zao sheng yi zhi	48
+图像增强	tu xiang zeng qiang	48
+直方图均衡	zhi fang tu jun heng	42
+
+# ========== 音频处理 ==========
+音频编解码	yin pin bian jie ma	48
+语音合成	yu yin he cheng	50
+语音唤醒	yu yin huan xing	52
+回声消除	hui sheng xiao chu	45
+音频滤波	yin pin lv bo	45
+频谱分析	pin pu fen xi	48
+
+# ========== 安全加密 ==========
+数据加密	shu ju jia mi	55
+密钥管理	mi yao guan li	50
+数字签名	shu zi qian ming	48
+哈希算法	ha xi suan fa	45
+椭圆曲线加密	tuo yuan qu xian jia mi	35
+随机数生成	sui ji shu sheng cheng	48
+安全芯片	an quan xin pian	50
+安全启动	an quan qi dong	45
+固件验证	gu jian yan zheng	48
+
+# ========== 工业自动化 ==========
+工业控制	gong ye kong zhi	60
+变频器	bian pin qi	55
+伺服驱动	ci fu qu dong	52
+步进驱动	bu jin qu dong	48
+编码器反馈	bian ma qi fan kui	45
+位置控制	wei zhi kong zhi	50
+速度控制	su du kong zhi	52
+力矩控制	li ju kong zhi	48
+闭环控制	bi huan kong zhi	50
+开环控制	kai huan kong zhi	45
+运动控制	yun dong kong zhi	52
+轴控制	zhou kong zhi	48
+工业以太网	gong ye yi tai wang	45
+工业现场总线	gong ye xian chang zong xian	40
+
+# ========== 汽车电子 ==========
+车载以太网	che zai yi tai wang	45
+防盗系统	fang dao xi tong	45
+胎压监测	tai ya jian ce	48
+倒车雷达	dao che lei da	50
+行车记录仪	xing che ji lu yi	45
+毫米波雷达	hao mi bo lei da	45
+
+# ========== 医疗电子 ==========
+心电监护	xin dian jian hu	50
+血氧监测	xue yang jian ce	48
+血压监测	xue ya jian ce	52
+体温监测	ti wen jian ce	50
+血糖仪	xue tang yi	48
+除颤器	chu chan qi	40
+呼吸机	hu xi ji	45
+超声设备	chao sheng she bei	42
+放射治疗	fang she zhi liao	35
+植入式设备	zhi ru shi she bei	40
+起搏器	qi bo qi	42
+助听器	zhu ting qi	45
+胰岛素泵	yi dao su beng	38
+
+# ========== 消费电子 ==========
+智能手机	zhi neng shou ji	60
+平板电脑	ping ban dian nao	55
+可穿戴设备	ke chuan dai she bei	52
+智能手表	zhi neng shou biao	55
+智能手环	zhi neng shou huan	50
+智能眼镜	zhi neng yan jing	45
+无线耳机	wu xian er ji	52
+智能音响	zhi neng yin xiang	50
+智能家居	zhi neng jia ju	58
+智能门锁	zhi neng men suo	52
+智能灯泡	zhi neng deng pao	48
+智能插座	zhi neng cha zuo	50
+扫地机器人	sao di ji qi ren	45
+空气净化器	kong qi jing hua qi	48
+智能电视	zhi neng dian shi	50
+智能冰箱	zhi neng bing xiang	45
+智能洗衣机	zhi neng xi yi ji	42
+
+# ========== 航空航天 ==========
+飞控系统	fei kong xi tong	50
+惯性导航	guan xing dao hang	45
+卫星通信	wei xing tong xin	48
+雷达系统	lei da xi tong	52
+无人机	wu ren ji	55
+飞行控制	fei xing kong zhi	50
+姿态控制	zi tai kong zhi	48
+高度计	gao du ji	45
+空速计	kong su ji	42
+陀螺稳定	tuo luo wen ding	40
+卫星定位	wei xing ding wei	48
+航天器	hang tian qi	40
+火箭控制	huo jian kong zhi	35
+
+# ========== 能源管理 ==========
+智能电网	zhi neng dian wang	55
+电能质量	dian neng zhi liang	48
+功率测量	gong lv ce liang	50
+电能计量	dian neng ji liang	48
+负载管理	fu zai guan li	45
+需量控制	xu liang kong zhi	42
+峰谷电价	feng gu dian jia	40
+储能系统	chu neng xi tong	50
+太阳能逆变	tai yang neng ni bian	45
+风力发电	feng li fa dian	48
+并网逆变	bing wang ni bian	42
+离网系统	li wang xi tong	40
+微电网	wei dian wang	45
+
+# ========== 环境监测 ==========
+空气质量	kong qi zhi liang	52
+水质监测	shui zhi jian ce	50
+土壤监测	tu rang jian ce	45
+噪声监测	zao sheng jian ce	48
+辐射监测	fu she jian ce	42
+气象监测	qi xiang jian ce	48
+温湿度监测	wen shi du jian ce	52
+甲醛检测	jia quan jian ce	48
+一氧化碳	yi yang hua tan	45
+二氧化碳	er yang hua tan	48
+氨气检测	an qi jian ce	42
+硫化氢	liu hua qing	40
+臭氧检测	chou yang jian ce	42
+粉尘检测	fen chen jian ce	45
+
+# ========== 安防监控 ==========
+视频监控	shi pin jian kong	55
+入侵检测	ru qin jian ce	50
+周界防护	zhou jie fang hu	45
+门禁系统	men jin xi tong	52
+报警系统	bao jing xi tong	55
+烟雾报警	yan wu bao jing	50
+火灾报警	huo zai bao jing	52
+燃气报警	ran qi bao jing	48
+红外报警	hong wai bao jing	45
+玻璃破碎	bo li po sui	42
+震动报警	zhen dong bao jing	45
+
+# ========== 机器人技术 ==========
+服务机器人	fu wu ji qi ren	50
+工业机器人	gong ye ji qi ren	52
+六轴机器人	liu zhou ji qi ren	45
+关节机器人	guan jie ji qi ren	48
+并联机器人	bing lian ji qi ren	42
+移动机器人	yi dong ji qi ren	50
+路径规划	lu jing gui hua	48
+避障算法	bi zhang suan fa	50
+定位导航	ding wei dao hang	52
+机器视觉	ji qi shi jue	55
+力觉反馈	li jue fan kui	42
+语音交互	yu yin jiao hu	48
+人机交互	ren ji jiao hu	50
+
+# ========== 测量和校准 ==========
+精度校准	jing du jiao zhun	45
+温度校准	wen du jiao zhun	42
+压力校准	ya li jiao zhun	40
+频率校准	pin lv jiao zhun	38
+时钟校准	shi zhong jiao zhun	48
+电压校准	dian ya jiao zhun	45
+电流校准	dian liu jiao zhun	42
+质量流量	zhi liang liu liang	40
+体积流量	ti ji liu liang	38
+标准器	biao zhun qi	42
+溯源标准	su yuan biao zhun	35
+国际标准	guo ji biao zhun	40
+计量认证	ji liang ren zheng	38
+
+# ========== 故障诊断 ==========
+故障诊断	gu zhang zhen duan	52
+预测维护	yu ce wei hu	48
+状态监测	zhuang tai jian ce	50
+振动分析	zhen dong fen xi	45
+温度分析	wen du fen xi	42
+电流分析	dian liu fen xi	40
+包络分析	bao luo fen xi	35
+倒频谱	dao pin pu	32
+小波分析	xiao bo fen xi	38
+
+# ========== 质量控制 ==========
+质量控制	zhi liang kong zhi	50
+统计过程控制	tong ji guo cheng kong zhi	40
+六西格玛	liu xi ge ma	38
+质量管理体系	zhi liang guan li ti xi	35
+持续改进	chi xu gai jin	42
+全面质量管理	quan mian zhi liang guan li	38
+
+# ========== 项目管理 ==========
+敏捷开发	min jie kai fa	45
+瀑布模型	pu bu mo xing	40
+螺旋模型	luo xuan mo xing	35
+迭代开发	die dai kai fa	42
+持续集成	chi xu ji cheng	48
+持续部署	chi xu bu shu	45
+版本控制	ban ben kong zhi	50
+
+# GPIO and pin modes
+通用输入输出	tong yong shu ru shu chu	100
+推挽输出	tui wan shu chu	100
+开漏输出	kai lou shu chu	100
+浮空输入	fu kong shu ru	100
+模拟输入	mo ni shu ru	100
+复用功能	fu yong gong neng	100
+上拉电阻	shang la dian zu	100
+下拉电阻	xia la dian zu	100
+
+# Timer and PWM
+占空比	zhan kong bi	100
+高电平时间	gao dian ping shi jian	100
+低电平时间	di dian ping shi jian	100
+高电平有效	gao dian ping you xiao	100
+低电平有效	di dian ping you xiao	100
+脉宽	mai kuan	100
+脉宽调制	mai kuan tiao zhi	100
+死区时间	si qu shi jian	100
+死区控制	si qu kong zhi	100
+预分频	yu fen pin	100
+预分频器	yu fen pin qi	100
+分频系数	fen pin xi shu	100
+自动重装载	zi dong chong zhuang zai	100
+自动重装载寄存器	zi dong chong zhuang zai ji cun qi	100
+重装载值	chong zhuang zai zhi	100
+比较匹配	bi jiao pi pei	100
+输出比较	shu chu bi jiao	100
+输入捕获	shu ru bu huo	100
+捕获比较	bu huo bi jiao	100
+捕获比较寄存器	bu huo bi jiao ji cun qi	100
+影子寄存器	ying zi ji cun qi	100
+计数器溢出	ji shu qi yi chu	100
+中心对齐	zhong xin dui qi	100
+边沿对齐	bian yan dui qi	100
+向上计数	xiang shang ji shu	100
+向下计数	xiang xia ji shu	100
+互补输出	hu bu shu chu	100
+
+# Signal timing
+上升沿	shang sheng yan	100
+下降沿	xia jiang yan	100
+边沿触发	bian yan chu fa	100
+电平触发	dian ping chu fa	100
+建立时间	jian li shi jian	100
+保持时间	bao chi shi jian	100
+采样时间	cai yang shi jian	100
+采样周期	cai yang zhou qi	100
+采样率	cai yang lv	100
+过采样	guo cai yang	100
+波特率	bo te lv	100
+
+# Interrupt and RTOS
+外部中断	wai bu zhong duan	100
+中断优先级	zhong duan you xian ji	100
+中断向量表	zhong duan xiang liang biao	100
+中断服务函数	zhong duan fu wu han shu	100
+
+# Clock and power
+时钟树	shi zhong shu	100
+时钟源	shi zhong yuan	100
+系统时钟	xi tong shi zhong	100
+总线时钟	zong xian shi zhong	100
+总线频率	zong xian pin lv	100
+外部晶振	wai bu jing zhen	100
+内部时钟	nei bu shi zhong	100
+锁相环	suo xiang huan	100
+主频	zhu pin	100
+低功耗模式	di gong hao mo shi	100
+睡眠模式	shui mian mo shi	100
+停止模式	ting zhi mo shi	100
+
+# Firmware architecture
+硬件抽象层	ying jian chou xiang ceng	100
+板级支持包	ban ji zhi chi bao	100
+片上外设	pian shang wai she	100
+独立看门狗	du li kan men gou	100
+窗口看门狗	chuang kou kan men gou	100

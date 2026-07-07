@@ -7,10 +7,12 @@
 
 ---
 name: pinyin
-version: "2026-07-02"
+version: "2026-07-07"
 import_tables:
-  - cn_dicts/8105   # 《通用规范汉字表》字表
-  - cn_dicts/base   # 基础词库
+  - cn_dicts/8105       # 《通用规范汉字表》字表
+  - cn_dicts/base       # 基础词库
+  - cn_dicts/embedded   # 嵌入式领域词库
+  - cn_dicts/mydict     # 个人自定义词库
 ...
 
 # 大写字母

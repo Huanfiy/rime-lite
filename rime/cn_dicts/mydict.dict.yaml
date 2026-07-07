@@ -1,0 +1,22 @@
+# ------- vendor 记录 -------
+# 来源: rime-ice 工程 /home/huan/sync/rime-ice/cn_dicts/mydict.dict.yaml
+# vendor 日期: 2026-07-07
+# 本地修改: 原样迁移
+# ---------------------------
+# Rime dictionary
+# encoding: utf-8
+#
+# Custom user dictionary
+# You can add your commonly used words here with normal pinyin codes.
+
+---
+name: mydict
+version: "2026-07-07"
+sort: by_weight
+use_preset_vocabulary: false
+...
+
+# word<Tab>pinyin<Tab>(optional weight)
+智能B柱	zhi neng B zhu
+智能 B 柱	zhi neng B zhu
+身份验证	shen fen yan zheng
