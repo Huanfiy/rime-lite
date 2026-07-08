@@ -11,7 +11,7 @@
 
 
 # 要比共享目录同名文件的 config_version 大才可生效
-config_version: '2026-07-02'
+config_version: '2026-07-08'
 
 
 # 方案列表
@@ -131,9 +131,8 @@ recognizer:
 # 快捷键
 key_binder:
   bindings:
-    # Tab / Shift+Tab 切换光标至下 / 上一个拼音
+    # Shift+Tab 切换光标至上一个拼音；Tab 已让位给 AI 候补触发键（D-18），右移用 Alt+Right
     - { when: composing, accept: Shift+Tab, send: Shift+Left }
-    - { when: composing, accept: Tab, send: Shift+Right }
     # Alt + ←/→ 切换光标至下 / 上一个拼音
     - { when: composing, accept: Alt+Left, send: Shift+Left }
     - { when: composing, accept: Alt+Right, send: Shift+Right }

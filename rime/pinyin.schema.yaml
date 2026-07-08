@@ -4,14 +4,14 @@
 # rime-lite 主方案：最小全拼
 # 依据 docs/design/architecture.md §4.2，参考 rime-ice 工程 rime_ice.schema.yaml 裁剪（2026-07-02）。
 # 相对 rime-ice 的取舍：
-#   - 零 Lua、零 OpenCC filter（无 Emoji、无简繁切换、无置顶 / 降频）
+#   - 热路径 Lua 仅 AI 候选通路（D-18，预算制红线 D-19）；零 OpenCC filter（无 Emoji、无简繁切换、无置顶 / 降频）
 #   - speller 保留超级简拼与 v/ü 转换，不引入模糊音与自动纠错
 #   - translators 仅保留：标点、拼音、custom_phrase、melt_eng
 
 schema:
   schema_id: pinyin
   name: 拼音
-  version: "2026-07-02"
+  version: "2026-07-08"
   author:
     - huan
   description: |
@@ -29,6 +29,9 @@ switches:
     states: [ ¥, $ ]
   - name: full_shape
     states: [ 半角, 全角 ]
+  - name: ai_suggest   # AI 候选自动预取（D-18）；关闭时触发键仍可显式请求
+    states: [ AI关, AI开 ]
+    reset: 1
 
 
 # 输入引擎
@@ -37,6 +40,7 @@ engine:
     - ascii_composer
     - recognizer
     - key_binder
+    - lua_processor@*ai.trigger      # AI 候补触发键（D-18，默认 Control+t）
     - speller
     - punctuator
     - selector
@@ -54,7 +58,8 @@ engine:
     - table_translator@custom_phrase   # 个人固定短语 custom_phrase.txt
     - table_translator@melt_eng        # 英文词库
   filters:
-    - uniquifier         # 候选去重
+    - lua_filter@*ai.suggest           # AI 智能候补注入（D-18，非阻塞，daemon 缺席自动降级）
+    - uniquifier         # 候选去重（AI 候补与本地候选重文时消重）
 
 
 # 拼写设定
@@ -104,6 +109,14 @@ melt_eng:
   initial_quality: 1.1
   comment_format:
     - xform/.*//            # 清空提示码
+
+
+# AI 候选通路（D-18）；daemon 见 services/candidate-daemon/
+ai_suggest:
+  min_length: 4          # 自动预取的最小编码长度
+  top_k: 8               # 送作参考的本地候选数
+  trigger_key: "Tab"     # 组词中按 Tab 调出 AI 候补（Ctrl+t 常被应用吞，2026-07-08 调整）
+  trigger_wait_ms: 250   # 触发键对在途结果的有界等待
 
 
 # 标点符号，从 default.yaml 导入
