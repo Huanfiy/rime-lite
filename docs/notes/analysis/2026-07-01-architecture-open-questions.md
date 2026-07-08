@@ -39,7 +39,7 @@
 
 | ID    | 优先级 | 议题                         | 当前倾向                                    |
 | ----- | --- | -------------------------- | --------------------------------------- |
-| OQ-2  | P0  | AI daemon 延迟模型与 socket 可行性 | 改按需触发 + 异步预取;提前验证 socket                |
+| OQ-2  | P0  | AI daemon 延迟模型与 socket 可行性 | 已拍板(2026-07-08,D-17):按需触发 + 异步预取;socket 实测可行 |
 | OQ-8  | P2  | Emoji 数据来源                 | 已拍板(2026-07-02):vendor rime-ice opencc;首版暂不挂载 Emoji |
 | OQ-9  | P2  | 首版英文输入范围                   | 已拍板(2026-07-02):挂 melt_eng,推翻原倾向          |
 | OQ-10 | P2  | 多机同步主路径                    | 已拍板(2026-07-02):Git 主路径;Rime sync 仅作运行态备份与迁移输入 |
@@ -68,7 +68,7 @@
 
 **影响**:决定 8 节整体接口形态与 `services/candidate-daemon/protocol.md` 的设计。
 
-**状态**:待确认(socket 可行性为阻断项)。
+**状态**:已拍板(2026-07-08,D-17)——选项 1(按需触发 + 异步预取);socket 阻断项经能力探针实测解除。探针实测记录与实施方案推导已移至 [2026-07-08-ai-daemon-implementation.md](2026-07-08-ai-daemon-implementation.md)(§2 实测、§3-§10 方案);后续未决项(daemon 工作负载与协议)在该文件内跟踪,不再属本 OQ。
 
 ## P2 — 倾向已明确 / 低风险
 
@@ -100,8 +100,8 @@
 
 ## 后续动作
 
-1. 逐项拍板未确认事项(P0 优先)。
-2. OQ-2 的 socket 可行性探针可独立于其他决策先行。
+1. 逐项拍板未确认事项(P0 优先)。(2026-07-08 OQ-2 拍板 D-17 后,全部 OQ 已清零——本文件满足 docs-rules §4 清理条件,待清理提交)
+2. OQ-2 的 socket 可行性探针可独立于其他决策先行。(2026-07-08 已完成,通过,记录移至 [2026-07-08-ai-daemon-implementation.md](2026-07-08-ai-daemon-implementation.md) §2)
 3. 拍板结论搬入 `[../../design](../../design)`,本文件保留推导过程。(2026-07-02 已完成:[architecture.md](../../design/architecture.md),覆盖除 OQ-2 外全部事项)
 4. 依结论回改 `[.agents/plans/2026-06-25-rime-lite-project-plan.md](../../../.agents/plans/2026-06-25-rime-lite-project-plan.md)`(尤其目录结构与阶段划分)。
 

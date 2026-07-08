@@ -38,7 +38,8 @@ tools/userdb-candidates -o /tmp/candidates.tsv rime/sync/<installation_id>/pinyi
 - **词库挂载链**：`pinyin.dict.yaml` 经 `import_tables` 挂载 `cn_dicts/8105`（字表）、`cn_dicts/base`（基础词库）、`cn_dicts/embedded`（领域词）、`cn_dicts/mydict`（个人词）与 `en_dicts/en`（经 melt_eng）。melt_eng 仅作词库挂载出英文候选，不是独立方案；启用方案仅 `pinyin`。
 - **词库分层**：8105 / base / en 为 vendor 层，不手工加词；embedded / mydict / `custom_phrase.txt` 为个人层，手工维护。加词判定顺序、格式与分区规则见 [docs/design/lexicon-sop.md](docs/design/lexicon-sop.md) §2。
 - **userdb 生命周期**：`rime/pinyin.userdb/` 仅是本机学习缓存（运行态，不进 Git）；稳定词条走「导出 → `tools/userdb-candidates` 机械筛选 → 人工审定 → 晋升静态词库 → Git」（D-1 / D-14 / D-15）。
-- **性能红线**：热路径零 Lua、零 OpenCC filter（filters 仅 `uniquifier`），新增功能不得违反。
+- **AI 智能候补通路**（D-18，设计见 [docs/design/ai-daemon.md](docs/design/ai-daemon.md)）：`rime/lua/ai/` ↔ unix socket ↔ `services/candidate-daemon/`（systemd 用户服务 `rime-candidate-daemon`）↔ OpenAI 兼容 API，生成式候补（上下文整句转换 + 延伸预测）注入候选栏；密钥仅存 `~/.config/rime-candidate-daemon/config.json`（0600），**严禁写入仓库任何文件**；daemon 缺席时输入法自动降级为原生体验。
+- **性能红线**（预算制，D-19）：热路径 Lua 预算 ≤ 0.1ms/键，且必须非阻塞（不等待 daemon / 网络）；filters 仅 `uniquifier` + `ai.suggest`；零 OpenCC filter；新增功能不得违反。
 - **运行态隔离**：`rime/build/`、`rime/*.userdb/`、`rime/sync/`、`installation.yaml`、`user.yaml` 由 `.gitignore` 隔离；一次性中间产物（候选 TSV、staging 目录）放仓库外，不入库。
 
 ## 关键禁区
