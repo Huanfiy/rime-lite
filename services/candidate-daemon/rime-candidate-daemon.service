@@ -1,0 +1,10 @@
+[Unit]
+Description=rime-lite AI candidate daemon (D-18)
+
+[Service]
+ExecStart=/usr/bin/python3 %h/sync/rime-lite/services/candidate-daemon/candidate-daemon.py
+Restart=on-failure
+RestartSec=2
+
+[Install]
+WantedBy=default.target
