@@ -113,10 +113,11 @@ melt_eng:
 
 # AI 候选通路（D-18）；daemon 见 services/candidate-daemon/
 ai_suggest:
-  min_length: 4          # 自动预取的最小编码长度
+  min_length: 4          # 候补注入 / 触发键请求的最小编码长度
+  auto_min_length: 6     # 自动预取的最小编码长度（D-20：短词本地词库已足够快）
   top_k: 8               # 送作参考的本地候选数
   trigger_key: "Tab"     # 组词中按 Tab 调出 AI 候补（Ctrl+t 常被应用吞，2026-07-08 调整）
-  trigger_wait_ms: 250   # 触发键对在途结果的有界等待
+  trigger_wait_ms: 250   # 触发键对在途结果的有界等待（未命中时亮 ⚡… 提示，稍候再按）
 
 
 # 标点符号，从 default.yaml 导入
