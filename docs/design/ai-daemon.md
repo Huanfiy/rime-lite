@@ -56,7 +56,7 @@ fcitx5（librime 进程内）
 - **luasocket 是阻塞库**：「异步」由 `settimeout(0)` + 缓存实现，无线程；阻塞等待仅触发键路径允许且有界。
 - **消重契约**：AI 候补与本地候选重文时的去重依赖 filters 顺序 `ai.suggest` → `uniquifier`，调整顺序会破坏该行为。
 - **缓存键**：`输入串@翻译段起点`，区分整句与选定首词后的剩余段；响应按 key 精确匹配，过期结果天然失配丢弃。请求的 `pinyin` 字段只含当前翻译段（`prefix` 另携带已选文本），候补文本与注入跨度一致，选定首词后不重复前缀。
-- **段提示重绘**：Tab 未命中的「⚡…」提示仅写 `Segment.prompt`，依赖 fcitx5 每键后重绘预编辑区（真机抽查点）；后续按键 / 刷新组句会重建分段并自然清除提示。
+- **段提示重绘**：Tab 未命中的「⚡…」提示仅写 `Segment.prompt`，依赖 fcitx5 每键后重绘预编辑区（2026-07-09 真机抽查确认）；后续按键 / 刷新组句会重建分段并自然清除提示。
 - **等待冷却**：trigger 的有界等待带 1s 冷却（`WAIT_COOLDOWN`），防止长按时自动重复的键事件每个都阻塞 250ms 造成队列积压——长按场景由此退化为 µs 级轮询。
 - **已选前缀提取**：`glue.selected_prefix` 从 preedit 文本剥尾部 ascii 拼音得到前缀；前缀以 ascii 词结尾（选定英文候选）时会被一并剥掉，仅损失提示语境，无正确性影响。
 
@@ -77,4 +77,4 @@ fcitx5（librime 进程内）
 
 - 候补口径（条数、延伸长度、风格）：daemon 的 `SYSTEM_PROMPT` 单处修改。
 - 协议变更：需同步 `rime/lua/ai/glue.lua` 与 daemon，并更新 README 协议正文与版本号。
-- M2 收尾（未做，不阻塞使用）：socket activation、真机体验抽查回写、notes 过程文件清理。
+- M2 收尾（未做，不阻塞使用）：socket activation、notes 过程文件清理。

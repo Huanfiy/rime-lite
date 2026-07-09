@@ -54,12 +54,12 @@
 - 阶段 0 / 1（骨架、最小可部署输入法）：2026-07-02 完成并验收（architecture.md §10）。
 - 阶段 2 / 3（个人词库迁移、userdb 晋升 93 条）：2026-07-07 完成并验收（architecture.md §11）；验证方式为隔离 staging 构建（零 error）+ librime C API 按键探针（12/12 用例）+ Codex 独立交叉审核。
 - AI 候补通路 M0 / M1（D-17/18/19 实现）：2026-07-08 完成并验收（architecture.md §12）；staging 构建零 E + 降级 / mock / 真 API 三档探针全过；真机 fcitx5 的 glue 链路已经用户实际输入证实，候补体验抽查随日常使用。
-- AI 触发架构 v1.2（D-20）：2026-07-09 完成——mock e2e 六项调度行为 + 客户端 payload / 重试单测 + staging 构建零 E；真机抽查点（`⚡…` 提示重绘、两拍收割节奏）待 `fcitx5 -rd` 后确认。
+- AI 触发架构 v1.2（D-20）：2026-07-09 完成并验收——mock e2e 六项调度行为 + 客户端 payload / 重试单测 + staging 构建零 E；真机抽查（`⚡…` 提示重绘、两拍收割节奏）同日经用户实际输入确认正常。
 - 词库维护进入长期运营态，流程见 [docs/design/lexicon-sop.md](docs/design/lexicon-sop.md)。
 
 ## 未决事项
 
 - AI 候选通路 M2 收尾未做（不阻塞使用）：socket activation 常驻优化、`design/ai-daemon.md` 落档、两份 notes 清理（2026-07-01 评审、2026-07-08 实施推导，后者含 M0/M1 过程记录）——见 [docs/notes/analysis/2026-07-08-ai-daemon-implementation.md](docs/notes/analysis/2026-07-08-ai-daemon-implementation.md) §9。
-- AI 候选真机 fcitx5 抽查待做（需 `fcitx5 -rd`，探针未覆盖 fcitx5 进程内路径）；测试期 API key 用后需作废轮换（曾在会话明文出现）。
+- 测试期 API key 用后需作废轮换（曾在会话明文出现）。
 - 本机已装未启用的 librime 插件（2026-07-07 探明，为后续扩展的前置事实）：`librime-plugin-octagram`（n-gram 语法模型，挂载尚缺 `.gram` 模型文件与 schema 配置）；`librime-plugin-lua`（动态链接系统 `liblua5.4`，`lua-socket 3.1.0-1` 可加载性已于 2026-07-08 实测确认，见上条）。
 - Emoji、`ext` 扩展词库：挂载点与数据来源已定（architecture.md §8），未挂载。
