@@ -74,6 +74,5 @@
 | 调用链 HTML（notes）               | 2026-07-07 | 删除，git `f086a11`            |
 | architecture.md §9 偏离表        | 2026-07-07 | 章节墓碑，编号保留                   |
 | refs/rime-ice userdb 归档      | 2026-07-07 | 阶段 3 消费后移除，引用改指 git `6438887` |
-
-
-下一个可清理对象：`docs/notes/analysis/2026-07-01-architecture-open-questions.md`（触发条件：OQ-2 拍板）。
+| notes/2026-07-01 架构评审 OQ    | 2026-07-09 | OQ 全部拍板后删除，引用改指 git `f8bc790`  |
+| notes/2026-07-08 AI daemon 实施推导 | 2026-07-09 | 结论落档 ai-daemon.md 后删除，引用改指 git `0ca9348` |

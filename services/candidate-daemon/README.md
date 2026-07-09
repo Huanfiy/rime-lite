@@ -1,7 +1,7 @@
 # candidate-daemon — AI 智能候补 daemon
 
-rime-lite 的 AI 生成式候补服务（决策 D-17 / D-18，设计推导见
-[docs/notes/analysis/2026-07-08-ai-daemon-implementation.md](../../docs/notes/analysis/2026-07-08-ai-daemon-implementation.md)）。
+rime-lite 的 AI 生成式候补服务（决策 D-17 / D-18 / D-20，结构与契约见
+[docs/design/ai-daemon.md](../../docs/design/ai-daemon.md)）。
 Rime 侧经 `rime/lua/ai/` 以 unix socket 连接本服务；本服务根据会话上下文（近期上屏文本）
 调用 OpenAI 兼容 API，生成用户想输入的完整内容（拼音整句转换 + 延伸预测，不受本地词库限制），
 以 ⚡ 候补形式注入候选栏首位，选中即整段上屏。

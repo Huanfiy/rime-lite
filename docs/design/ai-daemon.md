@@ -77,4 +77,4 @@ fcitx5（librime 进程内）
 
 - 候补口径（条数、延伸长度、风格）：daemon 的 `SYSTEM_PROMPT` 单处修改。
 - 协议变更：需同步 `rime/lua/ai/glue.lua` 与 daemon，并更新 README 协议正文与版本号。
-- M2 收尾（未做，不阻塞使用）：socket activation、notes 过程文件清理。
+- M2 收尾（未做，不阻塞使用）：socket activation 常驻优化（现为常驻服务）。

@@ -59,7 +59,7 @@
 
 ## 未决事项
 
-- AI 候选通路 M2 收尾未做（不阻塞使用）：socket activation 常驻优化、`design/ai-daemon.md` 落档、两份 notes 清理（2026-07-01 评审、2026-07-08 实施推导，后者含 M0/M1 过程记录）——见 [docs/notes/analysis/2026-07-08-ai-daemon-implementation.md](docs/notes/analysis/2026-07-08-ai-daemon-implementation.md) §9。
+- AI 候选通路 M2 收尾未做（不阻塞使用）：仅剩 socket activation 常驻优化——见 [docs/design/ai-daemon.md](docs/design/ai-daemon.md) §8。
 - 测试期 API key 用后需作废轮换（曾在会话明文出现）。
 - 本机已装未启用的 librime 插件（2026-07-07 探明，为后续扩展的前置事实）：`librime-plugin-octagram`（n-gram 语法模型，挂载尚缺 `.gram` 模型文件与 schema 配置）；`librime-plugin-lua`（动态链接系统 `liblua5.4`，`lua-socket 3.1.0-1` 可加载性已于 2026-07-08 实测确认，见上条）。
 - Emoji、`ext` 扩展词库：挂载点与数据来源已定（architecture.md §8），未挂载。
