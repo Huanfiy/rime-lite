@@ -78,7 +78,7 @@
 | 编号   | 决策                | 说明                                                              |
 | ---- | ----------------- | --------------------------------------------------------------- |
 | D-17 | AI daemon 延迟模型为「按需触发 + 异步预取」（OQ-2 选项 1） | 热路径任何情况下不等待 daemon：lua filter 仅做非阻塞收发与缓存查表（µs 级），结果展示以专用触发键为主入口（对在途结果有界等待并强制刷新）。依据：2026-07-08 Lua socket 能力探针实测通过——librime-lua 内 luasocket 可用（关键前置：先 `package.loadlib(liblua5.4, "*")` 再 require），unix RTT p50 11.9µs，超时可硬性封顶，daemon 缺席 30µs 内降级。实测与实施推导已移出工作区（git 历史 `0ca9348` 可查）；工作负载与协议同日由 D-18 拍板落地 |
-| D-18 | AI 候选工作负载 = LLM 生成式智能候补，经 OpenAI 兼容 API（同日实现落地） | 用户诉求「更聪明、懂我」且要**预测式候补**（猜后续输入），不受本地词库限制；octagram 对照结论：局部 n-gram 不覆盖跨句语境诉求，不走该轨道。行为：daemon 根据会话上下文生成 ≤ 3 条候补（拼音整句转换 + 延伸预测，如上屏「嵌入式系统」后输入 `zhongduan` → 「中断处理程序」），注入候选栏首位（⚡ 标记，选中即整段上屏），本地候选跟随（重文由 uniquifier 消重）。构成：`rime/lua/ai/`（suggest filter + trigger processor + glue）↔ unix socket ↔ `services/candidate-daemon/`（systemd 用户服务，密钥托管于 `~/.config/rime-candidate-daemon/config.json`，不入库）↔ 云端 API。参数：模型默认 `gpt-5.4` + `reasoning_effort: low`（生成实测 2.7~4.8s、方差小、~60 输出 token；曾按「选最快」用 spark，因推理 token 烧量大 / 方差 1.7~7s 于同日调整）；`ai_suggest` 开关默认开 = 长度 ≥ 4 的稳定态自动预取（daemon 去抖 300ms），关闭 = trigger-only 隐私模式；触发键 `Tab`（仅组词状态拦截，原音节右移绑定让位——Ctrl+t 常被应用抢占，同日调整；有界等待 250ms）；会话上下文为近期上屏 ≤ 6 条（`commit_notifier` 通报）。演进注：当日初版为重排式（只调本地候选顺序），用户验收判定不满足诉求，同日改为生成式候补并复验。协议 v1.1（NDJSON over UDS）与运行参数见 [services/candidate-daemon/README.md](../../services/candidate-daemon/README.md) |
+| D-18 | AI 候选工作负载 = LLM 生成式智能候补，经 OpenAI 兼容 API（同日实现落地） | 用户诉求「更聪明、懂我」且要**预测式候补**（猜后续输入），不受本地词库限制；octagram 对照结论：局部 n-gram 不覆盖跨句语境诉求，不走该轨道。行为：daemon 根据会话上下文生成 ≤ 3 条候补（拼音整句转换 + 延伸预测，如上屏「嵌入式系统」后输入 `zhongduan` → 「中断处理程序」），注入候选栏首位（⚡ 标记，选中即整段上屏），本地候选跟随（重文由 uniquifier 消重）。构成：`rime/lua/ai/`（suggest filter + trigger processor + glue）↔ unix socket ↔ `services/candidate-daemon/`（systemd 用户服务，密钥托管于 `~/.config/rime-candidate-daemon/config.json`，不入库）↔ 云端 API。参数：模型默认 `gpt-5.4` + `reasoning_effort: low`（生成实测 2.7~4.8s、方差小、~60 输出 token；曾按「选最快」用 spark，因推理 token 烧量大 / 方差 1.7~7s 于同日调整）；`ai_suggest` 开关默认开 = 长度 ≥ 4 的稳定态自动预取（daemon 去抖 300ms），关闭 = trigger-only 隐私模式（自动预取与开关子项已被 D-21 推翻：全局纯触发式，开关撤销）；触发键 `Tab`（仅组词状态拦截，原音节右移绑定让位——Ctrl+t 常被应用抢占，同日调整；有界等待 250ms）；会话上下文为近期上屏 ≤ 6 条（`commit_notifier` 通报）。演进注：当日初版为重排式（只调本地候选顺序），用户验收判定不满足诉求，同日改为生成式候补并复验。协议 v1.1（NDJSON over UDS）与运行参数见 [services/candidate-daemon/README.md](../../services/candidate-daemon/README.md) |
 | D-19 | 性能红线修订为预算制 | 原「热路径零 Lua」与 D-18 定义性冲突，修订为：**热路径 Lua 预算 ≤ 0.1ms/键**（实测口径）；filters 仅 `uniquifier` + `ai.suggest`，processors 新增 `ai.trigger`，全部非阻塞、daemon 缺席 µs 级降级；零 OpenCC filter 维持不变。M0 实测：开关开/关差值 ≤ 0.04ms/键（§12），远低于预算 |
 
 
@@ -87,7 +87,15 @@
 
 | 编号   | 决策                | 说明                                                              |
 | ---- | ----------------- | --------------------------------------------------------------- |
-| D-20 | AI 触发架构并发化 + 两拍触发契约（协议 v1.2） | 动因（2026-07-08 journal 观测）：daemon 串行 `api_lock` 使新请求排在半截前缀调用之后（随机 +0~6s），结果普遍落在上屏之后作废；触发键有界等待 250ms < 去抖 300ms，冷启动首按必空且无反馈。改造（API 延迟视为固定秒级，不触碰 D-17 无异步刷新与 D-19 预算红线）：**daemon 调度**——去串行锁改并发槽（`max_concurrency` 默认 3，HTTP 连接池摊销 TLS）+ 同 key 在途防重 + commit 作废所有在队请求（去抖中 + 等并发槽的，含 explicit，2026-07-09 扩展；在途 API 不中断，回包由客户端按 key 失配丢弃）+ auto 请求音节完整门控（悬空辅音结尾如 `chak`/`houb` 不上云，只看尾字符、宽容误收）；**explicit 快车道**——触发键请求带 `explicit` 标记跳过门控与去抖，端到端 = API 净耗时；**两拍契约**——Tab 未命中亮 `⚡…` 段提示（有界等待仅兜近落地结果，带 1s 冷却使长按 = 轮询、不积压事件队列）；**阈值分离**——自动预取 `auto_min_length: 6`，注入 / 触发维持 `min_length: 4`；**协议 v1.2**——请求增 `explicit` / `prefix` 字段、`pinyin` 改为当前翻译段（修复选定首词后候补重复已选前缀的缺陷），v1.1 客户端按 auto 兼容。验证：mock e2e 六项调度行为（explicit 快车道 / 去抖 / 门控 / explicit 越过门控 / 新输入取代 / commit 作废）+ 客户端 payload 与重试单测 + staging 构建零 E；真机 `⚡…` 提示重绘与两拍收割节奏 2026-07-09 抽查确认 |
+| D-20 | AI 触发架构并发化 + 两拍触发契约（协议 v1.2） | 动因（2026-07-08 journal 观测）：daemon 串行 `api_lock` 使新请求排在半截前缀调用之后（随机 +0~6s），结果普遍落在上屏之后作废；触发键有界等待 250ms < 去抖 300ms，冷启动首按必空且无反馈。改造（API 延迟视为固定秒级，不触碰 D-17 无异步刷新与 D-19 预算红线）：**daemon 调度**——去串行锁改并发槽（`max_concurrency` 默认 3，HTTP 连接池摊销 TLS）+ 同 key 在途防重 + commit 作废所有在队请求（去抖中 + 等并发槽的，含 explicit，2026-07-09 扩展；在途 API 不中断，回包由客户端按 key 失配丢弃）+ auto 请求音节完整门控（悬空辅音结尾如 `chak`/`houb` 不上云，只看尾字符、宽容误收）；**explicit 快车道**——触发键请求带 `explicit` 标记跳过门控与去抖，端到端 = API 净耗时；**两拍契约**——Tab 未命中亮 `⚡…` 段提示（有界等待仅兜近落地结果，带 1s 冷却使长按 = 轮询、不积压事件队列）；**阈值分离**——自动预取 `auto_min_length: 6`，注入 / 触发维持 `min_length: 4`；**协议 v1.2**——请求增 `explicit` / `prefix` 字段、`pinyin` 改为当前翻译段（修复选定首词后候补重复已选前缀的缺陷），v1.1 客户端按 auto 兼容。（auto 路径子项——音节门控 / 去抖 / 阈值分离 / explicit 字段——已被 D-21 推翻：auto 路径整体移除，explicit 快车道升格为唯一路径；并发槽 / 同 key 防重 / commit 作废 / 两拍契约保留现行。）验证：mock e2e 六项调度行为（explicit 快车道 / 去抖 / 门控 / explicit 越过门控 / 新输入取代 / commit 作废）+ 客户端 payload 与重试单测 + staging 构建零 E；真机 `⚡…` 提示重绘与两拍收割节奏 2026-07-09 抽查确认 |
+
+
+2026-07-09 晚间拍板的新增决策：
+
+
+| 编号   | 决策                | 说明                                                              |
+| ---- | ----------------- | --------------------------------------------------------------- |
+| D-21 | 撤销自动预取，AI 候补纯触发式（协议 v1.3） | 动因（2026-07-09 用户使用反馈）：正常打字几乎见不到 AI 候补——librime 无异步刷新通道（D-17），预取结果不能自行弹出，须再按键（事实上只有 Tab）才展示；而 API 延迟 2.7~4.8s 落后于打字节奏，auto 产出几乎总在上屏后作废。自动预取的全部价值仅剩「停顿后按 Tab 省一拍」，代价却是持续自动上云 + token 消耗，判定不成立，整体撤销。改造：**daemon**——移除 auto 路径（音节完整门控、去抖、`latest_auto` 取代逻辑；`debounce_ms` 配置废弃，出现即忽略），所有 suggest 直达并发槽；**filter**（`ai/suggest.lua`）——只收包 + 查缓存注入，不再发预取请求（commit 上下文通报保留；本会话从未按过触发键时直通透传，不碰 socket）；**开关**——`ai_suggest` 从 switches 撤销（trigger-only 即全局语义，隐私边界 = 不按 Tab 零上云；`ai_suggest:` 配置段保留，删 `auto_min_length`）；**协议 v1.3**——移除 `explicit` 字段（旧字段被忽略，v1.1 / v1.2 请求一律按显式处理）。保留：并发槽 + 同 key 防重 + commit 作废在队请求、两拍触发契约与 `⚡…` 提示（均沿 D-20）；`min_length` 初期沿 D-20 值 4，2026-07-10 调为 1——该门槛原为约束自动外发而设，纯触发式下失去保护对象，Tab 即触发。验证：mock e2e（直达并发槽零去抖延迟 / 悬空辅音不再拦截 / 同 key 防重 / commit 作废在队请求）+ glue payload 断言（无 explicit 字段）+ staging 构建零 E |
 
 
 未决事项：无阻塞项。AI 候选通路 M2 收尾见 [ai-daemon.md](ai-daemon.md) §8；运行参数（模型 / 去抖 / 上下文规模）走 daemon 配置文件调优，不动仓库。
@@ -179,7 +187,7 @@ engine:
     - uniquifier
 ```
 
-AI 候选通路的开关（`ai_suggest`，默认开）、参数段（`ai_suggest:` 键位 / 阈值 / 等待）与行为语义见 `rime/pinyin.schema.yaml` 及 [services/candidate-daemon/README.md](../../services/candidate-daemon/README.md)。
+AI 候选通路为纯触发式（D-21，无开关、无自动预取），参数段（`ai_suggest:` 键位 / 阈值 / 等待）与行为语义见 `rime/pinyin.schema.yaml` 及 [services/candidate-daemon/README.md](../../services/candidate-daemon/README.md)。
 
 关键配置块（字段值以 vendor 源为基准，已核对）：
 
