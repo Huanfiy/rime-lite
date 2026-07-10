@@ -4,7 +4,6 @@
   "api_key": "REPLACE_ME",
   "model": "gpt-5.4",
   "reasoning_effort": "low",
-  "debounce_ms": 300,
   "max_concurrency": 3,
   "context_commits": 6,
   "context_chars": 80,

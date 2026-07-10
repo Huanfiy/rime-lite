@@ -1,11 +1,11 @@
--- ai/trigger.lua — AI 候补触发键 processor（D-17 / D-18 / D-20）
+-- ai/trigger.lua — AI 候补触发键 processor（D-17 / D-18 / D-21）
+-- 纯触发式（D-21）下这里是 AI 候补的唯一请求入口：不按触发键，零上云。
 -- 两拍契约：组词状态下按触发键（默认 Tab，仅组词时拦截，其余场景 Tab 行为不变）——
 --   缓存命中 → 强制刷新组句，suggest filter 注入候补，即时展示；
---   未命中   → 发 explicit 请求（daemon 跳过去抖直达 API）并有界等待（默认 250ms），
+--   未命中   → 发请求（daemon 直达并发槽）并有界等待（默认 250ms），
 --              到点未回则在预编辑区亮「⚡…」提示，约一个 API 周期后再按即命中。
 --   长按触发键 = 轮询收割：自动重复的键事件逐次收包查缓存，结果落地即展示；
 --   有界等待带 1s 冷却，重复事件只做 µs 级查表，不会积压事件队列。
--- 开关关闭（ai_suggest off）时触发键仍可用 = trigger-only 隐私模式。
 -- 键位取自 schema 的 ai_suggest/trigger_key；Tab 的原音节导航绑定已在 default.yaml 让位。
 
 local glue = require("ai.glue")
@@ -21,7 +21,7 @@ function M.init(env)
   env.trigger_key = cfg:get_string("ai_suggest/trigger_key") or "Tab"
   env.wait_s = (cfg:get_int("ai_suggest/trigger_wait_ms") or 250) / 1000
   env.top_k = cfg:get_int("ai_suggest/top_k") or 8
-  env.min_len = cfg:get_int("ai_suggest/min_length") or 4
+  env.min_len = cfg:get_int("ai_suggest/min_length") or 1
   env.next_wait_ok = 0
 end
 
@@ -31,7 +31,7 @@ local function cache_key(raw, seg_start)
 end
 
 local function menu_snapshot(ctx, top_k)
-  -- 从当前组句菜单取候选文本（触发键显式路径需要，预取路径不经过这里）
+  -- 从当前组句菜单取候选文本（作为请求的本地机械转换参考）
   local ok, ret = pcall(function()
     local comp = ctx.composition
     if comp:empty() then return nil end
@@ -78,7 +78,7 @@ function M.func(key_event, env)
   local entry = glue.get(key)
   if not entry then
     if snap and #snap.texts > 0 then
-      glue.request(key, raw:sub(seg_start + 1), snap.texts, true,
+      glue.request(key, raw:sub(seg_start + 1), snap.texts,
                    seg_start > 0 and glue.selected_prefix(ctx) or "")
     end
     -- 有界等待只兜「即将落地」的结果；长按重复触发时受冷却限制，退化为纯轮询

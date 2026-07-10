@@ -1,7 +1,7 @@
--- ai/glue.lua — AI 候选 daemon 客户端共享层（D-17 / D-18 / D-20）
+-- ai/glue.lua — AI 候选 daemon 客户端共享层（D-17 / D-18 / D-21）
 -- 职责：unix socket 连接管理、非阻塞收发、结果缓存、协议编解码。
 -- 热路径约束（D-19 预算制）：本模块所有对外函数除 wait() 外必须非阻塞（µs 级）。
--- 协议 v1.2（NDJSON）见 services/candidate-daemon/README.md。
+-- 协议 v1.3（NDJSON）见 services/candidate-daemon/README.md。
 
 local json = require("vendor.json")
 
@@ -13,7 +13,7 @@ local M = {
   cache = {},        -- key → { order = {文本…}, t = 时间 }
   cache_n = 0,
   pending = {},      -- key → 发起时间（防重复请求）
-  activity = false,  -- 本会话是否发生过显式请求（供 filter 在开关关闭时判断是否仍需 drain）
+  activity = false,  -- 本会话是否按过触发键（filter 以此决定是否参与收包/注入）
   seq = 0,
 }
 
@@ -148,9 +148,9 @@ function M.selected_prefix(ctx)
   return (text:gsub("[%a%s']*$", ""))
 end
 
--- 发起候补请求（非阻塞、防重复）；explicit=true 走 daemon 快车道（跳过去抖）
--- 并标记本会话已有显式活动；prefix 为已选定前缀文本（可空）。
-function M.request(key, pinyin, cand_texts, explicit, prefix)
+-- 发起候补请求（非阻塞、防重复）；仅触发键路径调用（D-21 纯触发式），
+-- 成功发送即标记本会话有显式活动；prefix 为已选定前缀文本（可空）。
+function M.request(key, pinyin, cand_texts, prefix)
   if not M.setup() then return false end
   if M.cache[key] then return true end
   local p = M.pending[key]
@@ -159,12 +159,11 @@ function M.request(key, pinyin, cand_texts, explicit, prefix)
   M.seq = M.seq + 1
   local ok = send_line(json.encode({
     op = "suggest", id = M.seq, key = key, pinyin = pinyin, cands = cand_texts,
-    explicit = explicit or nil,
     prefix = (prefix and #prefix > 0) and prefix or nil,
   }))
   if ok then
     M.pending[key] = now()
-    if explicit then M.activity = true end
+    M.activity = true
   end
   return ok
 end

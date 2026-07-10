@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
-"""rime-lite AI 候选 daemon（D-17 / D-18）。
+"""rime-lite AI 候选 daemon（D-17 / D-18 / D-21）。
 
 职责：unix socket ↔ OpenAI 兼容 API 的桥；工作负载为**生成式智能候补**——
 根据会话上下文（近期上屏文本）预测用户想输入的完整内容（拼音整句转换 + 延伸预测，
-不受本地词库限制）；请求去抖合并（连打只算稳定态）；API key 托管（配置文件，不入库）。
+不受本地词库限制）；API key 托管（配置文件，不入库）。
 
-协议 v1.2（NDJSON over UDS，与 rime/lua/ai/glue.lua 对应）：
+协议 v1.3（NDJSON over UDS，与 rime/lua/ai/glue.lua 对应）：
   req : {"op":"suggest","id":N,"key":"<缓存键>","pinyin":"<待转换拼音(当前翻译段)>",
-         "cands":["本地候选参考",…],"prefix":"<已选定前缀文本,可缺省>","explicit":true|缺省}
+         "cands":["本地候选参考",…],"prefix":"<已选定前缀文本,可缺省>"}
         {"op":"commit","text":"<上屏文本>"}
         {"op":"ping"}
   resp: {"id":N,"key":"<原样回显>","cands":["AI 候补文本",…]}   # 最优在前，≤3 条
         {"pong":true,"commits":N}
-  v1.1 客户端（无 prefix/explicit 字段）按 auto 请求处理，行为向后兼容。
+  旧版 explicit 字段被忽略——v1.3 起所有请求都由触发键显式产生（D-21），
+  v1.1 / v1.2 客户端的请求一律按显式处理。
 
-调度模型（2026-07-09 并发化改造，D-20）：
-  auto     请求：音节完整门控 → 去抖（新请求/上屏取代旧任务）→ 并发槽 → API；
-  explicit 请求（触发键）：跳过门控与去抖，直接进并发槽，端到端 = API 净耗时；
-  上屏（commit）作废所有仍在排队的请求（去抖中 + 等并发槽的，含 explicit）——
-  组词态已变、结果注定失配；已在途的 API 调用不中断（token 已花，回包由客户端按 key 失配丢弃）。
+调度模型（2026-07-09 纯触发式改造，D-21，取代 D-20 的 auto/explicit 双路径）：
+  请求仅由触发键产生 → 并发槽（同 key 在途防重）→ API，端到端 = API 净耗时；
+  上屏（commit）作废仍在等并发槽的请求——组词态已变、结果注定失配；
+  已在途的 API 调用不中断（token 已花，回包由客户端按 key 失配丢弃）。
 
 仅用 Python 标准库；配置见 config.example.json 与 README.md。
 """
@@ -41,13 +41,13 @@ DEFAULTS = {
     "api_key": "",
     "model": "gpt-5.4",
     "reasoning_effort": "low",    # 部分模型不接受该参数（如 spark），置 null 则不发送
-    "debounce_ms": 300,           # 去抖：仅输入稳定态触发 API（explicit 请求不受此限）
     "max_concurrency": 3,         # 在途 API 调用上限（并发槽）
     "context_commits": 6,         # 会话上下文保留的上屏条数
     "context_chars": 80,          # 送入 prompt 的上下文尾部长度
     "request_timeout_s": 20,
     "mock_delay_ms": 0,           # mock 模拟 API 延迟（仅 provider=mock，供并发/取消链路验证）
 }
+# 已废弃配置（D-21 撤销自动预取后无消费方）：debounce_ms——配置文件中出现将被忽略。
 
 # 候补口径单点（ai-daemon.md §8）。「禁止照抄机械转换」与反例是抗锚定硬约束
 # （2026-07-09 真实失败样本：dexingweishi → 照抄「德行为使」而非语境正解「的行为是」），
@@ -60,30 +60,6 @@ SYSTEM_PROMPT = (
     "「已选前缀」是本次输入已确认的开头,候补不得重复它。"
     "反例:上文「长按Tab补全」+拼音dexingweishi→正解「的行为是…」,照抄机械转换「德行为使」为错。"
 )
-
-_VOWELS = frozenset("aeiouv")
-
-
-def stable_pinyin(p):
-    """音节完整性启发式（auto 请求门控）。
-
-    合法全拼音节只能以元音、n / ng、er 结尾；以悬空辅音结尾的半截输入
-    （观测样本：chak / houb / shenm / meiyig）注定在下一键失效，不值得上云。
-    宽容误收（如歧义切分）无害——只是多一次调用；严格漏收才有害，故只看尾字符。
-    """
-    if not p:
-        return False
-    p = p.rstrip("'")
-    if not p or not all("a" <= c <= "z" or c == "'" for c in p):
-        return False
-    c = p[-1]
-    if c in _VOWELS or c == "n":
-        return True
-    if c == "g" and len(p) >= 2 and p[-2] == "n":
-        return True
-    if c == "r" and len(p) >= 2 and p[-2] == "e":
-        return True
-    return False
 
 _commit_total = 0  # 跨连接统计，仅供 ping 诊断
 
@@ -196,37 +172,23 @@ async def handle_conn(reader, writer, cfg, client):
     global _commit_total
     peer_ctx = collections.deque(maxlen=cfg["context_commits"])
     state = {
-        "latest_auto": None,  # 最新 auto 请求 id：打字推进时取代仍在去抖的旧任务
-        "gen": 0,             # 上屏代数：commit 后组词态已变，去抖中的 auto 全部作废
+        "gen": 0,             # 上屏代数：commit 后组词态已变，等槽中的请求全部作废
         "inflight": set(),    # 在途 API 的缓存键（同 key 防重）
         "sem": asyncio.Semaphore(max(1, int(cfg["max_concurrency"]))),
     }
-    debounce = cfg["debounce_ms"] / 1000.0
     loop = asyncio.get_running_loop()
 
     async def do_suggest(obj):
         rid, key = obj["id"], obj["key"]
         pinyin = obj.get("pinyin", "")
-        explicit = bool(obj.get("explicit"))
         gen0 = state["gen"]
-        if not explicit:
-            # auto 路径：音节门控 + 去抖；explicit（触发键）跳过两者直达并发槽
-            if not stable_pinyin(pinyin):
-                return
-            state["latest_auto"] = rid
-            if debounce > 0:
-                await asyncio.sleep(debounce)
-            if state["latest_auto"] != rid or state["gen"] != gen0:
-                return  # 去抖窗口内被更新输入 / 上屏取代
         if key in state["inflight"]:
-            return  # 同 key 已在途（explicit 与 auto 撞车时由在途者供餐）
+            return  # 同 key 已在途（重复触发时由在途者供餐）
         state["inflight"].add(key)
         try:
             async with state["sem"]:
                 if state["gen"] != gen0:
-                    return  # 排队期间已上屏：组词态已变，在队请求（含 explicit）一律作废
-                if not explicit and state["latest_auto"] != rid:
-                    return  # 排队期间被更新输入取代
+                    return  # 排队期间已上屏：组词态已变，在队请求一律作废
                 local_cands = obj.get("cands") or []
                 t0 = time.time()
                 if cfg["provider"] == "mock":
@@ -257,7 +219,7 @@ async def handle_conn(reader, writer, cfg, client):
                     log(f"suggest id={rid} client gone, result dropped")
                     return
                 log(
-                    f"suggest id={rid}{' explicit' if explicit else ''} "
+                    f"suggest id={rid} "
                     f"pinyin={pinyin!r} {(time.time() - t0) * 1000:.0f}ms "
                     f"cands={texts!r} {note}"
                 )
@@ -278,7 +240,6 @@ async def handle_conn(reader, writer, cfg, client):
                 peer_ctx.append(str(obj["text"]))
                 _commit_total += 1
                 state["gen"] += 1
-                state["latest_auto"] = None
                 log(f"commit {obj['text']!r} (ctx={len(peer_ctx)})")
             elif op == "ping":
                 writer.write(
