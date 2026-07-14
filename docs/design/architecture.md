@@ -103,7 +103,8 @@
 
 | 编号   | 决策                | 说明                                                              |
 | ---- | ----------------- | --------------------------------------------------------------- |
-| D-22 | GPT-5.6 Fast 模型与精简提示词 | 系统提示词限制 ≤ 100 字；95 字纯规则版无法稳定识别 `fushanjingtiguan`，最终 99 字版保留一条真实领域歧义样例。以 `reasoning_effort: low`（中转可接受的最低档）+ `service_tier: priority` 对 Luna / Terra / Sol 交错测试五类样例：Luna 4/5（`gpio` 错作「通用输入输出」），中位 / 均值 / 最大延迟 5.012 / 5.324 / 9.178s；Terra 5/5，3.131 / 3.409 / 4.961s；Sol 5/5，2.784 / 3.198 / 4.751s。选择 `gpt-5.6-sol`；Priority 被当前 OpenAI 兼容中转接受但响应未回显 `service_tier`，故只确认参数兼容，不把上游实际 tier 作为已证事实。 |
+| D-22 | GPT-5.6 Fast 模型与精简提示词 | 系统提示词限制 ≤ 100 字（提示词长度子项已被 D-23 推翻）；95 字纯规则版无法稳定识别 `fushanjingtiguan`，最终 99 字版保留一条真实领域歧义样例。以 `reasoning_effort: low`（中转可接受的最低档）+ `service_tier: priority` 对 Luna / Terra / Sol 交错测试五类样例：Luna 4/5（`gpio` 错作「通用输入输出」），中位 / 均值 / 最大延迟 5.012 / 5.324 / 9.178s；Terra 5/5，3.131 / 3.409 / 4.961s；Sol 5/5，2.784 / 3.198 / 4.751s。选择 `gpt-5.6-sol`；Priority 被当前 OpenAI 兼容中转接受但响应未回显 `service_tier`，故只确认参数兼容，不把上游实际 tier 作为已证事实。 |
+| D-23 | 表情意图候补与提示词扩容 | 系统提示词上限放宽为 200 字，现行为 195 字：首项始终为转写；识别到表情意图时第 2、3 项仅输出匹配语义的 emoji / 颜文字，否则维持 ≤ 10 字延伸；同时保留轻微拼音误写纠正。真 API 抽查：`keaidebiaoqing` 与误拼 `keaidebiaoqiang` 均得「可爱的表情 / 🥰 / (｡･ω･｡)ﾉ♡」，未入示例的 `kaixindebiaoqing` 得「开心的表情 / 😄 / ٩(ˊᗜˋ*)و」；`fushanjingtiguan`、`shanjidianya` 专业回归通过。 |
 
 
 未决事项：无阻塞项。AI 候选通路 M2 收尾见 [ai-daemon.md](ai-daemon.md) §8；运行参数（模型 / 去抖 / 上下文规模）走 daemon 配置文件调优，不动仓库。
