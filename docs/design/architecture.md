@@ -78,7 +78,7 @@
 | 编号   | 决策                | 说明                                                              |
 | ---- | ----------------- | --------------------------------------------------------------- |
 | D-17 | AI daemon 延迟模型为「按需触发 + 异步预取」（OQ-2 选项 1） | 热路径任何情况下不等待 daemon：lua filter 仅做非阻塞收发与缓存查表（µs 级），结果展示以专用触发键为主入口（对在途结果有界等待并强制刷新）。依据：2026-07-08 Lua socket 能力探针实测通过——librime-lua 内 luasocket 可用（关键前置：先 `package.loadlib(liblua5.4, "*")` 再 require），unix RTT p50 11.9µs，超时可硬性封顶，daemon 缺席 30µs 内降级。实测与实施推导已移出工作区（git 历史 `0ca9348` 可查）；工作负载与协议同日由 D-18 拍板落地 |
-| D-18 | AI 候选工作负载 = LLM 生成式智能候补，经 OpenAI 兼容 API（同日实现落地） | 用户诉求「更聪明、懂我」且要**预测式候补**（猜后续输入），不受本地词库限制；octagram 对照结论：局部 n-gram 不覆盖跨句语境诉求，不走该轨道。行为：daemon 根据会话上下文生成 ≤ 3 条候补（拼音整句转换 + 延伸预测，如上屏「嵌入式系统」后输入 `zhongduan` → 「中断处理程序」），注入候选栏首位（⚡ 标记，选中即整段上屏），本地候选跟随（重文由 uniquifier 消重）。构成：`rime/lua/ai/`（suggest filter + trigger processor + glue）↔ unix socket ↔ `services/candidate-daemon/`（systemd 用户服务，密钥托管于 `~/.config/rime-candidate-daemon/config.json`，不入库）↔ 云端 API。参数：模型默认 `gpt-5.4` + `reasoning_effort: low`（生成实测 2.7~4.8s、方差小、~60 输出 token；曾按「选最快」用 spark，因推理 token 烧量大 / 方差 1.7~7s 于同日调整）；`ai_suggest` 开关默认开 = 长度 ≥ 4 的稳定态自动预取（daemon 去抖 300ms），关闭 = trigger-only 隐私模式（自动预取与开关子项已被 D-21 推翻：全局纯触发式，开关撤销）；触发键 `Tab`（仅组词状态拦截，原音节右移绑定让位——Ctrl+t 常被应用抢占，同日调整；有界等待 250ms）；会话上下文为近期上屏 ≤ 6 条（`commit_notifier` 通报）。演进注：当日初版为重排式（只调本地候选顺序），用户验收判定不满足诉求，同日改为生成式候补并复验。协议 v1.1（NDJSON over UDS）与运行参数见 [services/candidate-daemon/README.md](../../services/candidate-daemon/README.md) |
+| D-18 | AI 候选工作负载 = LLM 生成式智能候补，经 OpenAI 兼容 API（同日实现落地） | 用户诉求「更聪明、懂我」且要**预测式候补**（猜后续输入），不受本地词库限制；octagram 对照结论：局部 n-gram 不覆盖跨句语境诉求，不走该轨道。行为：daemon 根据会话上下文生成 ≤ 3 条候补（拼音整句转换 + 延伸预测，如上屏「嵌入式系统」后输入 `zhongduan` → 「中断处理程序」），注入候选栏首位（⚡ 标记，选中即整段上屏），本地候选跟随（重文由 uniquifier 消重）。构成：`rime/lua/ai/`（suggest filter + trigger processor + glue）↔ unix socket ↔ `services/candidate-daemon/`（systemd 用户服务，密钥托管于 `~/.config/rime-candidate-daemon/config.json`，不入库）↔ 云端 API。参数：模型默认 `gpt-5.4` + `reasoning_effort: low`（模型子项已被 D-22 推翻；生成实测 2.7~4.8s、方差小、~60 输出 token；曾按「选最快」用 spark，因推理 token 烧量大 / 方差 1.7~7s 于同日调整）；`ai_suggest` 开关默认开 = 长度 ≥ 4 的稳定态自动预取（daemon 去抖 300ms），关闭 = trigger-only 隐私模式（自动预取与开关子项已被 D-21 推翻：全局纯触发式，开关撤销）；触发键 `Tab`（仅组词状态拦截，原音节右移绑定让位——Ctrl+t 常被应用抢占，同日调整；有界等待 250ms）；会话上下文为近期上屏 ≤ 6 条（`commit_notifier` 通报）。演进注：当日初版为重排式（只调本地候选顺序），用户验收判定不满足诉求，同日改为生成式候补并复验。协议 v1.1（NDJSON over UDS）与运行参数见 [services/candidate-daemon/README.md](../../services/candidate-daemon/README.md) |
 | D-19 | 性能红线修订为预算制 | 原「热路径零 Lua」与 D-18 定义性冲突，修订为：**热路径 Lua 预算 ≤ 0.1ms/键**（实测口径）；filters 仅 `uniquifier` + `ai.suggest`，processors 新增 `ai.trigger`，全部非阻塞、daemon 缺席 µs 级降级；零 OpenCC filter 维持不变。M0 实测：开关开/关差值 ≤ 0.04ms/键（§12），远低于预算 |
 
 
@@ -96,6 +96,14 @@
 | 编号   | 决策                | 说明                                                              |
 | ---- | ----------------- | --------------------------------------------------------------- |
 | D-21 | 撤销自动预取，AI 候补纯触发式（协议 v1.3） | 动因（2026-07-09 用户使用反馈）：正常打字几乎见不到 AI 候补——librime 无异步刷新通道（D-17），预取结果不能自行弹出，须再按键（事实上只有 Tab）才展示；而 API 延迟 2.7~4.8s 落后于打字节奏，auto 产出几乎总在上屏后作废。自动预取的全部价值仅剩「停顿后按 Tab 省一拍」，代价却是持续自动上云 + token 消耗，判定不成立，整体撤销。改造：**daemon**——移除 auto 路径（音节完整门控、去抖、`latest_auto` 取代逻辑；`debounce_ms` 配置废弃，出现即忽略），所有 suggest 直达并发槽；**filter**（`ai/suggest.lua`）——只收包 + 查缓存注入，不再发预取请求（commit 上下文通报保留；本会话从未按过触发键时直通透传，不碰 socket）；**开关**——`ai_suggest` 从 switches 撤销（trigger-only 即全局语义，隐私边界 = 不按 Tab 零上云；`ai_suggest:` 配置段保留，删 `auto_min_length`）；**协议 v1.3**——移除 `explicit` 字段（旧字段被忽略，v1.1 / v1.2 请求一律按显式处理）。保留：并发槽 + 同 key 防重 + commit 作废在队请求、两拍触发契约与 `⚡…` 提示（均沿 D-20）；`min_length` 初期沿 D-20 值 4，2026-07-10 调为 1——该门槛原为约束自动外发而设，纯触发式下失去保护对象，Tab 即触发。验证：mock e2e（直达并发槽零去抖延迟 / 悬空辅音不再拦截 / 同 key 防重 / commit 作废在队请求）+ glue payload 断言（无 explicit 字段）+ staging 构建零 E |
+
+
+2026-07-14 拍板的新增决策：
+
+
+| 编号   | 决策                | 说明                                                              |
+| ---- | ----------------- | --------------------------------------------------------------- |
+| D-22 | GPT-5.6 Fast 模型与精简提示词 | 系统提示词限制 ≤ 100 字；95 字纯规则版无法稳定识别 `fushanjingtiguan`，最终 99 字版保留一条真实领域歧义样例。以 `reasoning_effort: low`（中转可接受的最低档）+ `service_tier: priority` 对 Luna / Terra / Sol 交错测试五类样例：Luna 4/5（`gpio` 错作「通用输入输出」），中位 / 均值 / 最大延迟 5.012 / 5.324 / 9.178s；Terra 5/5，3.131 / 3.409 / 4.961s；Sol 5/5，2.784 / 3.198 / 4.751s。选择 `gpt-5.6-sol`；Priority 被当前 OpenAI 兼容中转接受但响应未回显 `service_tier`，故只确认参数兼容，不把上游实际 tier 作为已证事实。 |
 
 
 未决事项：无阻塞项。AI 候选通路 M2 收尾见 [ai-daemon.md](ai-daemon.md) §8；运行参数（模型 / 去抖 / 上下文规模）走 daemon 配置文件调优，不动仓库。

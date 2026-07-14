@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""rime-lite AI 候选 daemon（D-17 / D-18 / D-21）。
+"""rime-lite AI 候选 daemon（D-17 / D-18 / D-21 / D-22）。
 
 职责：unix socket ↔ OpenAI 兼容 API 的桥；工作负载为**生成式智能候补**——
 根据会话上下文（近期上屏文本）预测用户想输入的完整内容（拼音整句转换 + 延伸预测，
@@ -39,8 +39,9 @@ DEFAULTS = {
     "provider": "openai",         # openai | mock（mock 供链路验证：返回固定候补）
     "base_url": "",
     "api_key": "",
-    "model": "gpt-5.4",
-    "reasoning_effort": "low",    # 部分模型不接受该参数（如 spark），置 null 则不发送
+    "model": "gpt-5.6-sol",
+    "reasoning_effort": "low",    # 当前中转的 GPT-5.6 最低可用推理档；置 null 则不发送
+    "service_tier": "priority",   # OpenAI Fast：Priority processing；置 null 则不发送
     "max_concurrency": 3,         # 在途 API 调用上限（并发槽）
     "context_commits": 6,         # 会话上下文保留的上屏条数
     "context_chars": 80,          # 送入 prompt 的上下文尾部长度
@@ -49,17 +50,14 @@ DEFAULTS = {
 }
 # 已废弃配置（D-21 撤销自动预取后无消费方）：debounce_ms——配置文件中出现将被忽略。
 
-# 候补口径单点（ai-daemon.md §8）。「禁止照抄机械转换」与反例是抗锚定硬约束
-# （2026-07-09 真实失败样本：dexingweishi → 照抄「德行为使」而非语境正解「的行为是」），
-# 精简措辞时不可删除。
+# 候补口径单点（ai-daemon.md §8，D-22）：严格不超过 100 字；保留领域消歧、
+# 机械候选抗锚定、首行纯转换、延伸边界与已选前缀约束。
 SYSTEM_PROMPT = (
-    "你是拼音输入法的智能候补引擎:将「拼音」按上文语境转换为中文,并延伸预测后续内容(不超过10字)。"
-    "输出1到3行,每行一个候补,最优在前;只输出候补文本,无序号、无解释。"
-    "约束:候补以拼音的转换开头,接在上文与已选前缀之后连读必须通顺,语境冲突时以上文为准;"
-    "「本地机械转换」是无语境的词典结果,仅供理解拼音切分,禁止照抄;"
-    "「已选前缀」是本次输入已确认的开头,候补不得重复它。"
-    "反例:上文「长按Tab补全」+拼音dexingweishi→正解「的行为是…」,照抄机械转换「德行为使」为错。"
+    "嵌入式拼音输入法：依上文完整转写，优先电子/半导体/编程术语，"
+    "如fushanjingtiguan=浮栅晶体管。本地机械转换仅供切分。"
+    "首行只转写，后两行可续写≤10字。仅输出1～3行，不重复已选前缀。"
 )
+assert len(SYSTEM_PROMPT) <= 100
 
 _commit_total = 0  # 跨连接统计，仅供 ping 诊断
 
@@ -134,6 +132,8 @@ class OpenAIClient:
         }
         if self.cfg.get("reasoning_effort"):
             payload["reasoning_effort"] = self.cfg["reasoning_effort"]
+        if self.cfg.get("service_tier"):
+            payload["service_tier"] = self.cfg["service_tier"]
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
         try:
             conn = self.pool.get_nowait()

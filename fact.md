@@ -2,7 +2,7 @@
 
 | 项    | 内容                                              |
 | ---- | ----------------------------------------------- |
-| 更新日期 | 2026-07-10                                      |
+| 更新日期 | 2026-07-14                                      |
 | 定位   | 已决事项与当前状态的速查层；设计依据与推导以 [docs/design/](docs/design/) 为准 |
 
 ## 工程定位
@@ -45,10 +45,11 @@
 - D-15：词库长期维护按 [docs/design/lexicon-sop.md](docs/design/lexicon-sop.md) 执行；晋升分析源自 rime-ice 归档导出扩展为现役 `pinyin.userdb` 导出。
 - D-16：记录与清理规则见 [docs-rules.md](docs-rules.md)——工作区只保留当前事实与未决过程，历史由 git 承担。
 - D-17：AI daemon 延迟模型为「按需触发 + 异步预取」——热路径零等待（filter 仅非阻塞收发 + 缓存查表），结果展示走专用触发键（有界等待在途结果 + 强制刷新）；依据 2026-07-08 socket 探针实测（unix RTT p50 ≈ 12µs，超时可封顶，缺席时 µs 级降级）。
-- D-18：AI 候选工作负载 = LLM 生成式智能候补走 OpenAI 兼容 API（当日由重排式演进为生成式，用户验收反馈驱动；octagram 不覆盖诉求，不走该轨道）；模型默认 `gpt-5.4` + `reasoning_effort: low`（初选 spark 因 token 烧量与方差同日调整），预取默认开（该子项已被 D-21 推翻），触发键 `Tab`；构成与参数见 architecture.md §2 与 services/candidate-daemon/README.md。
+- D-18：AI 候选工作负载 = LLM 生成式智能候补走 OpenAI 兼容 API（当日由重排式演进为生成式，用户验收反馈驱动；octagram 不覆盖诉求，不走该轨道）；模型默认 `gpt-5.4` + `reasoning_effort: low`（模型子项已被 D-22 推翻；初选 spark 因 token 烧量与方差同日调整），预取默认开（该子项已被 D-21 推翻），触发键 `Tab`；构成与参数见 architecture.md §2 与 services/candidate-daemon/README.md。
 - D-19：性能红线修订为预算制——热路径 Lua ≤ 0.1ms/键，filters 仅 uniquifier + ai.suggest；推翻 D-17 前「热路径零 Lua」表述（该红线由 D-18 定义性触发修订）。
 - D-20：AI 触发架构并发化 + 两拍触发契约（协议 v1.2，2026-07-09）——daemon 并发槽（默认 3）替代串行锁、auto 请求音节完整门控、commit 作废所有在队请求（去抖中 + 等槽的，含 explicit）；触发键 explicit 快车道跳过去抖；Tab 未命中亮 `⚡…` 段提示；自动预取 / 触发阈值分离 6 / 4；请求增 `explicit` / `prefix` 字段并修复选定首词后候补重复前缀的缺陷。（auto 门控 / 去抖 / 阈值分离 / explicit 字段等 auto 路径子项已被 D-21 推翻；并发槽 / 防重 / commit 作废 / 两拍契约保留现行。）动因与验证见 architecture.md §2。
 - D-21：撤销自动预取，AI 候补纯触发式（协议 v1.3，2026-07-09）——预取结果无法自行弹出（librime 无异步刷新通道），正常打字节奏下产出几乎总在上屏后作废，只烧 token 不产出；daemon 移除 auto 路径（门控 / 去抖 / `debounce_ms` 废弃），所有请求直达并发槽；filter 只收包注入不预取；`ai_suggest` 开关撤销（不按 Tab 零上云）；协议 v1.3 移除 `explicit` 字段。动因与验证见 architecture.md §2。
+- D-22：AI 候补改用 `gpt-5.6-sol` + `low` + Priority processing；系统提示词收敛为 99 字并保留嵌入式领域消歧。五类样例中 Sol / Terra 均 5/5，Sol 延迟中位数 2.784s、均值 3.198s，优于 Terra；Luna 4/5、中位数 5.012s，故选 Sol。完整口径见 architecture.md §2。
 
 ## 阶段与验证状态
 

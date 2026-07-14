@@ -1,6 +1,6 @@
 # candidate-daemon — AI 智能候补 daemon
 
-rime-lite 的 AI 生成式候补服务（决策 D-17 / D-18 / D-21，结构与契约见
+rime-lite 的 AI 生成式候补服务（决策 D-17 / D-18 / D-21 / D-22，结构与契约见
 [docs/design/ai-daemon.md](../../docs/design/ai-daemon.md)）。
 Rime 侧经 `rime/lua/ai/` 以 unix socket 连接本服务；本服务根据会话上下文（近期上屏文本）
 调用 OpenAI 兼容 API，生成用户想输入的完整内容（拼音整句转换 + 延伸预测，不受本地词库限制），
@@ -23,7 +23,8 @@ chmod 600 ~/.config/rime-candidate-daemon/config.json
 
 字段说明：`provider`（`openai` / `mock`，后者仅链路验证用，返回固定候补，可设 `mock_delay_ms` 模拟 API 延迟）；
 `max_concurrency` 在途 API 调用上限（并发槽，默认 3）；`context_commits` / `context_chars`
-控制「懂我」会话上下文（近期上屏文本）的规模；`reasoning_effort` 部分模型不接受，置 `null` 不发送。
+控制「懂我」会话上下文（近期上屏文本）的规模；`reasoning_effort` 部分模型不接受，置 `null` 不发送；
+`service_tier` 取 `priority` 使用 OpenAI Priority processing（Fast），置 `null` 不发送。
 已废弃：`debounce_ms`（D-21 撤销自动预取后无去抖对象，配置中出现将被忽略）。
 
 ## 启动（systemd 用户服务）
