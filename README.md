@@ -1,67 +1,81 @@
 # rime-lite
 
-个人最小 Rime 全拼输入方案。`rime/` 整目录即部署单元，Git 全量管理，无构建层；热路径零 Lua、零 OpenCC filter。
+个人最小 Rime 全拼输入方案。`rime/` 整目录即部署单元，Git 全量管理，无构建层。热路径 Lua 按预算制约束（D-19，见 [architecture.md](docs/design/architecture.md) §2）。
 
 ## 特性
 
-- **全拼简体输入**：《通用规范汉字表》字表（8105）+ 基础词库 + 嵌入式领域词库（602 条）+ 个人词库。
+- **全拼简体输入**：《通用规范汉字表》字表（8105）+ 基础词库 + 嵌入式领域词库 + 个人词库。
 - **英文输入**：挂载 melt_eng 词库，中文方案内直接出英文候选（输入 `hello` 首位即 hello）。
 - **中英切换**：左 Shift 按下即英、右 Shift 按下即中。
 - **固定短语置顶**：`custom_phrase.txt` 缩写码词条固定排在候选首位（`gpio` → GPIO、`zkb` → 占空比）。
 - **本机学习 + 词条晋升**：Rime userdb 即时学习；高频词按 SOP 周期性审核晋升进静态词库，跨机经 Git 同步。
-- **软链接切换**：与平级 Rime 工程（如 rime-ice）单命令互切，互不修改对方文件。
+- **AI 智能候补**：组词中按 `Tab` 显式请求（纯触发式，不按键零上云）；daemon 缺席时自动降级为原生体验。
+- **软链接切换**：与平级 Rime 工程单命令互切，互不修改对方文件。
 
 ## 环境要求
 
-- fcitx5-rime 5.1.4 / librime 1.10.0（Ubuntu 系统仓库版本，2026-07-07 验证）。
+- fcitx5-rime 5.1.4 / librime 1.10.0（Ubuntu 系统仓库；包名锚点 `librime1t64 1.10.0+dfsg1-2build2`）。
 - `/usr/share/rime-data`（librime-data 包）。
+- AI 候补另需：`librime-plugin-lua`、`lua-socket`、Python 3（仅标准库）。漏装时 AI 通路静默降级，无日志指向根因。
 
 ## 快速开始
 
 ```bash
 git clone <本仓库> ~/sync/rime-lite
 cd ~/sync/rime-lite
-tools/deploy        # 将 ~/.local/share/fcitx5/rime 软链接指向本工程 rime/
-fcitx5 -rd          # 重启 fcitx5 生效
+./run.sh setup          # 检查依赖、激活本工程、安装 daemon
+./run.sh apikey set     # 写入 OpenAI 兼容 API 密钥（0600，不入库）
+./run.sh restart        # 重启 fcitx5 生效
 ```
 
-`tools/deploy` 只创建 / 重指软链接，遇到真实目录一律停止，不覆盖、不删除。其他用法：
+只启用输入法、不要 AI 通路时：
 
 ```bash
-tools/deploy --status              # 查看当前激活工程
-tools/deploy --to <dir> [--yes]    # 切换到其他工程（如 rime-ice）
+./run.sh deploy
+./run.sh restart
+```
+
+`./run.sh deploy` 只创建 / 重指软链接，遇到真实目录一律停止，不覆盖、不删除。本机当前激活工程、daemon 与密钥状态：
+
+```bash
+./run.sh status
 ```
 
 ## 目录结构
 
 ```text
 rime-lite/
-├── fact.md              # 事实清单：已决事项与当前状态速查
-├── docs-rules.md        # 记录与清理规则（信息治理）
+├── AGENTS.md            # AI / 协作者入口：命令、禁区、决策指针
+├── docs-rules.md        # 记录与清理规则
+├── run.sh               # 统一入口：部署、验证、daemon、密钥
 ├── README.md
-├── docs/                # 文档三层：refs 参考输入 / notes 探索过程 / design 拍板结论
+├── docs/
 │   └── design/
-│       ├── architecture.md   # 架构设计与决策记录（D-n 编号）
-│       └── lexicon-sop.md    # 词库维护 SOP（加词、晋升、验证、提交）
+│       ├── architecture.md   # 架构与决策记录（D-n）
+│       ├── lexicon-sop.md    # 词库维护 SOP
+│       └── ai-daemon.md      # AI 候补结构与运维
 ├── rime/                # 部署单元 = Rime 用户目录内容
 │   ├── default.yaml
-│   ├── pinyin.schema.yaml    # 主方案：全拼
-│   ├── pinyin.dict.yaml      # 词库入口（import_tables）
-│   ├── melt_eng.schema.yaml  # 英文方案文件（vendor 保留，未列入方案列表）
-│   ├── melt_eng.dict.yaml
-│   ├── custom_phrase.txt     # 个人固定短语
-│   ├── cn_dicts/             # 中文词库（8105 / base / embedded / mydict）
-│   └── en_dicts/             # 英文词库（en）
+│   ├── pinyin.schema.yaml
+│   ├── pinyin.dict.yaml
+│   ├── custom_phrase.txt
+│   ├── lua/ai/          # AI 候补 glue / trigger / suggest
+│   ├── cn_dicts/
+│   └── en_dicts/
+├── services/
+│   └── candidate-daemon/     # AI daemon、systemd 模板、协议说明
 └── tools/
-    ├── deploy                # 部署（软链接切换）
-    └── userdb-candidates     # userdb 晋升候选分析
+    ├── deploy
+    └── userdb-candidates
 ```
 
-运行态文件（`rime/build/`、`rime/*.userdb/`、`rime/sync/` 等）由 `.gitignore` 隔离，不进 Git。
+运行态文件（`rime/build/`、`rime/*.userdb/`、`rime/sync/` 等）由 `.gitignore` 隔离，不进 Git。密钥只在 `~/.config/rime-candidate-daemon/config.json`。
 
 ## 日常维护
 
-- 加词、userdb 晋升、验证、提交的完整流程：[docs/design/lexicon-sop.md](docs/design/lexicon-sop.md)。
-- 当前事实与决策速查：[fact.md](fact.md)。
-- 架构设计与决策推导：[docs/design/architecture.md](docs/design/architecture.md)。
-- 记录与清理规则：[docs-rules.md](docs-rules.md)。
+- 统一入口与本机状态：`./run.sh` / `./run.sh status`。
+- 加词、userdb 晋升、验证、提交：[docs/design/lexicon-sop.md](docs/design/lexicon-sop.md)。
+- 架构与决策：[docs/design/architecture.md](docs/design/architecture.md)。
+- AI 候补：[docs/design/ai-daemon.md](docs/design/ai-daemon.md)。
+- 协作约定：[AGENTS.md](AGENTS.md)。
+- 记录与清理：[docs-rules.md](docs-rules.md)。

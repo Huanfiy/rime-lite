@@ -1,10 +1,14 @@
+# 模板：请用仓库根目录 ./run.sh daemon install 安装。
+# 该命令会按当前仓库绝对路径生成 ~/.config/systemd/user/rime-candidate-daemon.service。
 [Unit]
 Description=rime-lite AI candidate daemon (D-18)
 
 [Service]
-ExecStart=/usr/bin/python3 %h/sync/rime-lite/services/candidate-daemon/candidate-daemon.py
+ExecStart=/usr/bin/python3 /path/to/rime-lite/services/candidate-daemon/candidate-daemon.py
+WorkingDirectory=/path/to/rime-lite
 Restart=on-failure
 RestartSec=2
+UMask=0077
 
 [Install]
 WantedBy=default.target

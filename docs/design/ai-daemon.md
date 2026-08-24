@@ -50,7 +50,7 @@ fcitx5（librime 进程内）
 ## 5. 关键实现约束（维护前必读）
 
 - **loadlib 前置**：librime 以 `dlopen(RTLD_LOCAL)` 加载插件，liblua5.4 符号不进全局符号表，而 Debian lua-socket 的 C 模块依赖宿主导出 Lua 符号——`glue.lua` 必须先 `package.loadlib("/lib/x86_64-linux-gnu/liblua5.4.so.0", "*")` 再 `require("socket")`，否则报 `undefined symbol: lua_gettop`（2026-07-08 探针实测）。
-- **系统依赖**：`lua-socket`（apt 包）；daemon 仅 Python 标准库。
+- **系统依赖**：`librime-plugin-lua`（AI 通路现役，漏装则 glue `setup()` 静默失败并本进程永久禁用）、`lua-socket`（apt 包）；daemon 仅 Python 标准库。`librime-plugin-octagram` 已装亦不启用（缺 `.gram` 与 schema，且不走本轨道，见 architecture.md §8）。
 - **惰性候选流**：filter 是懒执行候选流的一环，前端每页只拉 5 个候选——注入决策必须在首个候选到达时完成，写在迭代循环之后的代码在正常打字时不会执行（教训记录见 architecture.md §12 修订注；D-21 后 filter 无预取，该约束仅剩注入一项）。
 - **luasocket 是阻塞库**：「异步」由 `settimeout(0)` + 缓存实现，无线程；阻塞等待仅触发键路径允许且有界。
 - **消重契约**：AI 候补与本地候选重文时的去重依赖 filters 顺序 `ai.suggest` → `uniquifier`，调整顺序会破坏该行为。
@@ -61,10 +61,10 @@ fcitx5（librime 进程内）
 
 ## 6. 运维
 
-- 服务管理：`systemctl --user status|restart rime-candidate-daemon`；日志 `journalctl --user -u rime-candidate-daemon -f`（每条 `suggest` 含延迟、产出与 token 用量，是「AI 是否在工作」的地面真相）。
-- 调参：模型 / 并发上限 / 上下文规模改 `~/.config/rime-candidate-daemon/config.json` 后 restart 服务，不动仓库；触发键 / 长度阈值 / 等待时长改 `rime/pinyin.schema.yaml` 的 `ai_suggest` 段后重新部署。
-- 新机器接入：`sudo apt install lua-socket` → 按 [README](../../services/candidate-daemon/README.md) 建配置与 systemd 单元 → `tools/deploy` + `fcitx5 -rd`。
-- 密钥卫生：仅存 daemon 配置文件（0600）；严禁写入仓库任何文件（CLAUDE.md 禁区）；泄露即轮换。
+- 服务管理：`./run.sh daemon status|restart|logs`（底层仍是 systemd 用户单元 `rime-candidate-daemon`）。每条 `suggest` 的 journal 含延迟、产出与 token 用量，是「AI 是否在工作」的地面真相。
+- 调参：模型 / 并发上限 / 上下文规模改 `~/.config/rime-candidate-daemon/config.json` 后 `./run.sh daemon restart`，不动仓库；触发键 / 长度阈值 / 等待时长改 `rime/pinyin.schema.yaml` 的 `ai_suggest` 段后重新部署。
+- 新机器接入：`./run.sh setup`（缺包装好可加 `--install-deps`）→ `./run.sh apikey set` → `./run.sh restart`。现役状态以 `./run.sh status` 为准，不写入文档。
+- 密钥卫生：仅存 daemon 配置文件（0600）；严禁写入仓库任何文件（[AGENTS.md](../../AGENTS.md) 禁区）。写入与轮换走 `./run.sh apikey set`；泄露则先在服务商侧作废旧 key。
 
 ## 7. 边界与非目标
 

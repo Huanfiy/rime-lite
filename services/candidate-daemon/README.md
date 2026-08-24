@@ -9,17 +9,19 @@ Rime 侧经 `rime/lua/ai/` 以 unix socket 连接本服务；本服务根据会�
 
 ## 依赖
 
-- 系统包：`lua-socket`（librime-lua 侧 IPC，`sudo apt install lua-socket`）
+- 系统包：`librime-plugin-lua`（漏装时 AI 通路静默消失）、`lua-socket`（librime-lua 侧 IPC）
 - Python 3（仅标准库）
+- 安装：`./run.sh deps` 检查，`./run.sh deps install` 或 `sudo apt install librime-plugin-lua lua-socket`
 
 ## 配置（含密钥，不入库）
 
 ```bash
-mkdir -p ~/.config/rime-candidate-daemon
-cp config.example.json ~/.config/rime-candidate-daemon/config.json
-chmod 600 ~/.config/rime-candidate-daemon/config.json
-# 编辑 base_url / api_key / model
+./run.sh apikey init              # 从示例复制到 ~/.config/rime-candidate-daemon/config.json
+./run.sh apikey set               # 写入 / 轮换密钥（不回显，0600）
+./run.sh apikey                   # 查看（密钥脱敏）
 ```
+
+也可手写同路径文件。`./run.sh apikey set` 支持 `--base-url` / `--model` / `--provider`；非交互环境用 `RIME_AI_API_KEY`。泄露则先在服务商侧作废旧 key，再跑 `apikey set`。
 
 字段说明：`provider`（`openai` / `mock`，后者仅链路验证用，返回固定候补，可设 `mock_delay_ms` 模拟 API 延迟）；
 `max_concurrency` 在途 API 调用上限（并发槽，默认 3）；`context_commits` / `context_chars`
@@ -30,13 +32,12 @@ chmod 600 ~/.config/rime-candidate-daemon/config.json
 ## 启动（systemd 用户服务）
 
 ```bash
-cp rime-candidate-daemon.service ~/.config/systemd/user/
-systemctl --user daemon-reload
-systemctl --user enable --now rime-candidate-daemon
-journalctl --user -u rime-candidate-daemon -f   # 观察日志
+./run.sh daemon install           # 按当前仓库绝对路径生成用户单元并 enable --now
+./run.sh daemon status            # 状态
+./run.sh daemon logs              # journalctl -f
 ```
 
-daemon 缺席时输入法自动降级为原生体验（连接失败 µs 级返回），可随时 stop / start。
+仓库内 `rime-candidate-daemon.service` 是模板；安装时 `run.sh` 会把 `ExecStart` 写成当前仓库路径。daemon 缺席时输入法自动降级为原生体验（连接失败 µs 级返回），可随时 `./run.sh daemon stop|start`。
 
 ## 使用
 

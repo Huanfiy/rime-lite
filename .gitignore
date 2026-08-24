@@ -35,4 +35,7 @@ __pycache__/
 # Editor/agent local state
 .claude/
 .agents/
+.cursor/
+.codex/
+.gemini/
 

@@ -41,7 +41,7 @@
 
 ### 3.1 导出
 
-**主路径（推荐）**：fcitx5 托盘菜单 → Rime → 同步用户数据，然后读取产物 `rime/sync/<installation_id>/pinyin.userdb.txt`（本机 installation_id 为 `e5a4b25d-3ad3-4900-aaff-ac3786723f3a`，见 `rime/installation.yaml`）。同步触发仅有菜单一种方式：DBus 接口 `org.fcitx.Fcitx.Rime1` 无 Sync 方法，无 CLI 途径（2026-07-07 实测）。
+**主路径（推荐）**：fcitx5 托盘菜单 → Rime → 同步用户数据，然后读取产物 `rime/sync/<installation_id>/pinyin.userdb.txt`。`installation_id` 见本机激活目录下的 `installation.yaml`，因机而异，不写入仓库文档。同步触发仅有菜单一种方式：DBus 接口 `org.fcitx.Fcitx.Rime1` 无 Sync 方法，无 CLI 途径（2026-07-07 实测）。
 
 **备选（可脚本化，fcitx5 无需停止）**：
 
@@ -88,10 +88,7 @@ tools/userdb-candidates -o /tmp/candidates.tsv rime/sync/<installation_id>/pinyi
 
 ```bash
 # 隔离构建（不触碰运行目录），要求零 E 级日志
-mkdir -p /tmp/rime-staging && cd /home/huan/sync/rime-lite
-rsync -a --exclude build --exclude sync --exclude '*.userdb' \
-      --exclude installation.yaml --exclude user.yaml rime/ /tmp/rime-staging/
-rime_deployer --build /tmp/rime-staging /usr/share/rime-data
+./run.sh verify
 ```
 
 排除清单对应 `.gitignore` 运行态段在 `rime/` 下的现存项；运行目录出现新增运行态产物（日志、锁文件等）时同步扩充。

@@ -7,7 +7,7 @@
 | 状态        | 已拍板，作为首版实施依据                                                                             |
 | 决策推导      | `docs/notes/analysis/2026-07-01-architecture-open-questions.md`（已移出工作区，git 历史 `f8bc790` 可查）      |
 | 原始计划      | `.agents/plans/2026-06-25-rime-lite-project-plan.md`（已移出工作区，git 历史 `d764656` 可查）         |
-| vendor 来源 | rime-ice 工程，现位于 `/home/huan/sync/rime-ice`（vendor 当日位于 `/home/huan/sync/fcitx5/share/rime`，2026-07-02 迁出） |
+| vendor 来源 | rime-ice 工程（2026-07-02 时位于 `/home/huan/sync/rime-ice`，远端 github:Huanfiy/rime-ice；vendor 当日位于 `/home/huan/sync/fcitx5/share/rime`）。本机是否仍保留该目录以 `./run.sh status` / 本机文件系统为准，不作为仓库事实 |
 | 部署目标      | `/home/huan/.local/share/fcitx5/rime`                                                    |
 
 
@@ -121,7 +121,13 @@
 
 ```text
 rime-lite/
-├── docs/                        # 文档（ref / exp / sol 三段式）
+├── AGENTS.md                    # AI / 协作者入口
+├── run.sh                       # 统一入口（包装 deploy / daemon / 密钥 / 验证）
+├── docs/                        # 文档（refs / notes / design）
+│   └── design/
+│       ├── architecture.md
+│       ├── lexicon-sop.md
+│       └── ai-daemon.md
 ├── rime/                        # 部署单元：整目录同步到 Rime 用户目录
 │   ├── default.yaml             # 全局配置：方案列表、菜单、方案选单
 │   ├── pinyin.schema.yaml       # 主方案：全拼
@@ -141,7 +147,7 @@ rime-lite/
 │       ├── ai/                  # glue（socket/缓存）、suggest（filter）、trigger（processor）
 │       └── vendor/json.lua      # vendor rxi/json.lua（协议编解码）
 ├── services/
-│   └── candidate-daemon/        # AI 候选 daemon（D-18）：daemon、systemd 单元、README（协议 v1）
+│   └── candidate-daemon/        # AI 候选 daemon（D-18）：daemon、systemd 模板、README（协议 v1.3）
 ├── tools/
 │   ├── deploy                   # 部署脚本，行为约定见第 6 节
 │   └── userdb-candidates        # userdb 晋升候选分析（D-15，用法见 lexicon-sop.md §3.2）
@@ -247,23 +253,25 @@ Rime 原生 table 格式（`词条<Tab>编码<Tab>权重`），承载个人固�
 
 ## 5. vendor 规范
 
-- 来源固定为 rime-ice 工程本机版本（2026-07-02 起位于 `/home/huan/sync/rime-ice`，远端 github:Huanfiy/rime-ice；vendor 当日位于 `/home/huan/sync/fcitx5/share/rime`，文件头注释保留历史路径）。
+- 来源固定为 rime-ice 工程本机版本（vendor 当日 2026-07-02，远端 github:Huanfiy/rime-ice；文件头注释保留历史路径）。本机是否仍保留该工程目录以本机为准。
 - vendor 对象：`cn_dicts/8105.dict.yaml`、`cn_dicts/base.dict.yaml`、`en_dicts/en.dict.yaml`、`melt_eng.schema.yaml`、`melt_eng.dict.yaml`（词库目录名与 rime-ice 一致，D-12）。
 - 每个 vendor 文件头部注释记录：来源文件路径、vendor 日期、是否有本地裁剪。
 - vendor 时去除文件头 UTF-8 BOM：在文件前部插入注释后，BOM 会落到 YAML 流中间导致解析失败（现用工程仅 `melt_eng.schema.yaml` 带 BOM，2026-07-02 实测）。
 - vendor 后即为项目内独立副本，不追随上游更新；如需同步上游，人工 diff 后决定。
-- 仓库内任何文件不得引用 rime-ice 工程路径（现 `/home/huan/sync/rime-ice`；D-4 的强约束，作为首版验收项）。
+- 仓库内任何文件不得引用 rime-ice 工程的运行时路径（D-4 的强约束，作为首版验收项）。
 
 ## 6. 部署流程
 
 部署采用软链接切换（D-11）：`~/.local/share/fcitx5/rime` 是指向当前激活工程配置目录的软链接。rime-lite 与 rime-ice 为平级工程，切换输入法工程 = 重指该链接，零复制，互不修改对方文件。
 
+用户入口为仓库根目录 `./run.sh`（`deploy` / `status` / `restart` / `setup`）；`tools/deploy` 仍是软链接切换的底层实现。
+
 `tools/deploy` 行为约定：
 
-1. `tools/deploy` 将链接指向本工程 `rime/`；`tools/deploy --to <dir>` 指向其他工程（切回 rime-ice：`--to /home/huan/sync/rime-ice`）；`--status` 查看当前激活工程；`--yes` 跳过确认。
+1. `./run.sh deploy`（或 `tools/deploy`）将链接指向本工程 `rime/`；`--to <dir>` 指向其他工程；`--status` 查看当前激活工程；`--yes` 跳过确认。
 2. 只创建 / 重指软链接；遇到真实目录一律停止，不覆盖、不删除。
-3. `~/.local/share/fcitx5` 的最终形态（2026-07-02 演化完成）：真实目录；`addon`、`inputmethod`、`pinyin`、`table` 为本机真实目录；`themes` 软链接指向 `/home/huan/sync/pc_cfg/fcitx5/themes`（版本管理归 pc_cfg）；仅 `rime` 为工程切换软链接。原 `/home/huan/sync/fcitx5` 工程已于同日退役删除，历史保留在备份远端 `/mnt/backup/fcitx5`。
-4. 切换后需重启 fcitx5（`fcitx5 -rd` 或注销重登）生效，脚本不代为执行。
+3. `~/.local/share/fcitx5` 的目标形态（2026-07-02 定型）：真实目录；仅 `rime` 为工程切换软链接，其余条目（`themes`、`addon` 等）由本机自行管理，不作为仓库事实。现役激活工程以 `./run.sh status` 为准。
+4. 切换后需重启 fcitx5（`./run.sh restart` 或 `fcitx5 -rd`）生效；`tools/deploy` 本身不代为执行。
 
 无构建步骤；`tools/` 下现有 `deploy` 与 `userdb-candidates`（2026-07-07 随 D-15 引入）两个脚本，原计划 §4 的其余工具（`build`、`compact-lexicon`、`smoke`、`bench`）无对象，不引入。
 
@@ -271,7 +279,7 @@ Rime 原生 table 格式（`词条<Tab>编码<Tab>权重`），承载个人固�
 
 - **本机学习**：主翻译器 `enable_user_dict: true`，学习结果落在目标目录的 userdb，属运行态，不进 Git（D-1）。
 - **词条晋升**：定期从 Rime 同步目录导出 userdb 文本 → 人工筛选高价值词条 → 写入 `custom_phrase.txt`（固定短语类）或目标词库（领域词 / 个人词）→ Git 提交。分析源仅限 `sync/huan_rime/rime_ice.userdb.txt` 与 `sync/huan_rime/rime_ice_huan.userdb.txt` 两份导出（D-2；rime-ice 退役前的最终导出已消费并移出工作区，git 历史 `6438887` 可查，工程本体在 `/home/huan/sync/rime-ice`）。首轮晋升已于 2026-07-07 按 D-14 完成：合并 10229 条 → 候选 143 条 → 晋升 93 条（embedded 50 / mydict 43，custom_phrase 无新增）。后续晋升按 [lexicon-sop.md](lexicon-sop.md) 执行（D-15）：分析源为现役 `pinyin.userdb` 的同步导出，候选分析用 `tools/userdb-candidates`。
-- **多机同步**：Git 同步 `rime/` 与 `tools/`，新机器初始化流程为 `git clone` + `tools/deploy`；各机 userdb 独立演化，不要求实时一致（D-6）。
+- **多机同步**：Git 同步工程源；新机器初始化为 `git clone` + `./run.sh setup`；各机 userdb 独立演化，不要求实时一致（D-6）。本机运行态不写入文档。
 
 ## 8. 扩展挂载点（非首版）
 
@@ -279,6 +287,7 @@ Rime 原生 table 格式（`词条<Tab>编码<Tab>权重`），承载个人固�
 | --------- | ------------------------------------------------------------------------- | --------------------------- |
 | Emoji     | vendor `opencc/emoji.json` + `emoji.txt` 至 `rime/opencc/`，filters 增加 `simplifier@emoji` | 无（数据来源已确认，D-9）              |
 | ext 扩展词库  | vendor `cn_dicts/ext.dict.yaml` 至 `cn_dicts/`，追加进 `import_tables`          | 基础词库候选覆盖不足时启用               |
+| octagram  | 挂载 `librime-plugin-octagram` + `.gram` 模型 + schema | 插件或已装；缺模型文件与 schema。不走 AI 候补轨道（D-18） |
 | 个人领域词库    | 新增 `*.dict.yaml` 追加进 `import_tables`（D-5，Rime 原生格式）                        | 已挂载（2026-07-07，D-13）      |
 | AI daemon | 已挂载（2026-07-08，D-17 / D-18 / D-19），结构见 [ai-daemon.md](ai-daemon.md) | —（M2 收尾项见 [ai-daemon.md](ai-daemon.md) §8） |
 
@@ -315,7 +324,7 @@ Rime 原生 table 格式（`词条<Tab>编码<Tab>权重`），承载个人固�
 - [x] 降级（daemon 缺席）：`nihao` 候选与手感与基线一致，触发键无副作用。
 - [x] mock 通路：自动预取（打字期间自主发出，无需触发键）→ 触发键注入候补（`AI候补一 ⚡` 居首、本地候选跟随）、开关关闭时不应用不外发、commit 通报到达 daemon；开关开/关每键耗时差 ≤ +0.04ms（红线预算 ≤0.1ms 达成，D-19）。修订注：初版 filter 把预取放在惰性候选流耗尽之后（正常打字不执行，被触发键显式路径掩盖），2026-07-08 当日发现并修复——预取移至头部候选收齐即发出，复验通过。
 - [x] 真 API（生成式候补，D-18 演进后形态）：引擎全链路 e2e——上屏「嵌入式系统」后输入 `zhongduan`，触发得 `中断处理 ⚡ / 中断处理程序 ⚡ / 中断服务程序 ⚡`（语境理解 + 延伸预测，均非本地词库整词）；生产冒烟——上下文「下周要去上海出差」+ `gaotie` → `高铁票 / 高铁去上海 / 高铁二等座`（3.8s）。首按未命中、二按命中属 D-17 交互契约预期（spark 生成实测 1.7~7s）。
-- [x] 生产接线：`lua-socket 3.1.0-1` 已系统安装；密钥配置 `~/.config/rime-candidate-daemon/config.json`（0600，不入库）；systemd 用户服务 `rime-candidate-daemon` 已 enable，负载更新随 `systemctl --user restart` 生效并复冒烟。
+- [x] 生产接线（**2026-07-08 验收时点**，不表示此后每台机器均保持该状态）：当时 `lua-socket 3.1.0-1` 已装、密钥配置与 systemd 用户服务在位。现役状态以 `./run.sh status` 为准；新机器接入走 `./run.sh setup`。
 - [x] 真机 fcitx5 复核：用户重启 fcitx5 后，实际输入的上屏文本经 `commit_notifier` 到达 daemon（journal 可见），证明 fcitx5 进程内 Lua glue 与 socket 链路工作正常；候补注入与 D-20 两拍触发（`⚡…` 提示重绘、收割节奏）经用户真机输入抽查确认（2026-07-09）。
 - [x] 模型与触发键调整（同日）：spark 生成烧 1300~2048 completion tokens/次、方差 1.7~7s → 默认换 `gpt-5.4` + `low`（冒烟 2.7~4.8s、~60 token），代码默认值 / 示例 / 本机配置同步；触发键 `Control+t` 被应用抢占 → 换 `Tab`（default.yaml 撤销 Tab 音节右移绑定），mock 回归复验通过。
 - 遗留：M2 收尾项见 [ai-daemon.md](ai-daemon.md) §8。
