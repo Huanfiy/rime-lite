@@ -2,7 +2,7 @@
 
 | 项    | 内容                                              |
 | ---- | ----------------------------------------------- |
-| 更新日期 | 2026-07-14                                      |
+| 更新日期 | 2026-08-24                                      |
 | 定位   | 已决事项与当前状态的速查层；设计依据与推导以 [docs/design/](docs/design/) 为准 |
 
 ## 工程定位
@@ -20,6 +20,7 @@
 ## 输入方案
 
 - 启用方案仅 `pinyin`（全拼）；melt_eng 仅作词库挂载出英文候选，不作独立方案（2026-07-02 调整，git `e4aab2b`）；候选每页 5 个。
+- 中英切换（D-24）：左 Shift 按下即英、右 Shift 按下即中，由 `rime/lua/ascii_shift.lua` 处理；`ascii_composer` 的 `Shift_L` / `Shift_R` 为 `noop`。组词中左 Shift 切英时上屏未确认编码（沿原 `commit_code`）。音节左移用右 Shift+Tab 或 Alt+←。
 - 性能红线为预算制（D-19，2026-07-08 修订）：热路径 Lua 预算 ≤ 0.1ms/键（实测差值 ≤ 0.04ms）；filters 仅 `uniquifier` + `ai.suggest`；零 OpenCC filter 不变。
 - AI 智能候补（D-18，2026-07-08 落地；D-21 起纯触发式）：组词中按 `Tab` 显式请求（无长度门槛，2026-07-10 起 `min_length: 1`），daemon 按会话上下文生成 ≤ 3 条候补（当前段转换 + 延伸预测，不受本地词库限制）注入候选栏首位（⚡ 标记，选中即整段上屏）；`rime/lua/ai/` ↔ unix socket ↔ `services/candidate-daemon/`（systemd 用户服务）↔ OpenAI 兼容 API；不按 `Tab` 零请求零上云，无自动预取、无开关（D-21 撤销）；Tab 两拍契约（命中缓存即展示；未命中亮 `⚡…` 提示、约一个 API 周期后再按即命中，长按 = 轮询收割）；daemon 缺席自动降级为原生体验。密钥在 `~/.config/rime-candidate-daemon/config.json`（不入库）。协议 v1.3（2026-07-09，D-21）。结构与契约见 [docs/design/ai-daemon.md](docs/design/ai-daemon.md)。
 - 词库挂载链：`pinyin.dict.yaml` 的 `import_tables` = `cn_dicts/8105`（字表）+ `cn_dicts/base`（基础词库）+ `cn_dicts/embedded`（领域词库，602 条）+ `cn_dicts/mydict`（个人词库，46 条）；另含 26 个大写字母词条。
@@ -51,6 +52,7 @@
 - D-21：撤销自动预取，AI 候补纯触发式（协议 v1.3，2026-07-09）——预取结果无法自行弹出（librime 无异步刷新通道），正常打字节奏下产出几乎总在上屏后作废，只烧 token 不产出；daemon 移除 auto 路径（门控 / 去抖 / `debounce_ms` 废弃），所有请求直达并发槽；filter 只收包注入不预取；`ai_suggest` 开关撤销（不按 Tab 零上云）；协议 v1.3 移除 `explicit` 字段。动因与验证见 architecture.md §2。
 - D-22：AI 候补改用 `gpt-5.6-sol` + `low` + Priority processing；系统提示词收敛为 99 字（长度子项已被 D-23 推翻）并保留嵌入式领域消歧。五类样例中 Sol / Terra 均 5/5，Sol 延迟中位数 2.784s、均值 3.198s，优于 Terra；Luna 4/5、中位数 5.012s，故选 Sol。完整口径见 architecture.md §2。
 - D-23：提示词上限放宽至 200 字（现 195 字），新增轻微拼音误写纠正与表情意图分支：首项转写，第 2、3 项输出匹配语义的 emoji / 颜文字；正确拼音、误拼、泛化表情及专业术语回归均通过。完整口径见 architecture.md §2。
+- D-24：中英切换为左 Shift 按下即英、右 Shift 按下即中（Lua `ascii_shift`）。本机 librime 1.10.0 无 `set_ascii_mode`，不升引擎；按下即切，无 500ms 超时。完整口径见 architecture.md §2。
 
 ## 阶段与验证状态
 

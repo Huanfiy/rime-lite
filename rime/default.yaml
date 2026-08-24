@@ -11,7 +11,7 @@
 
 
 # 要比共享目录同名文件的 config_version 大才可生效
-config_version: '2026-07-08'
+config_version: '2026-08-24'
 
 
 # 方案列表
@@ -39,11 +39,13 @@ switcher:
 
 
 # 中西文切换
+# Shift 由 lua/ascii_shift.lua 处理（左英右中、按下即切，D-24）。
+# Shift_* 必须 noop，否则 ascii_composer 会在 key-up 再切一次。
 ascii_composer:
   good_old_caps_lock: true
   switch_key:
     Caps_Lock: clear
-    Shift_L: commit_code
+    Shift_L: noop
     Shift_R: noop
     Control_L: noop
     Control_R: noop
@@ -131,7 +133,7 @@ recognizer:
 # 快捷键
 key_binder:
   bindings:
-    # Shift+Tab 切换光标至上一个拼音；Tab 已让位给 AI 候补触发键（D-18），右移用 Alt+Right
+    # 音节左移：组词中用右 Shift+Tab（左 Shift 按下即切英，D-24）；右移用 Alt+Right
     - { when: composing, accept: Shift+Tab, send: Shift+Left }
     # Alt + ←/→ 切换光标至下 / 上一个拼音
     - { when: composing, accept: Alt+Left, send: Shift+Left }

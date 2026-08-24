@@ -107,6 +107,14 @@
 | D-23 | 表情意图候补与提示词扩容 | 系统提示词上限放宽为 200 字，现行为 195 字：首项始终为转写；识别到表情意图时第 2、3 项仅输出匹配语义的 emoji / 颜文字，否则维持 ≤ 10 字延伸；同时保留轻微拼音误写纠正。真 API 抽查：`keaidebiaoqing` 与误拼 `keaidebiaoqiang` 均得「可爱的表情 / 🥰 / (｡･ω･｡)ﾉ♡」，未入示例的 `kaixindebiaoqing` 得「开心的表情 / 😄 / ٩(ˊᗜˋ*)و」；`fushanjingtiguan`、`shanjidianya` 专业回归通过。 |
 
 
+2026-08-24 拍板的新增决策：
+
+
+| 编号   | 决策                | 说明                                                              |
+| ---- | ----------------- | --------------------------------------------------------------- |
+| D-24 | 中英切换：左 Shift 按下即英、右 Shift 按下即中 | 本机 librime 1.10.0 无 `set_ascii_mode` / `unset_ascii_mode`（1.14.0 起），Ubuntu 24.04 官方源升不了引擎。改由 `rime/lua/ascii_shift.lua` 在 **key-down** 设 `ascii_mode`（左 true / 右 false），无 500ms 超时、不要求纯点按；返回 `kNoop` 不吞修饰键。`ascii_composer/switch_key` 的 `Shift_L` / `Shift_R` 置 `noop`，避免 key-up 再切。组词中左 Shift 切英沿原 `commit_code`（未确认段上屏编码）；已在目标模式则只保持，Shift+字母仍打大写。组词中左 Shift+Tab 会先切英，音节左移改用右 Shift+Tab 或 Alt+←。热路径仅 keycode 分支，受 D-19 预算约束。 |
+
+
 未决事项：无阻塞项。AI 候选通路 M2 收尾见 [ai-daemon.md](ai-daemon.md) §8；运行参数（模型 / 去抖 / 上下文规模）走 daemon 配置文件调优，不动仓库。
 
 ## 3. 仓库目录结构
@@ -128,8 +136,9 @@ rime-lite/
 │   │   └── mydict.dict.yaml     # 个人自定义词库（D-13，2026-07-07 挂载）
 │   ├── en_dicts/
 │   │   └── en.dict.yaml         # 英文主词库（vendor）
-│   └── lua/                     # AI 候选通路（D-18；红线预算制见 D-19）
-│       ├── ai/                  # glue（socket/缓存）、rerank（filter）、trigger（processor）
+│   └── lua/                     # 热路径 Lua（D-18 / D-24；红线预算制见 D-19）
+│       ├── ascii_shift.lua      # 左英右中，按下即切（D-24）
+│       ├── ai/                  # glue（socket/缓存）、suggest（filter）、trigger（processor）
 │       └── vendor/json.lua      # vendor rxi/json.lua（协议编解码）
 ├── services/
 │   └── candidate-daemon/        # AI 候选 daemon（D-18）：daemon、systemd 单元、README（协议 v1）
@@ -160,7 +169,7 @@ menu:
   page_size: 5
 ```
 
-另保留：方案选单（switcher）、ASCII 切换（ascii_composer）、标点映射（punctuator，供方案以 `import_preset: default` 引用）、通用 recognizer patterns（email / url / underscore）、基础 key_binder（光标移动、`-` / `=` 翻页、中英标点切换）。
+另保留：方案选单（switcher）、ASCII 切换（ascii_composer：Caps Lock；Shift 由 D-24 Lua 处理，`Shift_*` 为 noop）、标点映射（punctuator，供方案以 `import_preset: default` 引用）、通用 recognizer patterns（email / url / underscore）、基础 key_binder（光标移动、`-` / `=` 翻页、中英标点切换）。
 
 移除：双拼方案项、简繁 / Emoji / Lua 相关快捷键，以及在本机 librime 1.10.0（fcitx5-rime 5.1.4）上无效的段落——navigator（需 librime >= 1.16.0）、`punctuator/digit_separators`（需 librime >= 1.13.0）。
 
@@ -171,6 +180,7 @@ engine 定案（首版零 Lua、零 OpenCC filter；2026-07-08 起 AI 候选通�
 ```yaml
 engine:
   processors:
+    - lua_processor@*ascii_shift     # 左英右中，按下即切（D-24）
     - ascii_composer
     - recognizer
     - key_binder
