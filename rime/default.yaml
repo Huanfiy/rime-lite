@@ -11,7 +11,7 @@
 
 
 # 要比共享目录同名文件的 config_version 大才可生效
-config_version: '2026-08-24'
+config_version: '2026-08-25'
 
 
 # 方案列表
@@ -39,12 +39,12 @@ switcher:
 
 
 # 中西文切换
-# Shift 由 lua/ascii_shift.lua 处理（左英右中、按下即切，D-24）。
-# Shift_* 必须 noop，否则 ascii_composer 会在 key-up 再切一次。
+# 左 Shift / Caps 由 lua/ascii_shift.lua 处理（D-24 / D-25）。
+# Caps_Lock 与 Shift_* 必须 noop，否则 ascii_composer 会在 key-up 再切一次。
 ascii_composer:
   good_old_caps_lock: true
   switch_key:
-    Caps_Lock: clear
+    Caps_Lock: noop
     Shift_L: noop
     Shift_R: noop
     Control_L: noop

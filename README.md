@@ -6,7 +6,7 @@
 
 - **全拼简体输入**：《通用规范汉字表》字表（8105）+ 基础词库 + 嵌入式领域词库 + 个人词库。
 - **英文输入**：挂载 melt_eng 词库，中文方案内直接出英文候选（输入 `hello` 首位即 hello）。
-- **中英切换**：左 Shift 按下即英、右 Shift 按下即中。
+- **中英切换**：左 Shift 按下即英、Caps 点按即中（按住 Caps 仍当 Ctrl）。
 - **固定短语置顶**：`custom_phrase.txt` 缩写码词条固定排在候选首位（`gpio` → GPIO、`zkb` → 占空比）。
 - **本机学习 + 词条晋升**：Rime userdb 即时学习；高频词按 SOP 周期性审核晋升进静态词库，跨机经 Git 同步。
 - **AI 智能候补**：组词中按 `Tab` 显式请求（纯触发式，不按键零上云）；daemon 缺席时自动降级为原生体验。
@@ -59,7 +59,7 @@ rime-lite/
 │   ├── pinyin.schema.yaml
 │   ├── pinyin.dict.yaml
 │   ├── custom_phrase.txt
-│   ├── lua/ascii_shift.lua  # 左英右中（D-24）
+│   ├── lua/ascii_shift.lua  # 左 Shift 即英、Caps 点按即中（D-24 / D-25）
 │   ├── lua/ai/          # AI 候补 glue / trigger / suggest
 │   ├── cn_dicts/
 │   └── en_dicts/

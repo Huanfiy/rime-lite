@@ -112,7 +112,15 @@
 
 | 编号   | 决策                | 说明                                                              |
 | ---- | ----------------- | --------------------------------------------------------------- |
-| D-24 | 中英切换：左 Shift 按下即英、右 Shift 按下即中 | 本机 librime 1.10.0 无 `set_ascii_mode` / `unset_ascii_mode`（1.14.0 起），Ubuntu 24.04 官方源升不了引擎。改由 `rime/lua/ascii_shift.lua` 在 **key-down** 设 `ascii_mode`（左 true / 右 false），无 500ms 超时、不要求纯点按；返回 `kNoop` 不吞修饰键。`ascii_composer/switch_key` 的 `Shift_L` / `Shift_R` 置 `noop`，避免 key-up 再切。组词中左 Shift 切英沿原 `commit_code`（未确认段上屏编码）；已在目标模式则只保持，Shift+字母仍打大写。组词中左 Shift+Tab 会先切英，音节左移改用右 Shift+Tab 或 Alt+←。热路径仅 keycode 分支，受 D-19 预算约束。 |
+| D-24 | 中英切换：左 Shift 按下即英、右 Shift 按下即中 | 本机 librime 1.10.0 无 `set_ascii_mode` / `unset_ascii_mode`（1.14.0 起），Ubuntu 24.04 官方源升不了引擎。改由 `rime/lua/ascii_shift.lua` 在 **key-down** 设 `ascii_mode`（左 true / 右 false），无 500ms 超时、不要求纯点按；返回 `kNoop` 不吞修饰键。`ascii_composer/switch_key` 的 `Shift_L` / `Shift_R` 置 `noop`，避免 key-up 再切。组词中左 Shift 切英沿原 `commit_code`（未确认段上屏编码）；已在目标模式则只保持，Shift+字母仍打大写。组词中左 Shift+Tab 会先切英，音节左移改用右 Shift+Tab 或 Alt+←。热路径仅 keycode 分支，受 D-19 预算约束。**右 Shift 按下即中已被 D-25 推翻**（左 Shift 按下即英、Lua 路径、`Shift_*` noop、组词 commit_code 仍现行）。 |
+
+
+2026-08-25 拍板的新增决策：
+
+
+| 编号   | 决策                | 说明                                                              |
+| ---- | ----------------- | --------------------------------------------------------------- |
+| D-25 | 中英切换：Caps 点按即中，右 Shift 撤出 | 动因：右 Shift 紧贴 Enter，按下即切且 `kNoop` 不吞键，粉摘易连带发送 / 换行。本机 XKB `caps:ctrl_modifier` 使 Caps 仍发 `Caps_Lock` keysym、同时叠 Control，可与左 Ctrl 区分。`ascii_shift.lua`：Caps 点按（按下至松开间无其它键）切中（组词中切中沿原右 Shift：`clear` 组词）；按住 Caps 再按其它键只当 Ctrl、不切模式；Caps 键重复在和弦后不得重新武装点按。左 Shift 按下即英维持 D-24。右 Shift 不再切中英，仅作修饰（拼音下打大写）。`ascii_composer/switch_key` 的 `Caps_Lock` 改 `noop`（原 `clear`），`Shift_*` 仍 `noop`。无超时；返回 `kNoop`。热路径仅 keycode 分支，受 D-19 预算约束。 |
 
 
 未决事项：无阻塞项。AI 候选通路 M2 收尾见 [ai-daemon.md](ai-daemon.md) §8；运行参数（模型 / 去抖 / 上下文规模）走 daemon 配置文件调优，不动仓库。
@@ -129,7 +137,7 @@ rime-lite/
 │   │   ├── lexicon-sop.md
 │   │   └── ai-daemon.md
 │   └── plan/
-│       └── voice-daemon.md      # 待实施；落地后记 D-25
+│       └── voice-daemon.md      # 待实施；落地后记 D-26
 ├── rime/                        # 部署单元：整目录同步到 Rime 用户目录
 │   ├── default.yaml             # 全局配置：方案列表、菜单、方案选单
 │   ├── pinyin.schema.yaml       # 主方案：全拼
@@ -144,8 +152,8 @@ rime-lite/
 │   │   └── mydict.dict.yaml     # 个人自定义词库（D-13，2026-07-07 挂载）
 │   ├── en_dicts/
 │   │   └── en.dict.yaml         # 英文主词库（vendor）
-│   └── lua/                     # 热路径 Lua（D-18 / D-24；红线预算制见 D-19）
-│       ├── ascii_shift.lua      # 左英右中，按下即切（D-24）
+│   └── lua/                     # 热路径 Lua（D-18 / D-24 / D-25；红线预算制见 D-19）
+│       ├── ascii_shift.lua      # 左 Shift 即英、Caps 点按即中（D-24 / D-25）
 │       ├── ai/                  # glue（socket/缓存）、suggest（filter）、trigger（processor）
 │       └── vendor/json.lua      # vendor rxi/json.lua（协议编解码）
 ├── services/
@@ -177,7 +185,7 @@ menu:
   page_size: 5
 ```
 
-另保留：方案选单（switcher）、ASCII 切换（ascii_composer：Caps Lock；Shift 由 D-24 Lua 处理，`Shift_*` 为 noop）、标点映射（punctuator，供方案以 `import_preset: default` 引用）、通用 recognizer patterns（email / url / underscore）、基础 key_binder（光标移动、`-` / `=` 翻页、中英标点切换）。
+另保留：方案选单（switcher）、ASCII 切换（ascii_composer：`Caps_Lock` / `Shift_*` 为 noop；左 Shift 与 Caps 点按由 D-24 / D-25 Lua 处理）、标点映射（punctuator，供方案以 `import_preset: default` 引用）、通用 recognizer patterns（email / url / underscore）、基础 key_binder（光标移动、`-` / `=` 翻页、中英标点切换）。
 
 移除：双拼方案项、简繁 / Emoji / Lua 相关快捷键，以及在本机 librime 1.10.0（fcitx5-rime 5.1.4）上无效的段落——navigator（需 librime >= 1.16.0）、`punctuator/digit_separators`（需 librime >= 1.13.0）。
 
@@ -188,7 +196,7 @@ engine 定案（首版零 Lua、零 OpenCC filter；2026-07-08 起 AI 候选通�
 ```yaml
 engine:
   processors:
-    - lua_processor@*ascii_shift     # 左英右中，按下即切（D-24）
+    - lua_processor@*ascii_shift     # 左 Shift 按下即英、Caps 点按即中（D-24 / D-25）
     - ascii_composer
     - recognizer
     - key_binder
