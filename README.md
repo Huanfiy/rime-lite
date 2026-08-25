@@ -59,6 +59,7 @@ rime-lite/
 │   ├── pinyin.schema.yaml
 │   ├── pinyin.dict.yaml
 │   ├── custom_phrase.txt
+│   ├── lua/ascii_shift.lua  # 左英右中（D-24）
 │   ├── lua/ai/          # AI 候补 glue / trigger / suggest
 │   ├── cn_dicts/
 │   └── en_dicts/

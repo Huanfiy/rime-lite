@@ -123,11 +123,13 @@
 rime-lite/
 ├── AGENTS.md                    # AI / 协作者入口
 ├── run.sh                       # 统一入口（包装 deploy / daemon / 密钥 / 验证）
-├── docs/                        # 文档（refs / notes / design）
-│   └── design/
-│       ├── architecture.md
-│       ├── lexicon-sop.md
-│       └── ai-daemon.md
+├── docs/                        # 文档（refs / notes / plan / design）
+│   ├── design/
+│   │   ├── architecture.md
+│   │   ├── lexicon-sop.md
+│   │   └── ai-daemon.md
+│   └── plan/
+│       └── voice-daemon.md      # 待实施；落地后记 D-25
 ├── rime/                        # 部署单元：整目录同步到 Rime 用户目录
 │   ├── default.yaml             # 全局配置：方案列表、菜单、方案选单
 │   ├── pinyin.schema.yaml       # 主方案：全拼

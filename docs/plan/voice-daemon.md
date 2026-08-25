@@ -3,7 +3,7 @@
 | 项    | 内容                                                          |
 | ---- | ----------------------------------------------------------- |
 | 创建日期 | 2026-08-07                                                  |
-| 状态   | 待实施（M0 探针未开始）；决策未拍板，落地后以 D-24 记入 [fact.md](../../fact.md) |
+| 状态   | 待实施（M0 探针未开始）；决策未拍板，落地后以 D-25 记入 [architecture.md](../design/architecture.md) §2（D-24 已用于左右 Shift 切中英） |
 | 定位   | 语音输入组件的形态选型、实施步骤与验证方案；拍板结论落地后搬入 `docs/design/voice-daemon.md`，本文清理 |
 
 ## 1. 背景
@@ -101,14 +101,14 @@ resp: {"id":N,"ok":true}
 ### 4.6 文档回写（同轮提交，D-16）
 
 - 新建 `docs/design/voice-daemon.md`：结构、交互契约、性能与降级、关键实现约束、运维、边界。
-- `fact.md`：新增 D-24（语音组件形态与通路决策）+ 组件现状行。
-- `CLAUDE.md` 架构段加一行语音通路，与 AI 通路并列。
-- 本计划文件按 §2「拍板结论落地后清理」处置。
+- `docs/design/architecture.md` §2：新增 D-25（语音组件形态与通路决策）。
+- `AGENTS.md`：命令与禁区加一行语音通路指针，与 AI 通路并列。
+- 本计划文件按 docs-rules「落地后搬入 design 并清理」处置。
 
 ## 5. 验证（本仓库的「测试」）
 
 1. **M0 探针判据**（§3 四项），不通过不进 M1。
-2. **staging 构建零 E**：按 [CLAUDE.md](../../CLAUDE.md) 的 rsync + `rime_deployer --build` 流程跑，schema 与 lua 挂载必须零 E 级日志。
+2. **staging 构建零 E**：`./run.sh verify`，schema 与 lua 挂载必须零 E 级日志。
 3. **daemon 独立验证**：`voice-daemon.py --once 3` 说一句话，确认识别文本与耗时；`journalctl --user -u rime-voice-daemon -f` 观察常驻服务。
 4. **mock 端到端**：`provider=mock`（不加载模型）走完 F9 按下 → 候选栏「录音中」→ 松开 → 唤醒脉冲 → 候选出现 → 空格上屏全链路。
 5. **真机 PTT 抽查**：连续 3 句；确认 Esc 丢弃、组词中按 F9 先上屏再录音、`systemctl --user stop rime-voice-daemon` 后 F9 无副作用。

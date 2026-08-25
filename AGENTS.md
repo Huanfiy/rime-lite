@@ -40,7 +40,8 @@
 
 ## 红线
 
-- **性能（D-19）**：热路径 Lua 预算 ≤ 0.1ms/键，且必须非阻塞；filters 仅 `uniquifier` + `ai.suggest`；零 OpenCC filter。新增功能不得违反。
+- **中英（D-24）**：左 Shift 按下即英、右 Shift 按下即中。组词中音节左移用右 Shift+Tab 或 Alt+←（左 Shift+Tab 会先切英）。
+- **性能（D-19）**：热路径 Lua 预算 ≤ 0.1ms/键，且必须非阻塞；filters 仅 `uniquifier` + `ai.suggest`；零 OpenCC filter。新增功能不得违反。`ascii_shift` 热路径仅 keycode 分支。
 - **密钥**：仅存 `~/.config/rime-candidate-daemon/config.json`（0600）。严禁写入仓库任何文件、提交说明或会话落档。泄露则服务商侧作废，再用 `./run.sh apikey set` 写入新密钥。
 - **userdb**：禁止对运行中的 `rime/pinyin.userdb/` 执行任何 `rime_dict_manager` 子命令。导出路径见 lexicon-sop.md §3.1。
 - **部署**：`~/.local/share/fcitx5/rime` 只允许软链接切换；遇真实目录一律停止，不覆盖、不删除（D-11）。
