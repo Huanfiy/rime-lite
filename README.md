@@ -50,10 +50,8 @@ rime-lite/
 ├── run.sh               # 统一入口：部署、验证、daemon、密钥
 ├── README.md
 ├── docs/
-│   └── design/
-│       ├── architecture.md   # 架构与决策记录（D-n）
-│       ├── lexicon-sop.md    # 词库维护 SOP
-│       └── ai-daemon.md      # AI 候补结构与运维
+│   ├── design/              # 现行架构、决策、SOP
+│   └── plan/                # 已评审待实施（落地后搬入 design）
 ├── rime/                # 部署单元 = Rime 用户目录内容
 │   ├── default.yaml
 │   ├── pinyin.schema.yaml

@@ -1,25 +1,20 @@
 # 词库维护 SOP
 
-
-| 项    | 内容                                       |
-| ---- | ---------------------------------------- |
-| 创建日期 | 2026-07-07                               |
-| 状态   | 现行（决策 D-15，见 [architecture.md](architecture.md) §2） |
-| 适用范围 | rime-lite 词库的长期维护：日常加词、周期性 userdb 晋升、验证与提交 |
-| 不覆盖  | 方案（schema）结构调整、新词库类型引入（语法模型、Emoji）、AI 候选（OQ-2） |
-
+| 项 | 内容 |
+| --- | --- |
+| 状态 | 现行（D-15，见 [architecture.md](architecture.md) §2） |
+| 适用范围 | 日常加词、周期性 userdb 晋升、验证与提交 |
+| 不覆盖 | schema 结构调整、新词库类型（语法模型、Emoji）、AI 候补 |
 
 ## 1. 词库分层与职责
 
-
-| 文件                       | 承载                        | 修改方式                     |
-| ------------------------ | ------------------------- | ------------------------ |
-| `cn_dicts/8105`、`cn_dicts/base`、`en_dicts/en` | vendor 基础层             | 不手工加词；同步上游见 §5           |
-| `cn_dicts/embedded`      | 嵌入式 / 编程 / AI 领域词         | 手工加词（§2）+ 晋升追加（§3）       |
-| `cn_dicts/mydict`        | 非领域个人词（人名、公司、产品、口头语）      | 同上                       |
-| `custom_phrase.txt`      | 缩写码固定短语，候选置顶              | 手工加词（§2）                 |
-| `rime/pinyin.userdb/`    | 运行态学习缓存（D-1）              | 不手工编辑、不进 Git、不直接操作（§3.1） |
-
+| 文件 | 承载 | 修改方式 |
+| --- | --- | --- |
+| `cn_dicts/8105`、`cn_dicts/base`、`en_dicts/en` | vendor 基础层 | 不手工加词；同步上游见 §5 |
+| `cn_dicts/embedded` | 嵌入式 / 编程 / AI 领域词 | 手工加词（§2）+ 晋升追加（§3） |
+| `cn_dicts/mydict` | 非领域个人词（人名、公司、产品、口头语） | 同上 |
+| `custom_phrase.txt` | 缩写码固定短语，候选置顶 | 手工加词（§2） |
+| `rime/pinyin.userdb/` | 运行态学习缓存（D-1） | 不手工编辑、不进 Git、不直接操作（§3.1） |
 
 ## 2. 日常加词
 
@@ -32,18 +27,18 @@
 约束与生效：
 
 - Tab 分隔，无 UTF-8 BOM，行尾 LF；写入对应主题分区，或新建带日期的分区注释。
-- 任何词库改动需重新部署生效：fcitx5 托盘 → Rime → 重新部署，或 `fcitx5 -rd`。
+- 词库改动后 `./run.sh restart` 生效。
 - 提交按仓库 commit 约定，一笔一主题。
 
 ## 3. 周期性 userdb 晋升
 
-建议节奏：按需触发（userdb 学习量明显增长、或高频词反复未进首选时），无固定周期。全流程约半小时，其中人工审定为主要耗时。
+按需触发（学习量明显增长、或高频词反复未进首选时）。人工审定不可省略。
 
 ### 3.1 导出
 
-**主路径（推荐）**：fcitx5 托盘菜单 → Rime → 同步用户数据，然后读取产物 `rime/sync/<installation_id>/pinyin.userdb.txt`。`installation_id` 见本机激活目录下的 `installation.yaml`，因机而异，不写入仓库文档。同步触发仅有菜单一种方式：DBus 接口 `org.fcitx.Fcitx.Rime1` 无 Sync 方法，无 CLI 途径（2026-07-07 实测）。
+**主路径**：fcitx5 托盘 → Rime → 同步用户数据，读取 `rime/sync/<installation_id>/pinyin.userdb.txt`。`installation_id` 见本机 `installation.yaml`，不写入仓库文档。同步无 CLI / DBus 途径。
 
-**备选（可脚本化，fcitx5 无需停止）**：
+**备选**（可脚本化，fcitx5 无需停止）：
 
 ```bash
 cp -r rime/pinyin.userdb <工作目录>/
@@ -51,65 +46,57 @@ cd <工作目录> && rime_dict_manager -b pinyin
 # 产物：<工作目录>/sync/<id>/pinyin.userdb.txt
 ```
 
-`rime_dict_manager` 以当前工作目录为 Rime 用户目录；复制运行中的 LevelDB 理论上非事务一致，建议先触发一次同步或在输入空闲时复制。
+`rime_dict_manager` 以当前工作目录为 Rime 用户目录；复制运行中的 LevelDB 非事务一致，建议先同步或在输入空闲时复制。
 
-**禁止**：对运行中的 `rime/pinyin.userdb/` 直接执行任何 `rime_dict_manager` 子命令。fcitx5 对 `LOCK` 持排它锁，且 LevelDB 打开动作本身会写 LOG 文件（非只读）；锁被持有时命令报 `E level_db.cc:273] Error opening db` 退出（2026-07-07 实测）。
+**禁止**：对运行中的 `rime/pinyin.userdb/` 执行任何 `rime_dict_manager` 子命令（fcitx5 持有 `LOCK`，打开即写 LOG）。
 
-**不采用**：`rime_dict_manager -e`（导出为三列 `词<Tab>拼音<Tab>次数`，丢失 `d=`/`t=` 元数据，仅适合跨输入法迁移）。
+**不采用**：`rime_dict_manager -e`（丢失 `d=` / `t=` 元数据）。
 
 ### 3.2 候选分析
 
 ```bash
-tools/userdb-candidates -o /tmp/candidates.tsv rime/sync/<installation_id>/pinyin.userdb.txt
+./run.sh candidates -o /tmp/candidates.tsv rime/sync/<installation_id>/pinyin.userdb.txt
 ```
 
-候选 TSV 为一次性中间产物，输出到仓库外（如 `/tmp`），不进 Git。
+候选 TSV 输出到仓库外，不进 Git。
 
-- 可传多份导出文件（多机 / 多来源），按（词、拼音）合并 c 值。
-- 规则同 D-14：丢弃 c ≤ 0；排除单 CJK 字、已收录词（base / 8105 / embedded / mydict / custom_phrase / A–Z 词条）、纯 ASCII 且与拼音串相同的词；门槛 `--min-count` 默认 3。
-- 输出 TSV 列：word / pinyin / c_total / 各来源 c / bucket / flag；漏斗统计打印到 stderr。
-- bucket 与 flag 仅为启发式建议：fragment 标记对既往晋升词零误报、但对组句残留召回约五成；错词（typo）不做机器判定。**工具输出不可直接应用**。
+- 可传多份导出，按（词、拼音）合并 c 值。
+- 规则同 D-14：丢弃 c ≤ 0；排除单 CJK 字、已收录词（base / 8105 / embedded / mydict / custom_phrase / A–Z）、纯 ASCII 且与拼音串相同的词；门槛 `--min-count` 默认 3。
+- 输出列：word / pinyin / c_total / 各来源 c / bucket / flag。bucket / flag 仅为启发式，**不可直接应用**。
 
 ### 3.3 人工审定
 
-逐条过 TSV，此环节不可省略（D-1 的「审核」）：
-
-- 剔除组句残留（「我需要」「该问题」类，运行态会自然重学，不进静态词库）。
-- 剔除错词与临时词；同音异形词（如「落档 / 落挡」）先核实写法再定。
-- 复核分桶：领域词 → embedded，非领域 → mydict，需缩写码 → custom_phrase。
+- 剔除组句残留、错词与临时词；同音异形先核实写法。
+- 分桶：领域词 → embedded，非领域 → mydict，需缩写码 → custom_phrase。
 
 ### 3.4 应用
 
-- embedded / mydict：文件末尾新建分区 `# ========== userdb 晋升 (YYYY-MM-DD) ==========`，词条 `词<Tab>拼音<Tab>100`，按 c_total 降序。
-- custom_phrase：按 §2 格式写入，自定缩写码。
-- 同步更新目标文件头部「本地修改」注释（一行记录日期、来源与标准）。
+- embedded / mydict：末尾新建分区 `# ========== userdb 晋升 (YYYY-MM-DD) ==========`，词条 `词<Tab>拼音<Tab>100`，按 c_total 降序。
+- custom_phrase：按 §2 格式写入。
+- 更新目标文件头部「本地修改」注释。
 
 ### 3.5 验证
 
 ```bash
-# 隔离构建（不触碰运行目录），要求零 E 级日志
-./run.sh verify
+./run.sh verify    # 隔离构建，要求零 E 级日志
+./run.sh restart   # 真机抽查 3~5 个新词与既有词（如 nihao、gpio）
 ```
 
-排除清单对应 `.gitignore` 运行态段在 `rime/` 下的现存项；运行目录出现新增运行态产物（日志、锁文件等）时同步扩充。
-
-构建通过后重新部署（`fcitx5 -rd`），真机抽查 3~5 个新词条与既有词条（如 `nihao`、`gpio`）确认无回归。
+运行目录出现新的运行态产物时，同步扩充 `.gitignore`。
 
 ### 3.6 提交
 
-词库改动与文档回写分笔提交，按仓库 commit 约定。本轮筛选口径（阈值、剔除数、晋升数）记入提交说明或 design 文档，便于回溯。
+词库改动与文档回写分笔提交。本轮筛选口径（阈值、剔除数、晋升数）只记入提交说明，不写入 design 文档。
 
 ## 4. 多机协同
 
-- 词库经 Git 同步：`git pull` 后重新部署生效；各机 userdb 独立演化，不要求一致（D-6）。
-- 他机执行晋升同走本 SOP；installation_id 因机而异，以各机 `rime/installation.yaml` 为准。
+词库经 Git 同步：`git pull` 后重新部署；各机 userdb 独立演化（D-6）。他机晋升同走本 SOP。
 
 ## 5. vendor 词库同步上游（低频）
 
-- vendor 层（8105 / base / en / melt_eng）不追随上游自动更新（architecture.md §5）。
-- 需要时人工 diff 上游（rime-ice 工程或其远端仓库），确认后更新项目内副本，文件头注释记录新 vendor 日期与裁剪说明，走 §3.5 验证后提交。
+vendor 层不追随上游自动更新（architecture.md §5）。需要时人工 diff，更新副本并改文件头注释，走 §3.5 验证后提交。
 
 ## 6. 已知边界
 
-- 导出格式（`拼音<Tab>词<Tab>c= d= t=`）与 `rime_dict_manager` 选项集为 librime 1.10.0 实测行为；librime 升级后需先复核再沿用本 SOP。
-- `tools/userdb-candidates` 的排除集读取当前仓库词库；跑历史数据复现需用 `--repo-root` 指向历史版本目录，否则已晋升词条会被排除集吃掉（属预期行为，非工具缺陷）。
+- 导出格式与 `rime_dict_manager` 选项集以本机 librime 1.10.0 为准；升级后先复核。
+- `tools/userdb-candidates` 排除集读取当前仓库词库；复现历史数据需 `--repo-root` 指向历史版本，否则已晋升词条会被排除。

@@ -1,22 +1,21 @@
 # 语音输入组件（voice-daemon）实施计划
 
-| 项    | 内容                                                          |
-| ---- | ----------------------------------------------------------- |
-| 创建日期 | 2026-08-07                                                  |
-| 状态   | 待实施（M0 探针未开始）；决策未拍板，落地后以 D-27 记入 [architecture.md](../design/architecture.md) §2（D-26 已用于左 Shift 点按切中英） |
-| 定位   | 语音输入组件的形态选型、实施步骤与验证方案；拍板结论落地后搬入 `docs/design/voice-daemon.md`，本文清理 |
+| 项 | 内容 |
+| --- | --- |
+| 状态 | 待实施（M0 探针未开始）；落地后以 D-27 记入 [architecture.md](../design/architecture.md) §2，本文清理 |
+| 定位 | 语音输入组件的形态选型、实施步骤与验证方案 |
 
 ## 1. 背景
 
 诉求：语音输入要与现有 AI 候补组件**平级**——插件式、用户按键主动触发、高内聚低耦合、可独立开发调试、核心代码入库（模型与环境不入库）。
 
-现状判断（评估对象 VocoType-linux，2026-08-06 通读）：
+现状判断（评估对象 VocoType-linux）：
 
 - **VocoType 的架构不可复用**。其 fcitx5 版本注册为独立 InputMethod，非 F9 按键全部经 Unix socket 同步转发给 backend 内的第二个 librime 实例（`fcitx5/addon/ipc_client.cpp:25-80`，无超时、阻塞 fcitx 主线程），并与 fcitx5-rime 争抢 `rime/pinyin.userdb/` 的 LevelDB 排它锁。它是输入法替代品，不是插件。许可为 GPL-3.0，代码不拷入本仓库。
-- **可复用的是技术选型**：`funasr_onnx==0.4.1` + Paraformer-large / FSMN-VAD / CT-Transformer 三个 ONNX 模型（modelscope 下载）+ `sounddevice` 采集，纯 CPU、离线、约 700MB 常驻。本机 Python 3.12.3、X11 + GNOME、`xdotool` 已装、麦克风可用，均满足前提。
+- **可复用的是技术选型**：`funasr_onnx==0.4.1` + Paraformer-large / FSMN-VAD / CT-Transformer 三个 ONNX 模型（modelscope 下载）+ `sounddevice` 采集，纯 CPU、离线、约 700MB 常驻。前提：Python 3、X11、`xdotool`、麦克风。
 - **可复用的是本仓库 AI 组件的形态**：`rime/lua/ai/` ↔ UDS ↔ `services/candidate-daemon/` ↔ systemd 用户服务，配置在 `~/.config/`，代码入库。语音组件按同一形态复制一套即可。
 
-必须额外解决的一处差异：AI 候补的产物天然是「候选」，语音的产物要在**空组词状态**下产生；而 librime 无异步刷新通道（D-17 / D-21 已验证），librime-lua 1.10 也**未暴露 `Engine:commit_text`**（`librime-lua.so` 仅注册 `Context:get_commit_text`，2026-08-06 查证）。因此语音文本必须经「占位码 segment → lua_translator 产候选 → 用户确认上屏」的路径，并由 daemon 侧发唤醒脉冲替代第二拍按键。
+必须额外解决的一处差异：AI 候补的产物天然是「候选」，语音的产物要在**空组词状态**下产生；而 librime 无异步刷新通道（D-17 / D-21），librime-lua 1.10 也**未暴露 `Engine:commit_text`**（仅有 `Context:get_commit_text`）。因此语音文本必须经「占位码 segment → lua_translator 产候选 → 用户确认上屏」的路径，并由 daemon 侧发唤醒脉冲替代第二拍按键。
 
 目标形态：按住 F9 说话 → 松开 → 识别文本以 🎤 候选出现在候选栏 → 空格上屏 / Esc 丢弃；daemon 缺席时 F9 无副作用，输入体验退回原生。
 

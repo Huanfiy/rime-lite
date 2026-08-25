@@ -8,7 +8,7 @@
 
 个人最小 Rime 全拼输入方案（仅 fcitx5）。`rime/` 整目录即部署单元，源文件就是 librime 可直接读取的文件——无构建层、无测试框架、无包管理。验证方式是隔离 staging 构建 + 真机抽查。
 
-已决事项（D-n）与阶段验收见 [docs/design/architecture.md](docs/design/architecture.md) §2 / §10–12。修改配置或词库前先对照，避免推翻已拍板决策。
+已决事项（D-n）见 [docs/design/architecture.md](docs/design/architecture.md) §2。修改配置或词库前先对照，避免推翻已拍板决策。
 
 ## 命令
 
@@ -57,4 +57,4 @@
 
 格式 `<emoji> type(scope): subject`（refactor 特例：`♻️refactor(scope): subject`）。type 限 feat / fix / perf / refactor / chore / docs；subject 用中文；一笔一主题。不附加 `Co-Authored-By` 等 AI 署名尾注。
 
-词库改动与文档回写分笔提交。晋升类提交的筛选口径（阈值、剔除数、晋升数）记入提交说明**或** design 文档。清理独立成笔 `🔧 chore`。
+词库改动与文档回写分笔提交。晋升类提交的筛选口径（阈值、剔除数、晋升数）只记入提交说明。清理独立成笔 `🔧 chore`。
