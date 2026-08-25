@@ -15,6 +15,9 @@ installation.yaml
 user.yaml
 *.log
 
+# Local credentials
+.myapikey
+
 # glog 日志（librime 工具 / 探针，命名如 rime.xxx.host.user.log.INFO.<date>.<pid>）
 *.log.INFO.*
 *.log.WARNING.*
@@ -38,4 +41,3 @@ __pycache__/
 .cursor/
 .codex/
 .gemini/
-
