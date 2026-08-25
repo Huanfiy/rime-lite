@@ -3,7 +3,7 @@
 | 项    | 内容                                                          |
 | ---- | ----------------------------------------------------------- |
 | 创建日期 | 2026-08-07                                                  |
-| 状态   | 待实施（M0 探针未开始）；决策未拍板，落地后以 D-26 记入 [architecture.md](../design/architecture.md) §2（D-25 已用于 Caps 点按切中英） |
+| 状态   | 待实施（M0 探针未开始）；决策未拍板，落地后以 D-27 记入 [architecture.md](../design/architecture.md) §2（D-26 已用于左 Shift 点按切中英） |
 | 定位   | 语音输入组件的形态选型、实施步骤与验证方案；拍板结论落地后搬入 `docs/design/voice-daemon.md`，本文清理 |
 
 ## 1. 背景
@@ -101,7 +101,7 @@ resp: {"id":N,"ok":true}
 ### 4.6 文档回写（同轮提交，D-16）
 
 - 新建 `docs/design/voice-daemon.md`：结构、交互契约、性能与降级、关键实现约束、运维、边界。
-- `docs/design/architecture.md` §2：新增 D-26（语音组件形态与通路决策）。
+- `docs/design/architecture.md` §2：新增 D-27（语音组件形态与通路决策）。
 - `AGENTS.md`：命令与禁区加一行语音通路指针，与 AI 通路并列。
 - 本计划文件按 docs-rules「落地后搬入 design 并清理」处置。
 

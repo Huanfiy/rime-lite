@@ -40,7 +40,7 @@
 
 ## 红线
 
-- **中英（D-24 / D-25）**：左 Shift 按下即英、Caps 点按即中（按住 Caps 仍当 Ctrl）。右 Shift 不切中英。组词中音节左移用右 Shift+Tab 或 Alt+←（左 Shift+Tab 会先切英）。
+- **中英（D-26）**：左 Shift 点按切换中英（500ms；仅 Shift 按住时再按其它键才打断）。右 Shift / Caps 不切中英。组词中音节左移用 Shift+Tab 或 Alt+←。
 - **性能（D-19）**：热路径 Lua 预算 ≤ 0.1ms/键，且必须非阻塞；filters 仅 `uniquifier` + `ai.suggest`；零 OpenCC filter。新增功能不得违反。`ascii_shift` 热路径仅 keycode 分支。
 - **密钥**：仅存 `~/.config/rime-candidate-daemon/config.json`（0600）。严禁写入仓库任何文件、提交说明或会话落档。泄露则服务商侧作废，再用 `./run.sh apikey set` 写入新密钥。
 - **userdb**：禁止对运行中的 `rime/pinyin.userdb/` 执行任何 `rime_dict_manager` 子命令。导出路径见 lexicon-sop.md §3.1。
