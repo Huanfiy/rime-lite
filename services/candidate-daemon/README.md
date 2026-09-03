@@ -1,11 +1,7 @@
 # candidate-daemon — AI 智能候补 daemon
 
-rime-lite 的 AI 生成式候补服务（决策 D-17 / D-18 / D-21 / D-22 / D-23，结构与契约见
-[docs/design/ai-daemon.md](../../docs/design/ai-daemon.md)）。
-Rime 侧经 `rime/lua/ai/` 以 unix socket 连接本服务；本服务根据会话上下文（近期上屏文本）
-调用 OpenAI 兼容 API，生成用户想输入的完整内容（拼音整句转换 + 延伸预测，不受本地词库限制），
-以 ⚡ 候补形式注入候选栏首位，选中即整段上屏。
-纯触发式（D-21）：请求只在用户按触发键时发出，无自动预取，不按键零外发。
+unix socket ↔ OpenAI 兼容 API 的桥，Rime 侧客户端为 `rime/lua/ai/`。行为定义、结构与交互契约见
+[docs/design/ai-daemon.md](../../docs/design/ai-daemon.md)；本文只记依赖、配置、运维与协议。
 
 ## 依赖
 
@@ -39,17 +35,7 @@ Rime 侧经 `rime/lua/ai/` 以 unix socket 连接本服务；本服务根据会�
 
 用户单元由 `run.sh daemon install` 按当前仓库绝对路径生成（唯一来源，仓库内不存模板）。daemon 缺席时输入法自动降级为原生体验（连接失败 µs 级返回），可随时 `./run.sh daemon stop|start`。
 
-## 使用
-
-- 组词中按 `Tab` 调出 AI 候补（无长度门槛）——缓存命中即时展示（⚡ 标记、居候选栏首位，
-  选中即整段上屏，含延伸预测部分）；未命中则亮「⚡…」提示并直达 API，
-  约一个 API 周期后再按即命中，长按 `Tab` 可等结果落地自动展示。
-  Tab 仅在组词状态被拦截，其余场景行为不变；组词中的音节导航改用 `Shift+Tab`（左）/ `Alt+←→`。
-- 输入表达表情意图时，AI 首项仍为拼音转写，第 2、3 项改为匹配语义的 emoji / 颜文字；
-  其余输入维持「转写 + 可选延伸」口径。
-- 不按 `Tab` 时零请求、零外发（D-21 纯触发式，无自动预取）；上屏文本仅进本机 daemon
-  内存作会话上下文，不上云。
-- 键位与参数在 `rime/pinyin.schema.yaml` 的 `ai_suggest:` 段调整。
+Rime 侧键位与等待参数在 `rime/pinyin.schema.yaml` 的 `ai_suggest:` 段。
 
 ## 协议 v1.3（NDJSON over UDS）
 

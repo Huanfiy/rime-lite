@@ -40,7 +40,7 @@
 | D-11 | 部署方式为软链接切换；遇真实目录停止，不覆盖、不删除；平级工程互不修改 |
 | D-12 | schema / 词库入口 / 显示名统一 `pinyin`；`char-lib/` → `cn_dicts/` |
 | D-13 | 个人领域词库为 `cn_dicts/embedded.dict.yaml`，另挂 `mydict.dict.yaml`，均经 `pinyin.dict.yaml` 的 `import_tables` |
-| D-14 | userdb 晋升：按（词、拼音）合并 c 值，门槛 c_total ≥ 3；排除 c≤0、单字、已收录词、A–Z 词条；人工剔除组句残留与错词；分区追加，统一权重 100。流程见 [lexicon-sop.md](lexicon-sop.md) |
+| D-14 | userdb 晋升 = 机械筛选 + 人工审定；筛选规则单点在 `tools/userdb-candidates`，流程见 [lexicon-sop.md](lexicon-sop.md) |
 | D-15 | 词库长期维护按 lexicon-sop 执行；分析源为现役 `pinyin.userdb` 导出；候选分析用 `tools/userdb-candidates`，人工审定不可省略 |
 | D-16 | 记录与清理规则见根目录 [docs-rules.md](../../docs-rules.md) |
 | D-17 | AI 延迟模型：热路径任何情况下不等待 daemon；结果展示以触发键为主入口。预取路径已被 D-21 撤销，触发键契约仍现行 |
@@ -50,10 +50,10 @@
 | D-21 | 撤销自动预取，AI 候补纯触发式（协议 v1.3）：不按 Tab 零上云，无长度门槛。并发槽 / 防重 / commit 作废 / 两拍契约保留 |
 | D-22 | 模型与推理参数走 daemon 配置（不入库）。提示词长度上限已被 D-23 推翻 |
 | D-23 | 系统提示词上限 200 字；首项始终为转写；识别到表情意图时第 2、3 项仅输出匹配语义的 emoji / 颜文字，否则维持短延伸 |
-| D-24 | 左 Shift 按下即英、右 Shift 按下即中。右 Shift 已被 D-25 推翻；左 Shift 按下即英已被 D-26 推翻。Lua 路径与 `Shift_*` noop 仍现行 |
-| D-25 | Caps 点按即中，右 Shift 撤出。已被 D-26 推翻。`Caps_Lock` noop 因本机 Caps 映射为 Ctrl 仍现行 |
-| D-26 | 左 Shift 点按翻转中英，超时 500ms；仅 Shift 按住时再按其它键才打断。右 Shift / Caps 不切中英。组词中音节左移用 Shift+Tab 或 Alt+←。已被 D-27 推翻 |
-| D-27 | 左 Shift 单击切 ASCII，快速双击切中文；点按超时 500ms，双击窗口 400ms。仅 Shift 按住时再按其它键才打断（不切）；单击后其它键取消双击窗口。右 Shift / Caps 不切中英。组词中音节左移用 Shift+Tab 或 Alt+←。Lua 路径与 `Shift_*` noop 仍现行 |
+| D-24 | 中英切换走 Lua processor，`ascii_composer` 的 `Shift_*` / `Caps_Lock` 置 noop。键位方案已被 D-25 → D-27 逐次推翻，Lua 路径与 noop 仍现行 |
+| D-25 | Caps 点按即中。已被 D-26 推翻 |
+| D-26 | 左 Shift 点按翻转中英。已被 D-27 推翻 |
+| D-27 | 左 Shift 单击切 ASCII、快速双击切中文；右 Shift / Caps 不参与。时序参数与打断规则以 `rime/lua/ascii_shift.lua` 为准 |
 
 未决事项：无阻塞项。语音见 [voice-daemon.md](../plan/voice-daemon.md)；AI M2 见 [ai-daemon.md](ai-daemon.md) §8。运行参数走 daemon 配置，不动仓库。
 
@@ -71,7 +71,7 @@
 
 ### 4.1 default.yaml
 
-`schema_list` 仅 `pinyin`（melt_eng 只作词库挂载）。`ascii_composer` 的 `Caps_Lock` / `Shift_*` 为 `noop`，左 Shift 单击 / 双击由 D-27 Lua 处理。保留 switcher、punctuator、通用 recognizer、基础 key_binder。不包含双拼、简繁 / Emoji 快捷键，以及本机 librime 1.10.0 无效的 navigator / `digit_separators` 等段落。
+`schema_list` 仅 `pinyin`（melt_eng 只作词库挂载）。`ascii_composer` 全部切换键为 `noop`，中英切换交给 Lua（D-24 / D-27）。保留 switcher、punctuator、通用 recognizer、基础 key_binder。不包含双拼、简繁 / Emoji 快捷键，以及本机 librime 1.10.0 无效的 navigator / `digit_separators` 等段落。
 
 ### 4.2 pinyin.schema.yaml
 
@@ -122,18 +122,6 @@
 | octagram | 插件 + `.gram` + schema | 不走 AI 候补轨道（D-18） |
 | 语音 | 见 [voice-daemon.md](../plan/voice-daemon.md) | 待实施 |
 
-## 9. 与原计划的偏离
+## 9–12. 已清理
 
-本节已清理：对照对象已移出工作区；现行结论由 §2 覆盖。
-
-## 10. 首版完成判定
-
-本节已清理：一次性验收清单不属现行事实。
-
-## 11. 阶段 2/3 完成记录
-
-本节已清理：一次性验收清单不属现行事实。
-
-## 12. AI 候选通路完成记录
-
-本节已清理：一次性验收清单不属现行事实。热路径预算见 D-19；结构与契约见 [ai-daemon.md](ai-daemon.md)。
+原为计划对照与各阶段一次性验收清单，不属现行事实；编号保留不复用，内容见 git 历史。

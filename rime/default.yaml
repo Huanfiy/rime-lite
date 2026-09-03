@@ -133,7 +133,7 @@ recognizer:
 # 快捷键
 key_binder:
   bindings:
-    # 音节左移：组词中 Shift+Tab（左 Shift 单击/双击才切中英，和弦打断不切，D-27）；右移用 Alt+Right
+    # 音节左移：Tab 已让位给 AI 触发键（D-21），改用 Shift+Tab；右移用 Alt+Right
     - { when: composing, accept: Shift+Tab, send: Shift+Left }
     # Alt + ←/→ 切换光标至下 / 上一个拼音
     - { when: composing, accept: Alt+Left, send: Shift+Left }

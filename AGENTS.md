@@ -40,13 +40,13 @@
 
 ## 红线
 
-- **中英（D-27）**：左 Shift 单击切 ASCII，快速双击切中文（点按 500ms / 双击窗口 400ms；仅 Shift 按住时再按其它键才打断）。右 Shift / Caps 不切中英。组词中音节左移用 Shift+Tab 或 Alt+←。
-- **性能（D-19）**：热路径 Lua 预算 ≤ 0.1ms/键，且必须非阻塞；filters 仅 `uniquifier` + `ai.suggest`；零 OpenCC filter。新增功能不得违反。`ascii_shift` 热路径仅 keycode 分支。
+- **中英（D-27）**：左 Shift 单击切 ASCII、双击切中，右 Shift / Caps 不参与；细则与参数以 `rime/lua/ascii_shift.lua` 为准，`ascii_composer` 切换键保持 noop。
+- **性能（D-19）**：热路径 Lua 预算 ≤ 0.1ms/键，且必须非阻塞；filters 仅 `uniquifier` + `ai.suggest`；零 OpenCC filter。新增功能不得违反。
 - **密钥**：仅存 `~/.config/rime-candidate-daemon/config.json`（0600）。严禁写入仓库任何文件、提交说明或会话落档。泄露则服务商侧作废，再用 `./run.sh apikey set` 写入新密钥。
 - **userdb**：禁止对运行中的 `rime/pinyin.userdb/` 执行任何 `rime_dict_manager` 子命令。导出路径见 lexicon-sop.md §3.1。
 - **部署**：`~/.local/share/fcitx5/rime` 只允许软链接切换；遇真实目录一律停止，不覆盖、不删除（D-11）。
 - **平级工程**：不删除、不修改本机其他 Rime 工程目录（若存在）。是否存在以本机为准，不要在文档里断言路径。
-- **词条格式**：Tab 分隔、无 UTF-8 BOM、行尾 LF。`dict.yaml` 表体为 `词<Tab>拼音<Tab>权重`（拼音为空格分隔小写音节）；`custom_phrase.txt` 为 `词<Tab>编码<Tab>权重`。
+- **词条格式**：Tab 分隔、无 UTF-8 BOM、行尾 LF；各文件列定义见 lexicon-sop.md §2。
 - **vendor 层**：`cn_dicts/8105`、`cn_dicts/base`、`en_dicts/en` 不手工加词。
 
 ## 运行态隔离

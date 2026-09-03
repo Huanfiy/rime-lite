@@ -36,7 +36,7 @@ fcitx5（librime 进程内）
 - **连续输入零干扰**：filter 每键仅做非阻塞收包与查表（本会话从未按过触发键时直通透传）；AI 结果不会自行弹出——librime 无异步候选刷新通道，这是引擎级约束，也是「触发键」契约的根源（D-17）。
 - **两拍触发**（D-20 / D-21）：`Tab` 命中缓存即时展示；未命中则发请求并有界等待（250ms），到点未回亮「⚡…」段提示，约一个 API 周期后再按即命中。长按 `Tab` = 轮询收割（有界等待带 1s 冷却，不积压事件队列）。
 - **纯触发式**（D-21）：请求仅由触发键产生；隐私边界即「不按 `Tab` 零上云」。
-- **键位**：`Tab` 仅在组词状态被拦截；音节导航为 `Shift+Tab` / `Alt+←→`（左 Shift 单击/双击才切中英，D-27）。
+- **键位**：`Tab` 仅在组词状态被拦截；音节导航改为 `Shift+Tab` / `Alt+←→`（`default.yaml` key_binder）。
 - **数据外发边界**：上屏文本仅进本机 daemon 内存；仅在按触发键时，把上下文尾部（≤ 80 字）+ 已选前缀 + 当前段拼音 + 本地候选参考送云端。
 
 ## 4. 性能、降级与红线
@@ -61,7 +61,7 @@ fcitx5（librime 进程内）
 ## 6. 运维
 
 - 服务管理：`./run.sh daemon status|restart|logs`。journal 中每条 `suggest` 的延迟 / 产出 / token 是「AI 是否在工作」的地面真相。
-- 调参：模型 / 并发 / 上下文改 `~/.config/rime-candidate-daemon/config.json` 后 `./run.sh daemon restart`；触发键 / 阈值 / 等待改 `rime/pinyin.schema.yaml` 的 `ai_suggest` 段后重新部署。
+- 调参：模型 / 并发 / 上下文改 `~/.config/rime-candidate-daemon/config.json` 后 `./run.sh daemon restart`；触发键 / 等待 / top_k 改 `rime/pinyin.schema.yaml` 的 `ai_suggest` 段后 `./run.sh restart`。
 - 新机器：`./run.sh setup` → `./run.sh apikey set` → `./run.sh restart`。现役状态以 `./run.sh status` 为准。
 - 密钥：仅存 daemon 配置文件（0600）；写入与轮换走 `./run.sh apikey set`。
 
