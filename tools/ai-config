@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""rime-lite AI daemon 配置管理（只动 ~/.config/rime-candidate-daemon/config.json，不入库）。
+
+用法:
+  tools/ai-config show                       打印配置（密钥脱敏）；退出码 0 就绪 / 1 无配置 / 2 密钥未填
+  tools/ai-config init                       配置不存在时从示例复制（不含真实密钥）
+  tools/ai-config set [--base-url URL] [--model NAME] [--provider NAME]
+                                             写入或轮换密钥：取 $RIME_AI_API_KEY，否则终端提示输入（不回显）
+
+配置路径可用 $RIME_AI_CONFIG 覆盖（与 daemon 一致）。文件权限始终收敛为 0600。
+"""
+import argparse
+import getpass
+import json
+import os
+import shutil
+import sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+EXAMPLE = os.path.join(HERE, "..", "services", "candidate-daemon", "config.example.json")
+CONFIG = os.environ.get(
+    "RIME_AI_CONFIG",
+    os.path.expanduser("~/.config/rime-candidate-daemon/config.json"),
+)
+PLACEHOLDER = "REPLACE_ME"
+
+
+def die(msg):
+    sys.exit(f"错误: {msg}")
+
+
+def mask(key):
+    if not key or key == PLACEHOLDER:
+        return "<未配置>"
+    return "****" if len(key) <= 8 else f"{key[:4]}…{key[-4:]}"
+
+
+def load():
+    with open(CONFIG, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def save(cfg):
+    os.makedirs(os.path.dirname(CONFIG), exist_ok=True)
+    tmp = CONFIG + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump(cfg, f, indent=2, ensure_ascii=False)
+        f.write("\n")
+    os.replace(tmp, CONFIG)
+    os.chmod(CONFIG, 0o600)
+
+
+def key_ready(cfg):
+    k = cfg.get("api_key", "")
+    return bool(k) and k != PLACEHOLDER
+
+
+def cmd_show(_):
+    if not os.path.isfile(CONFIG):
+        print(f"config:   不存在（{CONFIG}）")
+        print("初始化:   ./run.sh apikey init   然后  ./run.sh apikey set")
+        return 1
+    cfg = load()
+    perm = os.stat(CONFIG).st_mode & 0o777
+    print(f"config:   {CONFIG} ({perm:04o})")
+    for k in ("provider", "base_url", "model"):
+        print(f"{k + ':':<9} {cfg.get(k, '')}")
+    print(f"api_key:  {mask(cfg.get('api_key', ''))}")
+    if perm != 0o600:
+        print(f"警告: 权限不是 0600，运行: chmod 600 {CONFIG}")
+    return 0 if key_ready(cfg) else 2
+
+
+def cmd_init(_):
+    if os.path.isfile(CONFIG):
+        print(f"已存在: {CONFIG}（未覆盖）")
+    else:
+        os.makedirs(os.path.dirname(CONFIG), exist_ok=True)
+        shutil.copyfile(EXAMPLE, CONFIG)
+        print(f"已从示例复制: {CONFIG}")
+    os.chmod(CONFIG, 0o600)
+    print("接下来: ./run.sh apikey set")
+    return 0
+
+
+def cmd_set(args):
+    key = os.environ.get("RIME_AI_API_KEY", "")
+    if not key:
+        if not sys.stdin.isatty():
+            die("非交互环境请设置 RIME_AI_API_KEY，或在终端运行本命令")
+        key = getpass.getpass("API key（输入不回显）: ")
+    if not key:
+        die("密钥为空")
+    cfg = load() if os.path.isfile(CONFIG) else json.load(open(EXAMPLE, encoding="utf-8"))
+    cfg["api_key"] = key
+    for field in ("base_url", "model", "provider"):
+        v = getattr(args, field)
+        if v:
+            cfg[field] = v
+    save(cfg)
+    print(f"已写入 {CONFIG}（0600）。请同时在服务商侧作废旧 key。")
+    return 0
+
+
+def main():
+    ap = argparse.ArgumentParser(prog="ai-config", description=__doc__.split("\n")[0])
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("show").set_defaults(fn=cmd_show)
+    sub.add_parser("init").set_defaults(fn=cmd_init)
+    p = sub.add_parser("set")
+    p.add_argument("--base-url", dest="base_url")
+    p.add_argument("--model")
+    p.add_argument("--provider")
+    p.set_defaults(fn=cmd_set)
+    args = ap.parse_args()
+    sys.exit(args.fn(args))
+
+
+if __name__ == "__main__":
+    main()

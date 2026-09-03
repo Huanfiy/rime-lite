@@ -27,7 +27,7 @@
 ./run.sh candidates -o /tmp/candidates.tsv <userdb.txt>
 ```
 
-`tools/deploy` 与 `tools/userdb-candidates` 仍是底层实现，`run.sh` 只做统一入口。
+`tools/deploy`、`tools/userdb-candidates`、`tools/ai-config` 是底层实现，`run.sh` 只做路由与 systemd / fcitx5 编排。
 
 ## 必读
 
