@@ -4,7 +4,7 @@
 # rime-lite 主方案：最小全拼
 # 依据 docs/design/architecture.md §4.2，参考 rime-ice 工程 rime_ice.schema.yaml 裁剪（2026-07-02）。
 # 相对 rime-ice 的取舍：
-#   - 热路径 Lua：AI 候选通路（D-18）+ 中英切换 ascii_shift（D-26）；预算制红线 D-19；零 OpenCC filter（无 Emoji、无简繁切换、无置顶 / 降频）
+#   - 热路径 Lua：AI 候选通路（D-18）+ 中英切换 ascii_shift（D-27）；预算制红线 D-19；零 OpenCC filter（无 Emoji、无简繁切换、无置顶 / 降频）
 #   - speller 保留超级简拼与 v/ü 转换，不引入模糊音与自动纠错
 #   - translators 仅保留：标点、拼音、custom_phrase、melt_eng
 
@@ -34,7 +34,7 @@ switches:
 # 输入引擎
 engine:
   processors:
-    - lua_processor@*ascii_shift     # 左 Shift 点按切中英（D-26，500ms）；ascii_composer 的 Shift_* / Caps_Lock 须 noop
+    - lua_processor@*ascii_shift     # 左 Shift 单击 ASCII / 双击切中（D-27）；ascii_composer 的 Shift_* / Caps_Lock 须 noop
     - ascii_composer
     - recognizer
     - key_binder

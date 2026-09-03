@@ -39,7 +39,7 @@ switcher:
 
 
 # 中西文切换
-# 左 Shift 点按由 lua/ascii_shift.lua 处理（D-26，500ms / commit_code）。
+# 左 Shift 单击切 ASCII、双击切中，由 lua/ascii_shift.lua 处理（D-27）。
 # Caps_Lock 与 Shift_* 必须 noop，否则 ascii_composer 会在 key-up 再切一次。
 ascii_composer:
   good_old_caps_lock: true
@@ -133,7 +133,7 @@ recognizer:
 # 快捷键
 key_binder:
   bindings:
-    # 音节左移：组词中 Shift+Tab（左 Shift 点按才切中英，和弦打断不切，D-26）；右移用 Alt+Right
+    # 音节左移：组词中 Shift+Tab（左 Shift 单击/双击才切中英，和弦打断不切，D-27）；右移用 Alt+Right
     - { when: composing, accept: Shift+Tab, send: Shift+Left }
     # Alt + ←/→ 切换光标至下 / 上一个拼音
     - { when: composing, accept: Alt+Left, send: Shift+Left }
