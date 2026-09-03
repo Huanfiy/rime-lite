@@ -47,7 +47,7 @@
 | D-18 | AI 工作负载 = LLM 生成式智能候补（OpenAI 兼容 API）：≤3 条注入候选栏首位（⚡），本地候选跟随，uniquifier 消重。结构见 [ai-daemon.md](ai-daemon.md)。自动预取与 `ai_suggest` 开关已被 D-21 推翻 |
 | D-19 | 热路径 Lua 预算 ≤ 0.1ms/键，且必须非阻塞；filters 仅 `uniquifier` + `ai.suggest`；零 OpenCC filter。`ascii_shift` 热路径仅 keycode 分支 |
 | D-20 | daemon 并发槽（`max_concurrency` 默认 3）+ 同 key 在途防重 + commit 作废在队请求；两拍触发契约（未命中亮 `⚡…`）。auto 路径已被 D-21 推翻 |
-| D-21 | 撤销自动预取，AI 候补纯触发式（协议 v1.3）：不按 Tab 零上云；`min_length` 为 1。并发槽 / 防重 / commit 作废 / 两拍契约保留 |
+| D-21 | 撤销自动预取，AI 候补纯触发式（协议 v1.3）：不按 Tab 零上云，无长度门槛。并发槽 / 防重 / commit 作废 / 两拍契约保留 |
 | D-22 | 模型与推理参数走 daemon 配置（不入库）。提示词长度上限已被 D-23 推翻 |
 | D-23 | 系统提示词上限 200 字；首项始终为转写；识别到表情意图时第 2、3 项仅输出匹配语义的 emoji / 颜文字，否则维持短延伸 |
 | D-24 | 左 Shift 按下即英、右 Shift 按下即中。右 Shift 已被 D-25 推翻；左 Shift 按下即英已被 D-26 推翻。Lua 路径与 `Shift_*` noop 仍现行 |

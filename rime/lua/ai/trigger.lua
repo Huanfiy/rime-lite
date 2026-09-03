@@ -21,13 +21,7 @@ function M.init(env)
   env.trigger_key = cfg:get_string("ai_suggest/trigger_key") or "Tab"
   env.wait_s = (cfg:get_int("ai_suggest/trigger_wait_ms") or 250) / 1000
   env.top_k = cfg:get_int("ai_suggest/top_k") or 8
-  env.min_len = cfg:get_int("ai_suggest/min_length") or 1
   env.next_wait_ok = 0
-end
-
--- 与 suggest.lua 的 cache_key 保持一致
-local function cache_key(raw, seg_start)
-  return raw .. "@" .. tostring(seg_start)
 end
 
 local function menu_snapshot(ctx, top_k)
@@ -67,14 +61,12 @@ function M.func(key_event, env)
 
   local raw = ctx.input
   if not raw or #raw == 0 then return kNoop end
-  -- 低于注入下限：保持吞键（组词中 Tab 不外泄），但不发请求
-  if #raw < env.min_len then return kAccepted end
 
   glue.drain()
 
   local snap = menu_snapshot(ctx, env.top_k)
   local seg_start = (snap and snap.start) or 0
-  local key = cache_key(raw, seg_start)
+  local key = glue.cache_key(raw, seg_start)
   local entry = glue.get(key)
   if not entry then
     if snap and #snap.texts > 0 then

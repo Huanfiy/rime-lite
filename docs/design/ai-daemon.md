@@ -7,7 +7,7 @@
 
 ## 1. 行为定义
 
-组词中按 `Tab` 显式请求（`min_length: 1`）：daemon 依据会话上下文（近期上屏 ≤ 6 条）经 OpenAI 兼容 API 生成 ≤ 3 条候补——首项为当前段拼音转换；普通输入的其余项可延伸预测，表情意图的其余项改为匹配语义的 emoji / 颜文字（D-23）。候补注入候选栏首位（⚡ 标记），选中即整段上屏。AI 候补不受本地词库限制；本地候选跟随其后，重文由 uniquifier 消重。纯触发式（D-21）：不按 `Tab` 零请求零上云。
+组词中按 `Tab` 显式请求（无长度门槛）：daemon 依据会话上下文（近期上屏 ≤ 6 条）经 OpenAI 兼容 API 生成 ≤ 3 条候补——首项为当前段拼音转换；普通输入的其余项可延伸预测，表情意图的其余项改为匹配语义的 emoji / 颜文字（D-23）。候补注入候选栏首位（⚡ 标记），选中即整段上屏。AI 候补不受本地词库限制；本地候选跟随其后，重文由 uniquifier 消重。纯触发式（D-21）：不按 `Tab` 零请求零上云。
 
 ## 2. 结构
 
@@ -48,7 +48,7 @@ fcitx5（librime 进程内）
 
 ## 5. 关键实现约束（维护前必读）
 
-- **loadlib 前置**：librime 以 `dlopen(RTLD_LOCAL)` 加载插件，liblua5.4 符号不进全局符号表，而 Debian lua-socket 的 C 模块依赖宿主导出 Lua 符号——`glue.lua` 必须先 `package.loadlib("/lib/x86_64-linux-gnu/liblua5.4.so.0", "*")` 再 `require("socket")`，否则报 `undefined symbol: lua_gettop`。
+- **loadlib 前置**：librime 以 `dlopen(RTLD_LOCAL)` 加载插件，liblua 符号不进全局符号表，而 Debian lua-socket 的 C 模块依赖宿主导出 Lua 符号——`glue.lua` 必须先 `package.loadlib(<liblua>, "*")` 再 `require("socket")`，否则报 `undefined symbol: lua_gettop`。默认路径为 x86_64 的 liblua5.4，其他机器用环境变量 `RIME_AI_LUALIB` 覆盖。
 - **系统依赖**：`librime-plugin-lua`（漏装则 glue `setup()` 静默失败并本进程永久禁用）、`lua-socket`；daemon 仅 Python 标准库。octagram 不走本轨道（architecture.md §8）。
 - **惰性候选流**：filter 是懒执行候选流的一环，前端每页只拉 5 个候选——注入决策必须在首个候选到达时完成，写在迭代循环之后的代码在正常打字时不会执行。
 - **luasocket 是阻塞库**：「异步」由 `settimeout(0)` + 缓存实现，无线程；阻塞等待仅触发键路径允许且有界。

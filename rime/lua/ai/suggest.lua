@@ -13,8 +13,6 @@ local M = {}
 local MAX_INSERT = 3   -- 注入的 AI 候补上限
 
 function M.init(env)
-  local cfg = env.engine.schema.config
-  env.min_len = cfg:get_int("ai_suggest/min_length") or 1
   -- 上屏通报：作为 daemon 会话上下文（「懂我」与延伸预测的语境来源）
   env.commit_conn = env.engine.context.commit_notifier:connect(function(ctx)
     local ok, text = pcall(function() return ctx:get_commit_text() end)
@@ -24,12 +22,6 @@ end
 
 function M.fini(env)
   if env.commit_conn then env.commit_conn:disconnect() end
-end
-
--- 缓存键：原始输入串 + 当前翻译段起点（区分「整句」与「选定首词后的剩余段」）
--- 与 trigger.lua 的 cache_key 保持一致
-local function cache_key(raw, seg_start)
-  return raw .. "@" .. tostring(seg_start)
 end
 
 -- 注入 AI 候补：以首个本地候选的分段范围为准，选中即整段替换上屏
@@ -47,8 +39,8 @@ end
 function M.func(input, env)
   local ctx = env.engine.context
   local raw = ctx.input
-  -- 早退：无输入 / 长度不足 / 本会话无显式活动（触发键从未按下 = 零 AI 参与）
-  if not raw or #raw < env.min_len or not glue.activity then
+  -- 早退：无输入 / 本会话无显式活动（触发键从未按下 = 零 AI 参与）
+  if not raw or #raw == 0 or not glue.activity then
     for cand in input:iter() do yield(cand) end
     return
   end
@@ -60,7 +52,7 @@ function M.func(input, env)
   for cand in input:iter() do
     if first then
       first = false
-      local entry = glue.get(cache_key(raw, cand.start))
+      local entry = glue.get(glue.cache_key(raw, cand.start))
       if entry then yield_ai(entry, cand) end
     end
     yield(cand)

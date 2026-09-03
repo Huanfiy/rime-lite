@@ -20,12 +20,9 @@ function M.init(env)
   env.double_expired = 0
 end
 
--- 墙钟：优先已加载的 luasocket；否则 /proc/uptime。os.clock 是 CPU 时间，不能测点按。
+-- 墙钟：读 /proc/uptime（10ms 分辨率，仅在 Shift_L 按下 / 松开时调用）。
+-- os.clock 是 CPU 时间不能测点按；不借用 luasocket，避免与 ai/ 模块的加载顺序耦合。
 local function wall_now()
-  local socket = package.loaded.socket
-  if type(socket) == "table" and socket.gettime then
-    return socket.gettime()
-  end
   local f = io.open("/proc/uptime", "r")
   if f then
     local line = f:read("*l")

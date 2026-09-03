@@ -25,9 +25,10 @@ local RETRY_COOLDOWN = 2   -- 秒：连接失败后的重试冷却
 function M.setup()
   if M.enabled ~= nil then return M.enabled end
   M.enabled = false
-  -- 关键前置：librime 以 RTLD_LOCAL 加载插件，需先把 liblua5.4 符号提升为全局
-  -- （依据与约束见 docs/design/ai-daemon.md §5）
-  pcall(package.loadlib, "/lib/x86_64-linux-gnu/liblua5.4.so.0", "*")
+  -- 关键前置：librime 以 RTLD_LOCAL 加载插件，需先把 liblua 符号提升为全局
+  -- （依据与约束见 docs/design/ai-daemon.md §5）；非 x86_64 / 非 lua5.4 机器经环境变量覆盖
+  local lualib = os.getenv("RIME_AI_LUALIB") or "/lib/x86_64-linux-gnu/liblua5.4.so.0"
+  pcall(package.loadlib, lualib, "*")
   local extra_cpath = os.getenv("RIME_AI_LUASOCKET_CPATH")  -- 测试钩子：staging 下指向本地提取副本
   if extra_cpath then package.cpath = extra_cpath .. ";" .. package.cpath end
   local ok_s, socket = pcall(require, "socket")
@@ -124,6 +125,12 @@ function M.drain()
       break
     end
   end
+end
+
+-- 缓存键：原始输入串 + 当前翻译段起点（区分「整句」与「选定首词后的剩余段」）；
+-- trigger 与 suggest 共用，响应按 key 精确匹配
+function M.cache_key(raw, seg_start)
+  return raw .. "@" .. tostring(seg_start)
 end
 
 function M.get(key)

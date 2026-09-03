@@ -67,5 +67,5 @@ resp: {"id":N,"key":"<原样回显>","cands":["AI 候补文本",…]}   # 最优
 v1.1 / v1.2 客户端的请求一律按显式处理。
 
 socket 路径：`$XDG_RUNTIME_DIR/rime-candidate-daemon.sock`（0600）。
-测试钩子（环境变量）：`RIME_AI_CONFIG` 指定配置路径；`RIME_AI_SOCKET`（Lua 侧）
-覆盖 socket 路径；`RIME_AI_LUASOCKET_CPATH`（Lua 侧）追加 luasocket 搜索路径。
+环境变量钩子：`RIME_AI_CONFIG` 指定配置路径；Lua 侧 `RIME_AI_SOCKET` 覆盖 socket 路径、
+`RIME_AI_LUASOCKET_CPATH` 追加 luasocket 搜索路径、`RIME_AI_LUALIB` 覆盖 loadlib 的 liblua 路径。
