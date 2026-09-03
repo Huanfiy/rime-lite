@@ -37,7 +37,7 @@ Rime 侧经 `rime/lua/ai/` 以 unix socket 连接本服务；本服务根据会�
 ./run.sh daemon logs              # journalctl -f
 ```
 
-仓库内 `rime-candidate-daemon.service` 是模板；安装时 `run.sh` 会把 `ExecStart` 写成当前仓库路径。daemon 缺席时输入法自动降级为原生体验（连接失败 µs 级返回），可随时 `./run.sh daemon stop|start`。
+用户单元由 `run.sh daemon install` 按当前仓库绝对路径生成（唯一来源，仓库内不存模板）。daemon 缺席时输入法自动降级为原生体验（连接失败 µs 级返回），可随时 `./run.sh daemon stop|start`。
 
 ## 使用
 

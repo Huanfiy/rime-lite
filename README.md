@@ -62,7 +62,7 @@ rime-lite/
 │   ├── cn_dicts/
 │   └── en_dicts/
 ├── services/
-│   └── candidate-daemon/     # AI daemon、systemd 模板、协议说明
+│   └── candidate-daemon/     # AI daemon、配置示例、协议说明
 └── tools/
     ├── deploy
     └── userdb-candidates

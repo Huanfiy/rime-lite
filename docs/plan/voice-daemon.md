@@ -61,7 +61,7 @@
 ### 4.2 服务与配置（入库）
 
 - `services/voice-daemon/config.example.json`：`provider` / `device` / `sample_rate` / `preload_model` / `wake_pulse`（keysym 或 null）/ `max_record_s`。
-- `services/voice-daemon/rime-voice-daemon.service`：照 `rime-candidate-daemon.service` 写，`ExecStart` 指向仓库外 venv 的 python + 仓库内脚本；**需带 `Environment=DISPLAY=:0`**（或安装步骤里 `systemctl --user import-environment DISPLAY XAUTHORITY`），否则唤醒脉冲发不出去。
+- 用户单元照 `run.sh` 的 `write_unit()` 由安装命令生成（不存模板），`ExecStart` 指向仓库外 venv 的 python + 仓库内脚本；**需带 `Environment=DISPLAY=:0`**（或安装步骤里 `systemctl --user import-environment DISPLAY XAUTHORITY`），否则唤醒脉冲发不出去。
 - `services/voice-daemon/README.md`：依赖（`lua-socket`、venv、模型下载）、协议正文、安装与运维命令、故障排查。
 
 ### 4.3 `rime/lua/voice/`（入库）
