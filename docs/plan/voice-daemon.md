@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 | --- | --- |
-| 状态 | 待实施（M0 探针未开始）；落地后以 D-27 记入 [architecture.md](../design/architecture.md) §2，本文清理 |
+| 状态 | 待实施（M0 探针未开始）；落地后以 D-28 记入 [architecture.md](../design/architecture.md) §2，本文清理 |
 | 定位 | 语音输入组件的形态选型、实施步骤与验证方案 |
 
 ## 1. 背景
@@ -100,7 +100,7 @@ resp: {"id":N,"ok":true}
 ### 4.6 文档回写（同轮提交，D-16）
 
 - 新建 `docs/design/voice-daemon.md`：结构、交互契约、性能与降级、关键实现约束、运维、边界。
-- `docs/design/architecture.md` §2：新增 D-27（语音组件形态与通路决策）。
+- `docs/design/architecture.md` §2：新增 D-28（语音组件形态与通路决策）。
 - `AGENTS.md`：命令与禁区加一行语音通路指针，与 AI 通路并列。
 - 本计划文件按 docs-rules「落地后搬入 design 并清理」处置。
 
