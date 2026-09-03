@@ -15,7 +15,7 @@
 - 英文：melt_eng 挂载于中文方案，不作独立方案
 - 个人固定短语（`custom_phrase.txt`）
 - 本机 userdb 学习；稳定词条按 [lexicon-sop.md](lexicon-sop.md) 晋升
-- 左 Shift 单击切 ASCII、快速双击切中（D-27）
+- 左 Shift 点按或 Ctrl+Space 翻转中英（D-28）
 - AI 智能候补，纯触发式（D-21）；结构见 [ai-daemon.md](ai-daemon.md)
 - 软链接切换激活工程（D-11）
 
@@ -50,10 +50,11 @@
 | D-21 | 撤销自动预取，AI 候补纯触发式（协议 v1.3）：不按 Tab 零上云，无长度门槛。并发槽 / 防重 / commit 作废 / 两拍契约保留 |
 | D-22 | 模型与推理参数走 daemon 配置（不入库）。提示词长度上限已被 D-23 推翻 |
 | D-23 | 系统提示词上限 200 字；首项始终为转写；识别到表情意图时第 2、3 项仅输出匹配语义的 emoji / 颜文字，否则维持短延伸 |
-| D-24 | 中英切换走 Lua processor，`ascii_composer` 的 `Shift_*` / `Caps_Lock` 置 noop。键位方案已被 D-25 → D-27 逐次推翻，Lua 路径与 noop 仍现行 |
+| D-24 | 中英切换走 Lua processor，`ascii_composer` 的 `Shift_*` / `Caps_Lock` 置 noop。键位方案已被 D-25 → D-28 逐次推翻，Lua 路径与 noop 仍现行 |
 | D-25 | Caps 点按即中。已被 D-26 推翻 |
 | D-26 | 左 Shift 点按翻转中英。已被 D-27 推翻 |
-| D-27 | 左 Shift 单击切 ASCII、快速双击切中文；右 Shift / Caps 不参与。时序参数与打断规则以 `rime/lua/ascii_shift.lua` 为准 |
+| D-27 | 左 Shift 单击切 ASCII、快速双击切中文。已被 D-28 推翻 |
+| D-28 | 左 Shift 点按或 Ctrl+Space 翻转中英；右 Shift / Caps 不参与。时序参数与打断规则以 `rime/lua/ascii_shift.lua` 为准 |
 
 未决事项：无阻塞项。语音见 [voice-daemon.md](../plan/voice-daemon.md)；AI M2 见 [ai-daemon.md](ai-daemon.md) §8。运行参数走 daemon 配置，不动仓库。
 
@@ -71,7 +72,7 @@
 
 ### 4.1 default.yaml
 
-`schema_list` 仅 `pinyin`（melt_eng 只作词库挂载）。`ascii_composer` 全部切换键为 `noop`，中英切换交给 Lua（D-24 / D-27）。保留 switcher、punctuator、通用 recognizer、基础 key_binder。不包含双拼、简繁 / Emoji 快捷键，以及本机 librime 1.10.0 无效的 navigator / `digit_separators` 等段落。
+`schema_list` 仅 `pinyin`（melt_eng 只作词库挂载）。`ascii_composer` 全部切换键为 `noop`，中英切换交给 Lua（D-24 / D-28）。保留 switcher、punctuator、通用 recognizer、基础 key_binder。不包含双拼、简繁 / Emoji 快捷键，以及本机 librime 1.10.0 无效的 navigator / `digit_separators` 等段落。
 
 ### 4.2 pinyin.schema.yaml
 

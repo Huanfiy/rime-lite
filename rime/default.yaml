@@ -39,7 +39,7 @@ switcher:
 
 
 # 中西文切换
-# 左 Shift 单击切 ASCII、双击切中，由 lua/ascii_shift.lua 处理（D-27）。
+# 左 Shift 点按与 Ctrl+Space 翻转中英，由 lua/ascii_shift.lua 处理（D-28）。
 # Caps_Lock 与 Shift_* 必须 noop，否则 ascii_composer 会在 key-up 再切一次。
 ascii_composer:
   good_old_caps_lock: true

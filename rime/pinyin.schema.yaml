@@ -27,7 +27,7 @@ switches:
 # 输入引擎
 engine:
   processors:
-    - lua_processor@*ascii_shift     # 中英切换（D-27），须先于 ascii_composer
+    - lua_processor@*ascii_shift     # 中英切换（D-28），须先于 ascii_composer
     - ascii_composer
     - recognizer
     - key_binder

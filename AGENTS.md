@@ -40,7 +40,7 @@
 
 ## 红线
 
-- **中英（D-27）**：左 Shift 单击切 ASCII、双击切中，右 Shift / Caps 不参与；细则与参数以 `rime/lua/ascii_shift.lua` 为准，`ascii_composer` 切换键保持 noop。
+- **中英（D-28）**：左 Shift 点按或 Ctrl+Space 翻转中英，右 Shift / Caps 不参与；细则与参数以 `rime/lua/ascii_shift.lua` 为准，`ascii_composer` 切换键保持 noop。
 - **性能（D-19）**：热路径 Lua 预算 ≤ 0.1ms/键，且必须非阻塞；filters 仅 `uniquifier` + `ai.suggest`；零 OpenCC filter。新增功能不得违反。
 - **密钥**：仅存 `~/.config/rime-candidate-daemon/config.json`（0600）。严禁写入仓库任何文件、提交说明或会话落档。泄露则服务商侧作废，再用 `./run.sh apikey set` 写入新密钥。
 - **userdb**：禁止对运行中的 `rime/pinyin.userdb/` 执行任何 `rime_dict_manager` 子命令。导出路径见 lexicon-sop.md §3.1。
