@@ -4,6 +4,7 @@
 # 本地修改: 原样迁移
 #           2026-07-07 追加 userdb 晋升词条(来源: rime-ice userdb 最终导出, git 历史 6438887,
 #           筛选标准 c_total>=3、排除已收录词与组句残留)。
+#           2026-09-04 追加 userdb 晋升词条。
 # ---------------------------
 # Rime dictionary
 # encoding: utf-8
@@ -13,7 +14,7 @@
 
 ---
 name: mydict
-version: "2026-07-07"
+version: "2026-09-04"
 sort: by_weight
 use_preset_vocabulary: false
 ...
@@ -67,3 +68,61 @@ use_preset_vocabulary: false
 胡总	hu zong	100
 腾讯云	teng xun yun	100
 车钥匙	che yao shi	100
+
+# ========== userdb 晋升 (2026-09-04) ==========
+原车	yuan che	100
+有概率	you gai lv	100
+中欧功能	zhong ou gong neng	100
+资料包	zi liao bao	100
+交付包	jiao fu bao	100
+干净度	gan jing du	100
+不覆盖	bu fu gai	100
+交付物	jiao fu wu	100
+发版本	fa ban ben	100
+已修复	yi xiu fu	100
+已绑定	yi bang ding	100
+无异常	wu yi chang	100
+留档	liu dang	100
+舒适区	shu shi qu	100
+赠额	zeng e	100
+跑一轮	pao yi lun	100
+我需要	wo xu yao	100
+我这个	wo zhe ge	100
+哪部分	na bu fen	100
+做下	zuo xia	100
+写一份	xie yi fen	100
+哪一层	na yi ceng	100
+太臃肿	tai yong zhong	100
+扫不到	sao bu dao	100
+还是说	hai shi shuo	100
+只关注	zhi guan zhu	100
+我目前	wo mu qian	100
+最优雅	zui you ya	100
+看了下	kan le xia	100
+该问题	gai wen ti	100
+这一块	zhe yi kuai	100
+这两句	zhe liang ju	100
+你那边	ni na bian	100
+切为	qie wei	100
+我之前	wo zhi qian	100
+排查下	pai cha xia	100
+更优雅	geng you ya	100
+本文件	ben wen jian	100
+给一个	gei yi ge	100
+落档哪个	luo dang na ge	100
+为我的	wei wo de	100
+休息好	xiu xi hao	100
+会导致	hui dao zhi	100
+你直接	ni zhi jie	100
+帮助我	bang zhu wo	100
+我不理解	wo bu li jie	100
+我使用	wo shi yong	100
+我当前	wo dang qian	100
+我本地	wo ben di	100
+我设置	wo she zhi	100
+按我的	an wo de	100
+摘出来	zhai chu lai	100
+整一个	zheng yi ge	100
+请排查	qing pai cha	100
+这一句	zhe yi ju	100
+这两处	zhe liang chu	100

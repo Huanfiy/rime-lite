@@ -6,6 +6,7 @@
 #           保留来源分区注释,先 embedded 原有分区,后追加 embedded_huan 分区(去重后)。
 #           2026-07-07 追加 userdb 晋升词条(来源: rime-ice userdb 最终导出, git 历史 6438887,
 #           筛选标准 c_total>=3、排除已收录词与组句残留)。
+#           2026-09-04 追加 userdb 晋升词条。
 # ---------------------------
 # Rime dictionary
 # encoding: utf-8
@@ -18,7 +19,7 @@
 
 ---
 name: embedded
-version: "2026-07-07"
+version: "2026-09-04"
 sort: by_weight
 use_preset_vocabulary: false
 ...
@@ -707,3 +708,26 @@ CISC	cisc	55
 长短按	chang duan an	100
 零偏	ling pian	100
 预编辑	yu bian ji	100
+
+# ========== userdb 晋升 (2026-09-04) ==========
+子仓	zi cang	100
+唤醒后	huan xing hou	100
+钥匙板	yao shi ban	100
+本仓	ben cang	100
+小模型	xiao mo xing	100
+软架构	ruan jia gou	100
+双分	shuang fen	100
+产测	chan ce	100
+本仓库	ben cang ku	100
+速刷	su shua	100
+预发布	yu fa bu	100
+子仓库	zi cang ku	100
+在环	zai huan	100
+文件头	wen jian tou	100
+软需	ruan xu	100
+配网	pei wang	100
+采集端	cai ji duan	100
+峰峰值	feng feng zhi	100
+预烧录	yu shao lu	100
+未初始化	wei chu shi hua	100
+静电流	jing dian liu	100
