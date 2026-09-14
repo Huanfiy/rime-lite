@@ -16,11 +16,11 @@
 #
 # 对照排除集（词级，自动从仓库 rime/ 读取，相对本脚本定位仓库根）：
 #   cn_dicts/base、cn_dicts/8105、cn_dicts/embedded、cn_dicts/mydict、
-#   custom_phrase.txt、pinyin.dict.yaml
+#   en_priority.txt、custom_phrase.txt、pinyin.dict.yaml
 #
 # bucket / flag 为机械启发式建议，仅供人工审定参考，不是最终归属：
-#   bucket: 含拉丁字母或数字 → custom_phrase；命中领域关键词 → embedded；
-#           其余 → mydict
+#   bucket: 纯 ASCII → en_priority；含拉丁字母或数字 → custom_phrase；
+#           命中领域关键词 → embedded；其余 → mydict
 #   flag:   疑似组句残留 → fragment?
 #
 # 用法:
@@ -47,7 +47,10 @@ EXCLUDE_DICT_YAMLS = [
     "rime/cn_dicts/mydict.dict.yaml",
     "rime/pinyin.dict.yaml",
 ]
-EXCLUDE_CUSTOM_PHRASE = "rime/custom_phrase.txt"
+EXCLUDE_TABLEDB = (
+    "rime/en_priority.txt",
+    "rime/custom_phrase.txt",
+)
 
 C_RE = re.compile(r"\bc=(-?\d+)\b")
 LATIN_DIGIT_RE = re.compile(r"[A-Za-z0-9]")
@@ -143,7 +146,7 @@ def parse_dict_yaml_words(path):
     return words
 
 
-def parse_custom_phrase_words(path):
+def parse_tabledb_words(path):
     words = set()
     with open(path, encoding="utf-8") as f:
         for line in f:
@@ -162,10 +165,11 @@ def load_exclude_words(repo_root):
         if not os.path.isfile(path):
             sys.exit(f"错误: 排除集文件不存在: {path}")
         words |= parse_dict_yaml_words(path)
-    path = os.path.join(repo_root, EXCLUDE_CUSTOM_PHRASE)
-    if not os.path.isfile(path):
-        sys.exit(f"错误: 排除集文件不存在: {path}")
-    words |= parse_custom_phrase_words(path)
+    for rel in EXCLUDE_TABLEDB:
+        path = os.path.join(repo_root, rel)
+        if not os.path.isfile(path):
+            sys.exit(f"错误: 排除集文件不存在: {path}")
+        words |= parse_tabledb_words(path)
     return words
 
 
@@ -181,7 +185,13 @@ def is_cjk(ch):
     )
 
 
+def is_ascii_word(word):
+    return bool(word) and all(ord(ch) < 128 for ch in word)
+
+
 def bucket_of(word):
+    if is_ascii_word(word) and LATIN_DIGIT_RE.search(word):
+        return "en_priority"
     if LATIN_DIGIT_RE.search(word):
         return "custom_phrase"
     for kw in EMBEDDED_KEYWORDS:
@@ -310,7 +320,7 @@ def main():
     err.write(f"c_total < {args.min_count} 阈值过滤数: {n_threshold}\n")
     err.write(f"最终候选数: {len(candidates)}\n")
     err.write("各桶数量(启发式建议):\n")
-    for b in ("custom_phrase", "embedded", "mydict"):
+    for b in ("en_priority", "custom_phrase", "embedded", "mydict"):
         err.write(f"  {b}: {bucket_counts.get(b, 0)}\n")
     err.write("flag 统计(启发式建议):\n")
     if flag_counts:

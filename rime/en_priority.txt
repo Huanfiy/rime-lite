@@ -1,0 +1,16 @@
+# Rime table
+# coding: utf-8
+#@/db_name	en_priority.txt
+#@/db_type	tabledb
+#
+# 超高频英文 / 命令：中文输入下也要整词首选。
+# 由方案中 en_priority/initial_quality: 100 压过拼音、melt_eng 与 custom_phrase。
+# 格式：词<Tab>编码<Tab>权重（权重可省略）。日常加词见 docs/design/lexicon-sop.md §2。
+#
+# 此行之后不能写注释
+
+gs	gs
+gst	gst
+cd	cd
+ls	ls
+pwd	pwd

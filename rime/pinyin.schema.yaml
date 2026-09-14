@@ -46,6 +46,7 @@ engine:
   translators:
     - punct_translator
     - script_translator                # 主翻译器：全拼
+    - table_translator@en_priority     # 超高频英文 / 命令 en_priority.txt（中文下也首选）
     - table_translator@custom_phrase   # 个人固定短语 custom_phrase.txt
     - table_translator@melt_eng        # 英文词库
   filters:
@@ -82,6 +83,16 @@ translator:
     - xform/([jqxy])v/$1u/ # 显示为 ju qu xu yu
 
 
+# 超高频英文 / 命令：en_priority.txt（中文输入下也整词首选）
+en_priority:
+  dictionary: ""
+  user_dict: en_priority
+  db_class: stabledb        # 只读数据库，不动态调频
+  enable_completion: false
+  enable_sentence: false
+  initial_quality: 100      # 高于 custom_phrase / 拼音 / melt_eng
+
+
 # 个人固定短语：custom_phrase.txt
 custom_phrase:
   dictionary: ""
@@ -89,7 +100,7 @@ custom_phrase:
   db_class: stabledb        # 只读数据库，不动态调频
   enable_completion: false
   enable_sentence: false
-  initial_quality: 99       # 高于拼音与 melt_eng，固定短语排序在前
+  initial_quality: 99       # 高于拼音与 melt_eng，低于 en_priority
 
 
 # 次翻译器，英文

@@ -5,7 +5,7 @@
 #
 # rime-lite 个人固定短语（词汇<Tab>编码<Tab>权重，权重可省略）
 # 迁移自 rime-ice 工程 custom_phrase.txt（2026-07-02），删除明显非领域示例词。
-# 由方案中 custom_phrase/initial_quality: 99 提升权重，词条排在候选首位。
+# 由方案中 custom_phrase/initial_quality: 99 提升权重，高于拼音与 melt_eng，低于 en_priority。
 #
 # 此行之后不能写注释
 
