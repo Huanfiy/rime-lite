@@ -14,6 +14,7 @@
 - 全拼简体：字表 `8105` + `base` + `embedded` + `mydict`
 - 英文：melt_eng 挂载于中文方案，不作独立方案
 - 个人固定短语（`custom_phrase.txt`）
+- 超高频英文 / 命令置顶（`en_priority.txt`）
 - 本机 userdb 学习；稳定词条按 [lexicon-sop.md](lexicon-sop.md) 晋升
 - 左 Shift 点按或 Ctrl+Space 翻转中英（D-28）
 - AI 智能候补，纯触发式（D-21）；结构见 [ai-daemon.md](ai-daemon.md)
@@ -31,7 +32,7 @@
 | D-2 | 只筛选高价值词条，不全量导入 userdb |
 | D-3 | 不保留置顶 / 隐藏 / 降频规则层 |
 | D-4 | 基础词库为项目内副本；构建与部署不得依赖外部 rime-ice 路径（目录名经 D-12 定为 `cn_dicts/`） |
-| D-5 | 个人词库用 Rime 原生格式（`custom_phrase.txt` + `dict.yaml`），无 YAML → dict 构建层 |
+| D-5 | 个人词库用 Rime 原生格式（`en_priority.txt` + `custom_phrase.txt` + `dict.yaml`），无 YAML → dict 构建层 |
 | D-6 | Git 同步工程源为主路径；Rime 原生同步仅作运行态备份与迁移输入 |
 | D-7 | 挂载 melt_eng 英文词库（中文方案内出英文候选） |
 | D-8 | 方案命名 `huan_pinyin`。已被 D-12 推翻 |
@@ -78,7 +79,7 @@
 
 - processors：`ascii_shift` 在 `ascii_composer` 之前；`ai.trigger` 在 `speller` 之前。
 - filters：`ai.suggest` 在 `uniquifier` 之前（消重契约）。
-- translators：`script_translator` + `custom_phrase`（`initial_quality: 99` 置顶）+ `melt_eng`（`initial_quality: 1.1`，低于中文 `1.2`）。
+- translators：`script_translator` + `en_priority`（`initial_quality: 100`，中文下也整词首选）+ `custom_phrase`（`99`）+ `melt_eng`（`1.1`，低于中文 `1.2`）。
 - AI 为纯触发式（D-21）；参数段见 schema 的 `ai_suggest:` 与 [candidate-daemon README](../../services/candidate-daemon/README.md)。
 - speller 保留标准全拼与超级简拼，不引入模糊音与自动纠错。
 
@@ -88,9 +89,12 @@
 - `melt_eng.dict.yaml`：仅 `en_dicts/en`。
 - `melt_eng.schema.yaml`：保留文件、不进 `schema_list`。
 
-### 4.4 custom_phrase.txt
+### 4.4 置顶表
 
-`词<Tab>编码<Tab>权重`，固定短语与定制大小写英文。
+两张 `stabledb` 表，格式均为 `词<Tab>编码<Tab>权重`：
+
+- `en_priority.txt`：超高频英文 / 命令，`initial_quality: 100`，中文输入下也整词首选。
+- `custom_phrase.txt`：缩写码固定短语与定制大小写英文，`99`。
 
 ## 5. vendor 规范
 

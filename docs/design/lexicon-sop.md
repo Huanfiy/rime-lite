@@ -13,6 +13,7 @@
 | `cn_dicts/8105`、`cn_dicts/base`、`en_dicts/en` | vendor 基础层 | 不手工加词；同步上游见 §5 |
 | `cn_dicts/embedded` | 嵌入式 / 编程 / AI 领域词 | 手工加词（§2）+ 晋升追加（§3） |
 | `cn_dicts/mydict` | 非领域个人词（人名、公司、产品、口头语） | 同上 |
+| `en_priority.txt` | 超高频英文 / 命令，中文输入下也整词首选 | 手工加词（§2） |
 | `custom_phrase.txt` | 缩写码固定短语，候选置顶 | 手工加词（§2） |
 | `rime/pinyin.userdb/` | 运行态学习缓存（D-1） | 不手工编辑、不进 Git、不直接操作（§3.1） |
 
@@ -20,9 +21,10 @@
 
 判定顺序：
 
-1. 需要缩写码直达且置顶（如 `zkb` → 占空比）→ `custom_phrase.txt`，格式 `词<Tab>编码<Tab>权重`（权重可省略）。
-2. 全拼输入的领域词 → `cn_dicts/embedded.dict.yaml`，格式 `词<Tab>拼音<Tab>100`（拼音为空格分隔的小写音节，允许单个大写字母音节）。
-3. 全拼输入的非领域词 → `cn_dicts/mydict.dict.yaml`，格式同上。
+1. 超高频英文 / 命令，中文输入下也要整词首选（如 `gs`、`cd`）→ `en_priority.txt`，格式 `词<Tab>编码<Tab>权重`（权重可省略）。
+2. 需要缩写码直达且置顶（如 `zkb` → 占空比）→ `custom_phrase.txt`，格式同上。
+3. 全拼输入的领域词 → `cn_dicts/embedded.dict.yaml`，格式 `词<Tab>拼音<Tab>100`（拼音为空格分隔的小写音节，允许单个大写字母音节）。
+4. 全拼输入的非领域词 → `cn_dicts/mydict.dict.yaml`，格式同上。
 
 约束与生效：
 
@@ -61,18 +63,18 @@ cd <工作目录> && rime_dict_manager -b pinyin
 候选 TSV 输出到仓库外，不进 Git。
 
 - 可传多份导出，按（词、拼音）合并 c 值。
-- 规则同 D-14：丢弃 c ≤ 0；排除单 CJK 字、已收录词（base / 8105 / embedded / mydict / custom_phrase / A–Z）、纯 ASCII 且与拼音串相同的词；门槛 `--min-count` 默认 3。
+- 规则同 D-14：丢弃 c ≤ 0；排除单 CJK 字、已收录词（base / 8105 / embedded / mydict / en_priority / custom_phrase / A–Z）、纯 ASCII 且与拼音串相同的词；门槛 `--min-count` 默认 3。
 - 输出列：word / pinyin / c_total / 各来源 c / bucket / flag。bucket / flag 仅为启发式，**不可直接应用**。
 
 ### 3.3 人工审定
 
 - 剔除组句残留、错词与临时词；同音异形先核实写法。
-- 分桶：领域词 → embedded，非领域 → mydict，需缩写码 → custom_phrase。
+- 分桶：纯 ASCII 超高频词 / 命令 → en_priority，领域词 → embedded，非领域 → mydict，需缩写码 → custom_phrase。
 
 ### 3.4 应用
 
 - embedded / mydict：末尾新建分区 `# ========== userdb 晋升 (YYYY-MM-DD) ==========`，词条 `词<Tab>拼音<Tab>100`，按 c_total 降序。
-- custom_phrase：按 §2 格式写入。
+- en_priority / custom_phrase：按 §2 格式写入。
 - 更新目标文件头部「本地修改」注释。
 
 ### 3.5 验证
