@@ -7,6 +7,7 @@
 #           2026-07-07 追加 userdb 晋升词条(来源: rime-ice userdb 最终导出, git 历史 6438887,
 #           筛选标准 c_total>=3、排除已收录词与组句残留)。
 #           2026-09-04 追加 userdb 晋升词条。
+#           2026-09-15 追加 userdb 晋升词条。
 # ---------------------------
 # Rime dictionary
 # encoding: utf-8
@@ -19,7 +20,7 @@
 
 ---
 name: embedded
-version: "2026-09-04"
+version: "2026-09-15"
 sort: by_weight
 use_preset_vocabulary: false
 ...
@@ -731,3 +732,21 @@ CISC	cisc	55
 预烧录	yu shao lu	100
 未初始化	wei chu shi hua	100
 静电流	jing dian liu	100
+
+# ========== userdb 晋升 (2026-09-15) ==========
+多模态	duo mo tai	100
+三防漆	san fang qi	100
+云同步	yun tong bu	100
+卡模拟	ka mo ni	100
+原子性	yuan zi xing	100
+后训练	hou xun lian	100
+寻卡	xun ka	100
+帧定界	zhen ding jie	100
+扫码枪	sao ma qiang	100
+接入点	jie ru dian	100
+板端	ban duan	100
+源仓库	yuan cang ku	100
+裸板	luo ban	100
+设备侧	she bei ce	100
+软掉电	ruan diao dian	100
+镜像包	jing xiang bao	100

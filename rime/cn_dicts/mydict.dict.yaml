@@ -5,6 +5,7 @@
 #           2026-07-07 追加 userdb 晋升词条(来源: rime-ice userdb 最终导出, git 历史 6438887,
 #           筛选标准 c_total>=3、排除已收录词与组句残留)。
 #           2026-09-04 追加 userdb 晋升词条。
+#           2026-09-15 追加 userdb 晋升词条。
 # ---------------------------
 # Rime dictionary
 # encoding: utf-8
@@ -14,7 +15,7 @@
 
 ---
 name: mydict
-version: "2026-09-04"
+version: "2026-09-15"
 sort: by_weight
 use_preset_vocabulary: false
 ...
@@ -126,3 +127,16 @@ use_preset_vocabulary: false
 请排查	qing pai cha	100
 这一句	zhe yi ju	100
 这两处	zhe liang chu	100
+
+# ========== userdb 晋升 (2026-09-15) ==========
+表情包	biao qing bao	100
+其它	qi ta	100
+太抽象	tai chou xiang	100
+重买	chong mai	100
+重进	chong jin	100
+兑换码	dui huan ma	100
+刻意练习	ke yi lian xi	100
+动漫风	dong man feng	100
+短视频	duan shi pin	100
+设定图	she ding tu	100
+费曼法	fei man fa	100
