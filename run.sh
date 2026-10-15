@@ -10,6 +10,11 @@ AI_CONFIG="$REPO_DIR/tools/ai-config"
 DAEMON_PY="$REPO_DIR/services/candidate-daemon/candidate-daemon.py"
 UNIT_NAME="rime-candidate-daemon"
 UNIT_DST="$HOME/.config/systemd/user/${UNIT_NAME}.service"
+RANKER_DIR="$REPO_DIR/services/pause-rank"
+RANKER_PY="$RANKER_DIR/ranker/ranker.py"
+RANKER_UNIT="rime-pause-rank"
+RANKER_UNIT_DST="$HOME/.config/systemd/user/${RANKER_UNIT}.service"
+ADDON_CONF="$HOME/.local/share/fcitx5/addon/pauserank.conf"
 STAGING_DIR="${RIME_STAGING_DIR:-/tmp/rime-lite-staging}"
 LINK="$HOME/.local/share/fcitx5/rime"
 
@@ -28,6 +33,12 @@ usage() {
   daemon status|logs             查看服务状态 / 跟踪日志
   daemon uninstall               停用并移除用户单元（不删配置与密钥）
 
+  ranker build                   构建停顿重排插件与打分 worker（D-30）
+  ranker install                 构建 → 安装 fcitx5 插件配置 → 安装并启动打分服务
+  ranker start|stop|restart      控制 rime-pause-rank
+  ranker status|logs             查看服务状态 / 跟踪打分日志
+  ranker uninstall               停用服务并移除插件配置（restart 后生效）
+
   apikey                         查看配置（密钥脱敏）
   apikey set [--base-url URL] [--model NAME] [--provider NAME]
                                  写入或轮换密钥（不回显，文件 0600），随后重启 daemon
@@ -44,7 +55,7 @@ EOF
 die() { echo "错误: $*" >&2; exit 1; }
 have() { command -v "$1" >/dev/null 2>&1; }
 pkg_ok() { dpkg-query -W -f '${Status}' "$1" 2>/dev/null | grep -q 'install ok installed'; }
-unit_installed() { systemctl --user cat "$UNIT_NAME" >/dev/null 2>&1; }
+unit_installed() { systemctl --user cat "${1:-$UNIT_NAME}" >/dev/null 2>&1; }
 
 cmd_restart() {
   have fcitx5 || die "未找到 fcitx5"
@@ -90,14 +101,15 @@ cmd_deps_install() {
   sudo apt install $missing
 }
 
+# write_unit <单元文件> <描述> <脚本>
 write_unit() {
-  mkdir -p "$(dirname "$UNIT_DST")"
-  cat > "$UNIT_DST" <<EOF
+  mkdir -p "$(dirname "$1")"
+  cat > "$1" <<EOF
 [Unit]
-Description=rime-lite AI candidate daemon (D-18)
+Description=$2
 
 [Service]
-ExecStart=/usr/bin/python3 $DAEMON_PY
+ExecStart=/usr/bin/python3 $3
 WorkingDirectory=$REPO_DIR
 Restart=on-failure
 RestartSec=2
@@ -113,7 +125,7 @@ cmd_daemon() {
     install)
       [ -f "$DAEMON_PY" ] || die "找不到 $DAEMON_PY"
       have python3 || die "未找到 python3"
-      write_unit
+      write_unit "$UNIT_DST" "rime-lite AI candidate daemon (D-18)" "$DAEMON_PY"
       systemctl --user daemon-reload
       systemctl --user enable --now "$UNIT_NAME"
       echo "已安装并启动 $UNIT_NAME（$UNIT_DST）"
@@ -136,6 +148,43 @@ cmd_daemon() {
       ;;
     *)
       die "daemon 子命令: install|start|stop|restart|status|logs|uninstall"
+      ;;
+  esac
+}
+
+cmd_ranker() {
+  case "${1:-}" in
+    build)
+      "$RANKER_DIR/build.sh"
+      ;;
+    install)
+      have python3 || die "未找到 python3"
+      "$RANKER_DIR/build.sh"
+      mkdir -p "$(dirname "$ADDON_CONF")"
+      cp "$RANKER_DIR/build/pauserank.conf" "$ADDON_CONF"
+      write_unit "$RANKER_UNIT_DST" "rime-lite pause rerank scorer (D-30)" "$RANKER_PY"
+      systemctl --user daemon-reload
+      systemctl --user enable --now "$RANKER_UNIT"
+      echo "已安装插件配置（$ADDON_CONF）并启动 $RANKER_UNIT。插件改动需 ./run.sh restart 生效。"
+      ;;
+    start|stop|restart)
+      systemctl --user "$1" "$RANKER_UNIT"
+      ;;
+    status)
+      unit_installed "$RANKER_UNIT" || die "单元未安装（$RANKER_UNIT_DST 不存在）。运行: ./run.sh ranker install"
+      systemctl --user --no-pager status "$RANKER_UNIT" || true
+      ;;
+    logs)
+      journalctl --user -u "$RANKER_UNIT" -f
+      ;;
+    uninstall)
+      if unit_installed "$RANKER_UNIT"; then systemctl --user disable --now "$RANKER_UNIT" || true; fi
+      rm -f "$RANKER_UNIT_DST" "$ADDON_CONF"
+      systemctl --user daemon-reload
+      echo "已移除打分服务与插件配置；./run.sh restart 后插件卸载。Lua 侧无私有键时只做一次 keycode 比较。"
+      ;;
+    *)
+      die "ranker 子命令: build|install|start|stop|restart|status|logs|uninstall"
       ;;
   esac
 }
@@ -173,6 +222,20 @@ cmd_status() {
   fi
   local sock="${XDG_RUNTIME_DIR:-/tmp}/rime-candidate-daemon.sock"
   [ -S "$sock" ] && echo "socket:   $sock" || echo "socket:   不存在"
+  echo
+  echo "== 停顿重排 =="
+  if unit_installed "$RANKER_UNIT"; then
+    echo "unit:     $(systemctl --user is-enabled "$RANKER_UNIT" 2>/dev/null || true) / $(systemctl --user is-active "$RANKER_UNIT" 2>/dev/null || true)"
+  else
+    echo "unit:     未安装"
+  fi
+  if [ -f "$ADDON_CONF" ]; then
+    echo "插件:     $(sed -n 's/^Library=//p' "$ADDON_CONF")"
+  else
+    echo "插件:     未安装"
+  fi
+  local rsock="${XDG_RUNTIME_DIR:-/tmp}/rime-pause-rank/ranker.sock"
+  [ -S "$rsock" ] && echo "socket:   $rsock" || echo "socket:   不存在"
   echo
   echo "== 密钥 =="
   "$AI_CONFIG" show || true
@@ -218,6 +281,7 @@ cmd_setup() {
   echo
   echo "接下来: ./run.sh restart   # 使输入方案生效"
   echo "组词中按 Tab 请求 AI 候补。daemon 缺席时自动降级为原生体验。"
+  echo "停顿重排（可选，需源码构建的 llama.cpp 与模型）: ./run.sh ranker install，见 services/pause-rank/README.md"
 }
 
 cmd="${1:-}"
@@ -232,6 +296,7 @@ case "$cmd" in
   candidates) exec "$CANDIDATES" "$@" ;;
   deps) if [ "${1:-}" = "install" ]; then cmd_deps_install; else cmd_deps; fi ;;
   daemon) cmd_daemon "$@" ;;
+  ranker) cmd_ranker "$@" ;;
   apikey) cmd_apikey "$@" ;;
   *) usage >&2; exit 2 ;;
 esac

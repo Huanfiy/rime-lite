@@ -6,7 +6,7 @@
 schema:
   schema_id: pinyin
   name: 拼音
-  version: "2026-08-25.1"
+  version: "2026-10-15.1"
   author:
     - huan
   description: rime-lite 最小全拼方案
@@ -27,6 +27,7 @@ switches:
 # 输入引擎
 engine:
   processors:
+    - lua_processor@*pause_rank.processor  # 停顿重排私有键 F33/F34（D-30）；居首免被截获，其余键只比较 keycode
     - lua_processor@*ascii_shift     # 中英切换（D-28），须先于 ascii_composer
     - ascii_composer
     - recognizer
@@ -50,6 +51,7 @@ engine:
     - table_translator@custom_phrase   # 个人固定短语 custom_phrase.txt
     - table_translator@melt_eng        # 英文词库
   filters:
+    - lua_filter@*pause_rank.filter    # 停顿重排（D-30）：打分首选提到同跨度汉字首位；先于 ai.suggest，⚡ 候补仍居首
     - lua_filter@*ai.suggest           # AI 候补缓存注入（D-18 / D-21，只注入不请求；非阻塞，daemon 缺席自动降级）
     - uniquifier         # 候选去重（AI 候补与本地候选重文时消重）
 
