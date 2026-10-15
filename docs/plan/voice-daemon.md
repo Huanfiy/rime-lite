@@ -111,7 +111,7 @@ resp: {"id":N,"ok":true}
 3. **daemon 独立验证**：`voice-daemon.py --once 3` 说一句话，确认识别文本与耗时；`journalctl --user -u rime-voice-daemon -f` 观察常驻服务。
 4. **mock 端到端**：`provider=mock`（不加载模型）走完 F9 按下 → 候选栏「录音中」→ 松开 → 唤醒脉冲 → 候选出现 → 空格上屏全链路。
 5. **真机 PTT 抽查**：连续 3 句；确认 Esc 丢弃、组词中按 F9 先上屏再录音、`systemctl --user stop rime-voice-daemon` 后 F9 无副作用。
-6. **热路径预算复核（D-19）**：AI processor + 语音 processor 同时在链上时每键开销仍 ≤ 0.1ms；语音不引入 filter，「filters 仅 uniquifier + ai.suggest」条文不变。
+6. **热路径预算复核（D-19）**：AI processor + 语音 processor 同时在链上时每键开销仍 ≤ 0.1ms；语音不引入 filter，filters 白名单（D-19 / D-30）不变。
 
 ## 6. 边界与非目标
 

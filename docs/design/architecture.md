@@ -18,6 +18,7 @@
 - 本机 userdb 学习；稳定词条按 [lexicon-sop.md](lexicon-sop.md) 晋升
 - 左 Shift 点按或 Ctrl+Space 翻转中英（D-28）
 - AI 智能候补，纯触发式（D-21）；结构见 [ai-daemon.md](ai-daemon.md)
+- 停顿重排：组词停顿后本地 LM 按上文重排同跨度候选，纯本机（D-30）；结构见 [pause-rank.md](pause-rank.md)
 - 软链接切换激活工程（D-11）
 
 **不覆盖：** Emoji、`ext` / 腾讯词库、置顶 / 隐藏 / 降频规则层、双拼 / 反查 / 日期 / 计算器、fcitx5 以外平台。语音输入待实施，见 [voice-daemon.md](../plan/voice-daemon.md)。
@@ -46,7 +47,7 @@
 | D-16 | 记录与清理规则见根目录 [docs-rules.md](../../docs-rules.md) |
 | D-17 | AI 延迟模型：热路径任何情况下不等待 daemon；结果展示以触发键为主入口。预取路径已被 D-21 撤销，触发键契约仍现行 |
 | D-18 | AI 工作负载 = LLM 生成式智能候补（OpenAI 兼容 API）：≤3 条注入候选栏首位（⚡），本地候选跟随，uniquifier 消重。结构见 [ai-daemon.md](ai-daemon.md)。自动预取与 `ai_suggest` 开关已被 D-21 推翻 |
-| D-19 | 热路径 Lua 预算 ≤ 0.1ms/键，且必须非阻塞；filters 仅 `uniquifier` + `ai.suggest`；零 OpenCC filter。`ascii_shift` 热路径仅 keycode 分支 |
+| D-19 | 热路径 Lua 预算 ≤ 0.1ms/键，且必须非阻塞；零 OpenCC filter。`ascii_shift` 热路径仅 keycode 分支。filters 白名单已被 D-30 扩充，预算与非阻塞仍现行 |
 | D-20 | daemon 并发槽（`max_concurrency` 默认 3）+ 同 key 在途防重 + commit 作废在队请求；两拍触发契约（未命中亮 `⚡…`）。auto 路径已被 D-21 推翻 |
 | D-21 | 撤销自动预取，AI 候补纯触发式（协议 v1.3）：不按 Tab 零上云，无长度门槛。并发槽 / 防重 / commit 作废 / 两拍契约保留 |
 | D-22 | 模型与推理参数走 daemon 配置（不入库）。提示词长度上限已被 D-23 推翻 |
@@ -57,14 +58,16 @@
 | D-27 | 左 Shift 单击切 ASCII、快速双击切中文。已被 D-28 推翻 |
 | D-28 | 左 Shift 点按或 Ctrl+Space 翻转中英；右 Shift / Caps 不参与。时序参数与打断规则以 `rime/lua/ascii_shift.lua` 为准 |
 | D-29 | 候补三槽定职（固定输出 3 行）：第 1 项转写；第 2 项另一种合理转写（同音 / 纠错 / 缩写展开）；第 3 项表情意图给 emoji，否则短续写。`context_commits` 默认 30（逐词上屏时 6 条仅十余字，令 `context_chars` 成为实际上限） |
+| D-30 | 停顿重排转正（2026-10-15，试用 3 天）：组词停顿 200ms、高亮在首页首项时，本地 LM（Qwen3-0.6B-Base，llama.cpp CPU）按本会话上屏上文给同跨度汉字候选打分，与 Rime 名次融合后把首选提到同跨度汉字首位。fcitx5 插件注入私有键桥接，不改 fcitx5-rime；零上云，云端候补仍纯触发（D-21 不变）。filters 白名单为 `pause_rank.filter` + `ai.suggest` + `uniquifier`。结构见 [pause-rank.md](pause-rank.md)，参数见 [services/pause-rank](../../services/pause-rank/README.md) |
 
-未决事项：无阻塞项。语音见 [voice-daemon.md](../plan/voice-daemon.md)；AI M2 见 [ai-daemon.md](ai-daemon.md) §8。运行参数走 daemon 配置，不动仓库。
+未决事项：无阻塞项。语音见 [voice-daemon.md](../plan/voice-daemon.md)；AI M2 见 [ai-daemon.md](ai-daemon.md) §8；停顿重排已知问题见 [pause-rank.md](pause-rank.md) §6。运行参数走 daemon 配置，不动仓库。
 
 ## 3. 仓库结构要点
 
 目录树见 [README.md](../../README.md)。与部署相关的约束：
 
 - **无构建层**（D-5）：`rime/` 内即 librime 可直接读取的源文件。
+- **原生组件在部署单元之外**（D-30）：`services/pause-rank/` 的插件与打分 worker 需编译，产物在其 `build/`（`.gitignore` 隔离）；`rime/` 仍无构建层。
 - **`rime/` 同时是激活后的运行目录**（D-11）：运行态由 `.gitignore` 隔离。
 - 中文基础词库当前仅 `8105` + `base`；`ext` / `tencent` 不引入。词库子目录只用单层路径。
 
@@ -78,8 +81,8 @@
 
 ### 4.2 pinyin.schema.yaml
 
-- processors：`ascii_shift` 在 `ascii_composer` 之前；`ai.trigger` 在 `speller` 之前。
-- filters：`ai.suggest` 在 `uniquifier` 之前（消重契约）。
+- processors：`pause_rank.processor` 居首（私有键不被截获）；`ascii_shift` 在 `ascii_composer` 之前；`ai.trigger` 在 `speller` 之前。
+- filters：`pause_rank.filter` → `ai.suggest` → `uniquifier`（⚡ 候补居首；消重契约）。
 - translators：`script_translator` + `en_priority`（`initial_quality: 100`，中文下也整词首选）+ `custom_phrase`（`99`）+ `melt_eng`（`1.1`，低于中文 `1.2`）。
 - AI 为纯触发式（D-21）；参数段见 schema 的 `ai_suggest:` 与 [candidate-daemon README](../../services/candidate-daemon/README.md)。
 - speller 保留标准全拼与超级简拼，不引入模糊音与自动纠错。

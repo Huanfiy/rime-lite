@@ -11,6 +11,7 @@
 - **超高频英文 / 命令**：`en_priority.txt` 在中文输入下也整词首选（`gs`、`cd`、`ls`）。
 - **本机学习 + 词条晋升**：Rime userdb 即时学习；高频词按 SOP 周期性审核晋升进静态词库，跨机经 Git 同步。
 - **AI 智能候补**：组词中按 `Tab` 显式请求（纯触发式，不按键零上云）；daemon 缺席时自动降级为原生体验。
+- **停顿重排**：组词停顿约 0.2s 后，本地小模型按已上屏的上文把更合适的同音词提到首位（`yizhi` 在「驱动程序」之后 → 移植）；纯本机、不占按键，服务缺席时自动降级为原生体验。
 - **软链接切换**：与平级 Rime 工程单命令互切，互不修改对方文件。
 
 ## 环境要求
@@ -18,6 +19,7 @@
 - fcitx5-rime 5.1.4 / librime 1.10.0（Ubuntu 系统仓库；包名锚点 `librime1t64 1.10.0+dfsg1-2build2`）。
 - `/usr/share/rime-data`（librime-data 包）。
 - AI 候补另需：`librime-plugin-lua`、`lua-socket`、Python 3（仅标准库）。漏装时 AI 通路静默降级，无日志指向根因。
+- 停顿重排另需（可选）：`libfcitx5core-dev`、g++、源码构建的 llama.cpp（CPU）与 GGUF 模型，见 [services/pause-rank/README.md](services/pause-rank/README.md)。
 
 ## 快速开始
 
@@ -27,6 +29,13 @@ cd ~/sync/rime-lite
 ./run.sh setup          # 检查依赖、激活本工程、安装 daemon
 ./run.sh apikey set     # 写入 OpenAI 兼容 API 密钥（0600，不入库）
 ./run.sh restart        # 重启 fcitx5 生效
+```
+
+启用停顿重排（可选，依赖见上）：
+
+```bash
+./run.sh ranker install # 构建插件与打分 worker，安装插件配置与打分服务
+./run.sh restart
 ```
 
 只启用输入法、不要 AI 通路时：
@@ -48,11 +57,13 @@ cd ~/sync/rime-lite
 rime-lite/
 ├── AGENTS.md            # AI / 协作者入口：命令、禁区、决策指针
 ├── docs-rules.md        # 记录与清理规则
-├── run.sh               # 统一入口：部署、验证、daemon、密钥
+├── run.sh               # 统一入口：部署、验证、daemon、停顿重排、密钥
 ├── README.md
 ├── docs/
 │   ├── design/              # 现行架构、决策、SOP
-│   └── plan/                # 已评审待实施（落地后搬入 design）
+│   ├── notes/               # 实测数据等长期备忘
+│   ├── plan/                # 已评审待实施（落地后搬入 design）
+│   └── plans/               # 建议架构（未评审 / 部分实施）
 ├── rime/                # 部署单元 = Rime 用户目录内容
 │   ├── default.yaml
 │   ├── pinyin.schema.yaml
@@ -61,10 +72,12 @@ rime-lite/
 │   ├── en_priority.txt      # 超高频英文 / 命令，中文下也首选
 │   ├── lua/ascii_shift.lua  # 左 Shift / Ctrl+Space 翻转中英（D-28）
 │   ├── lua/ai/          # AI 候补 glue / trigger / suggest
+│   ├── lua/pause_rank/  # 停顿重排 processor / filter（D-30）
 │   ├── cn_dicts/
 │   └── en_dicts/
 ├── services/
-│   └── candidate-daemon/     # AI daemon、配置示例、协议说明
+│   ├── candidate-daemon/     # AI daemon、配置示例、协议说明
+│   └── pause-rank/           # 停顿重排 fcitx5 插件、本地打分服务、构建脚本
 └── tools/
     ├── deploy               # 软链接切换
     ├── ai-config            # daemon 配置 / 密钥读写
@@ -79,5 +92,6 @@ rime-lite/
 - 加词、userdb 晋升、验证、提交：[docs/design/lexicon-sop.md](docs/design/lexicon-sop.md)。
 - 架构与决策：[docs/design/architecture.md](docs/design/architecture.md)。
 - AI 候补：[docs/design/ai-daemon.md](docs/design/ai-daemon.md)。
+- 停顿重排：[docs/design/pause-rank.md](docs/design/pause-rank.md)。
 - 协作约定：[AGENTS.md](AGENTS.md)。
 - 记录与清理：[docs-rules.md](docs-rules.md)。

@@ -22,6 +22,7 @@
 ./run.sh restart                    # fcitx5 -rd
 ./run.sh verify                     # 隔离 staging 构建，要求零 E 级日志
 ./run.sh daemon install|start|stop|restart|status|logs
+./run.sh ranker build|install|start|stop|restart|status|logs|uninstall   # 停顿重排（D-30）
 ./run.sh apikey                     # 查看当前配置（密钥脱敏）
 ./run.sh apikey set                 # 写入 / 轮换密钥（不回显、0600）
 ./run.sh candidates -o /tmp/candidates.tsv <userdb.txt>
@@ -37,11 +38,13 @@
 | 加词、userdb 晋升、验证、提交 | [docs/design/lexicon-sop.md](docs/design/lexicon-sop.md) |
 | AI 候补结构、契约、运维 | [docs/design/ai-daemon.md](docs/design/ai-daemon.md) |
 | daemon 协议与配置字段 | [services/candidate-daemon/README.md](services/candidate-daemon/README.md) |
+| 停顿重排结构、契约 | [docs/design/pause-rank.md](docs/design/pause-rank.md) |
+| 停顿重排构建、协议、参数 | [services/pause-rank/README.md](services/pause-rank/README.md) |
 
 ## 红线
 
 - **中英（D-28）**：左 Shift 点按或 Ctrl+Space 翻转中英，右 Shift / Caps 不参与；细则与参数以 `rime/lua/ascii_shift.lua` 为准，`ascii_composer` 切换键保持 noop。
-- **性能（D-19）**：热路径 Lua 预算 ≤ 0.1ms/键，且必须非阻塞；filters 仅 `uniquifier` + `ai.suggest`；零 OpenCC filter。新增功能不得违反。
+- **性能（D-19 / D-30）**：热路径 Lua 预算 ≤ 0.1ms/键，且必须非阻塞；filters 仅 `pause_rank.filter` + `ai.suggest` + `uniquifier`；零 OpenCC filter。新增功能不得违反。
 - **密钥**：仅存 `~/.config/rime-candidate-daemon/config.json`（0600）。严禁写入仓库任何文件、提交说明或会话落档。泄露则服务商侧作废，再用 `./run.sh apikey set` 写入新密钥。
 - **userdb**：禁止对运行中的 `rime/pinyin.userdb/` 执行任何 `rime_dict_manager` 子命令。导出路径见 lexicon-sop.md §3.1。
 - **部署**：`~/.local/share/fcitx5/rime` 只允许软链接切换；遇真实目录一律停止，不覆盖、不删除（D-11）。
@@ -51,7 +54,7 @@
 
 ## 运行态隔离
 
-`rime/build/`、`rime/*.userdb/`、`rime/sync/`、`installation.yaml`、`user.yaml` 由 `.gitignore` 隔离。一次性中间产物（候选 TSV、staging 目录）放仓库外，不入库。
+`rime/build/`、`rime/*.userdb/`、`rime/sync/`、`installation.yaml`、`user.yaml`、`services/pause-rank/build/` 由 `.gitignore` 隔离。模型文件不入库。一次性中间产物（候选 TSV、staging 目录）放仓库外，不入库。
 
 ## Commit 约定
 
