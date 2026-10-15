@@ -6,7 +6,7 @@
 schema:
   schema_id: pinyin
   name: 拼音
-  version: "2026-10-15.1"
+  version: "2026-10-15.2"
   author:
     - huan
   description: rime-lite 最小全拼方案
@@ -74,6 +74,13 @@ speller:
     - derive/^([jqxy])u/$1v/
     - derive/^([nl])ue$/$1ve/
     - derive/^([jqxy])v/$1u/
+    ### 乱序容错（D-31）：音节内相邻字母互换，只收不撞合法音节的规则
+    - derive/ao$/oa/               # hoa → hao
+    - derive/iao$/aio/             # xaio → xiao
+    - derive/([iu])an$/a$1n/       # tain → tian
+    - derive/([iu])ang$/a$1ng/     # haung → huang
+    - derive/([aeio])ng$/$1gn/     # dagn → dang
+    - derive/^([jqxlnm])iu$/$1ui/  # lui → liu
 
 
 # 主翻译器，拼音
