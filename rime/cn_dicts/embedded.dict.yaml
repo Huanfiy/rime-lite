@@ -8,6 +8,7 @@
 #           筛选标准 c_total>=3、排除已收录词与组句残留)。
 #           2026-09-04 追加 userdb 晋升词条。
 #           2026-09-15 追加 userdb 晋升词条。
+#           2026-10-15 追加 userdb 晋升词条。
 # ---------------------------
 # Rime dictionary
 # encoding: utf-8
@@ -20,7 +21,7 @@
 
 ---
 name: embedded
-version: "2026-09-15"
+version: "2026-10-15"
 sort: by_weight
 use_preset_vocabulary: false
 ...
@@ -750,3 +751,14 @@ CISC	cisc	55
 设备侧	she bei ce	100
 软掉电	ruan diao dian	100
 镜像包	jing xiang bao	100
+
+# ========== userdb 晋升 (2026-10-15) ==========
+空片	kong pian	100
+大语言模型	da yu yan mo xing	100
+空板	kong ban	100
+预训练	yu xun lian	100
+假数据	jia shu ju	100
+哑变量	ya bian liang	100
+对接板	dui jie ban	100
+导热率	dao re lv	100
+齐次性	qi ci xing	100

@@ -6,6 +6,7 @@
 #           筛选标准 c_total>=3、排除已收录词与组句残留)。
 #           2026-09-04 追加 userdb 晋升词条。
 #           2026-09-15 追加 userdb 晋升词条。
+#           2026-10-15 追加 userdb 晋升词条。
 # ---------------------------
 # Rime dictionary
 # encoding: utf-8
@@ -15,7 +16,7 @@
 
 ---
 name: mydict
-version: "2026-09-15"
+version: "2026-10-15"
 sort: by_weight
 use_preset_vocabulary: false
 ...
@@ -140,3 +141,15 @@ use_preset_vocabulary: false
 短视频	duan shi pin	100
 设定图	she ding tu	100
 费曼法	fei man fa	100
+
+# ========== userdb 晋升 (2026-10-15) ==========
+主力机	zhu li ji	100
+免税州	mian shui zhou	100
+做减法	zuo jian fa	100
+强相关	qiang xiang guan	100
+心智负担	xin zhi fu dan	100
+成体系	cheng ti xi	100
+手机卡	shou ji ka	100
+相对值	xiang dui zhi	100
+精细度	jing xi du	100
+视情况	shi qing kuang	100
