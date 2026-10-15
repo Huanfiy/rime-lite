@@ -2,7 +2,7 @@
 # rime-lite 部署脚本（软链接切换模式，见 docs/design/architecture.md §6 / D-11）
 #
 # 模型：fcitx5 的 Rime 用户目录 ~/.local/share/fcitx5/rime 是一个软链接，
-#       指向当前激活工程的配置目录。rime-lite 与 rime-ice 为平级工程，
+#       指向当前激活工程的配置目录。rime-lite 与其他 Rime 工程为平级工程，
 #       切换 = 重指链接，互不修改对方文件。
 #
 # 行为约定：
@@ -14,8 +14,7 @@
 #
 # 用法:
 #   tools/deploy              激活本工程（仓库 rime/ 目录）
-#   tools/deploy --to <dir>   激活其他工程（如切回 rime-ice:
-#                             --to /home/huan/sync/rime-ice）
+#   tools/deploy --to <dir>   激活其他 Rime 工程
 #   tools/deploy --status     查看当前激活的工程
 #   tools/deploy --yes        跳过确认
 set -euo pipefail

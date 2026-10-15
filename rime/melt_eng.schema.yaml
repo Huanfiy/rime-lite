@@ -1,7 +1,8 @@
 # ------- vendor 记录 -------
-# 来源: rime-ice 工程 melt_eng.schema.yaml (/home/huan/sync/fcitx5/share/rime)
+# 来源: 上游原文件 melt_eng.schema.yaml，署名见下方原文件头
 # vendor 日期: 2026-07-02
-# 本地修改: 去除文件头 UTF-8 BOM；移除 7 个双拼 algebra 块及其 __include 备选注释（双拼不在项目范围）
+# 本地修改: 去除文件头 UTF-8 BOM；移除 7 个双拼 algebra 块及其 __include 备选注释（双拼不在项目范围）；
+#           删除双拼选型说明注释，全拼 algebra 块更名为 algebra_quanpin（2026-10-15）
 # ---------------------------
 # Rime schema
 # vim: set sw=2 sts=2 et:
@@ -9,7 +10,6 @@
 #
 # 复制自 https://github.com/tumuyan/rime-melt，修改了拼写派生
 # 感谢 @[Mirtle](https://github.com/mirtlecn) 贡献的极其好用的拼写派生
-# 全拼和各个双拼有部分拼写规则不通用，需要修改 speller/algebra 下的 __include: algebra_rime_ice 为你所使用的方案
 
 schema:
   schema_id: melt_eng
@@ -51,9 +51,7 @@ speller:
   alphabet: zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA
   delimiter: " '"
   algebra:
-    # 根据当前所用拼音方案选择 __include 的值
-    # 如果要在补丁中（melt_eng.custom.yaml）修改 algebra 以适配双拼，请参考 [常见问题](https://github.com/iDvel/rime-ice/issues/133)
-    __include: algebra_rime_ice         # 全拼
+    __include: algebra_quanpin         # 全拼
 
 translator:
   dictionary: melt_eng
@@ -135,7 +133,7 @@ algebra_common:
   - erase/^[a-z]$/
 
 # 全拼
-algebra_rime_ice:
+algebra_quanpin:
   __include: algebra_common
   __append:
     - derive/(?<!\d)1([1-9])(?!\d)/shi$1/

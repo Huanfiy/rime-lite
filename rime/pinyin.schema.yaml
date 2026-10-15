@@ -1,7 +1,7 @@
 # Rime schema
 # encoding: utf-8
 #
-# rime-lite 主方案：最小全拼（自 rime-ice 裁剪，分层理由见 docs/design/architecture.md §4.2）
+# rime-lite 主方案：最小全拼（分层理由见 docs/design/architecture.md §4.2）
 
 schema:
   schema_id: pinyin

@@ -7,7 +7,7 @@
 
 ## 1. 定位与范围
 
-可整目录部署、不依赖外部 rime-ice 运行时路径、Git 全量管理的最小全拼输入方案（仅 fcitx5）。
+可整目录部署、不依赖仓库外路径、Git 全量管理的最小全拼输入方案（仅 fcitx5）。
 
 **覆盖：**
 
@@ -33,7 +33,7 @@
 | D-1 | 不自建 `events/*.jsonl`；userdb 仅本机学习缓存；稳定词条走导出 → 审核 → 晋升静态词库 → Git |
 | D-2 | 只筛选高价值词条，不全量导入 userdb |
 | D-3 | 不保留置顶 / 隐藏 / 降频规则层 |
-| D-4 | 基础词库为项目内副本；构建与部署不得依赖外部 rime-ice 路径（目录名经 D-12 定为 `cn_dicts/`） |
+| D-4 | 基础词库为项目内副本；构建与部署不得依赖仓库外路径（目录名经 D-12 定为 `cn_dicts/`） |
 | D-5 | 个人词库用 Rime 原生格式（`en_priority.txt` + `custom_phrase.txt` + `dict.yaml`），无 YAML → dict 构建层 |
 | D-6 | Git 同步工程源为主路径；Rime 原生同步仅作运行态备份与迁移输入 |
 | D-7 | 挂载 melt_eng 英文词库（中文方案内出英文候选） |
@@ -104,10 +104,10 @@
 
 ## 5. vendor 规范
 
-- 来源为 rime-ice（github:Huanfiy/rime-ice）；vendor 后为项目内独立副本，不追随上游。需要时人工 diff。
+- vendor 后为项目内独立副本，不追随上游、不做同步。
 - vendor 对象：`cn_dicts/8105`、`cn_dicts/base`、`en_dicts/en`、`melt_eng.schema.yaml`、`melt_eng.dict.yaml`。
-- 文件头注释记录来源、日期、是否裁剪；写入前去除 UTF-8 BOM（BOM 落在注释后会导致 YAML 解析失败）。
-- 仓库内任何文件不得引用 rime-ice 工程的运行时路径（D-4）。
+- 文件头注释记录来源、日期、是否裁剪；上游原文件头（署名、许可链接）原样保留；写入前去除 UTF-8 BOM（BOM 落在注释后会导致 YAML 解析失败）。
+- 仓库内任何文件不得引用仓库外工程的路径（D-4）。
 
 ## 6. 部署流程
 
