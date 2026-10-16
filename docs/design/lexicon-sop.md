@@ -23,12 +23,13 @@
 
 1. 超高频英文 / 命令，中文输入下也要整词首选（如 `gs`、`cd`）→ `en_priority.txt`，格式 `词<Tab>编码<Tab>权重`（权重可省略）。
 2. 需要缩写码直达且置顶（如 `zkb` → 占空比）→ `custom_phrase.txt`，格式同上。
-3. 全拼输入的领域词 → `cn_dicts/embedded.dict.yaml`，格式 `词<Tab>拼音<Tab>100`（拼音为空格分隔的小写音节，允许单个大写字母音节）。
+3. 全拼输入的领域词 → `cn_dicts/embedded.dict.yaml`，格式 `词<Tab>拼音<Tab>权重`（拼音为空格分隔的小写音节，允许单个大写字母音节）。
 4. 全拼输入的非领域词 → `cn_dicts/mydict.dict.yaml`，格式同上。
 
 约束与生效：
 
 - Tab 分隔，无 UTF-8 BOM，行尾 LF；写入对应主题分区，或新建带日期的分区注释。
+- 权重按 D-32：先填 100，再跑 `./run.sh candidates --audit`，把列出行的权重改为其 `suggested`（同码静态排序第 2 位）；要压过同码首位时人工改为高于首位权重。`--audit` 只输出表头即合规。
 - 词库改动后 `./run.sh restart` 生效。
 - 提交按仓库 commit 约定，一笔一主题。
 
@@ -64,24 +65,26 @@ cd <工作目录> && rime_dict_manager -b pinyin
 
 - 可传多份导出，按（词、拼音）合并 c 值。
 - 规则同 D-14：丢弃 c ≤ 0；排除单 CJK 字、已收录词（base / 8105 / embedded / mydict / en_priority / custom_phrase / A–Z）、纯 ASCII 且与拼音串相同的词；门槛 `--min-count` 默认 3。
-- 输出列：word / pinyin / c_total / 各来源 c / bucket / flag。bucket / flag 仅为启发式，**不可直接应用**。
+- 输出列：word / pinyin / c_total / 各来源 c / weight / rivals / bucket / flag。weight 为 D-32 规则建议权重，rivals 为同码 vendor 竞争词前 3 名（词:权重）；bucket / flag 仅为启发式，**不可直接应用**。
 
 ### 3.3 人工审定
 
 - 剔除组句残留、错词与临时词；同音异形先核实写法。
 - 分桶：纯 ASCII 超高频词 / 命令 → en_priority，领域词 → embedded，非领域 → mydict，需缩写码 → custom_phrase。
+- 权重：默认取 weight 列；rivals 首位是生僻词、该词应作首选时，改为高于首位的权重。
 
 ### 3.4 应用
 
-- embedded / mydict：末尾新建分区 `# ========== userdb 晋升 (YYYY-MM-DD) ==========`，词条 `词<Tab>拼音<Tab>100`，按 c_total 降序。
+- embedded / mydict：末尾新建分区 `# ========== userdb 晋升 (YYYY-MM-DD) ==========`，词条 `词<Tab>拼音<Tab>权重`（§3.3 审定值），按 c_total 降序。
 - en_priority / custom_phrase：按 §2 格式写入。
 - 更新目标文件头部「本地修改」注释。
 
 ### 3.5 验证
 
 ```bash
-./run.sh verify    # 隔离构建，要求零 E 级日志
-./run.sh restart   # 真机抽查 3~5 个新词与既有词（如 nihao、gpio）
+./run.sh candidates --audit   # 自建层权重核查（D-32），要求只有表头
+./run.sh verify               # 隔离构建，要求零 E 级日志
+./run.sh restart              # 真机抽查 3~5 个新词与既有词（如 nihao、gpio）
 ```
 
 运行目录出现新的运行态产物时，同步扩充 `.gitignore`。
@@ -96,9 +99,10 @@ cd <工作目录> && rime_dict_manager -b pinyin
 
 ## 5. vendor 词库同步上游（低频）
 
-vendor 层不追随上游自动更新（architecture.md §5）。需要时人工 diff，更新副本并改文件头注释，走 §3.5 验证后提交。
+vendor 层不追随上游自动更新（architecture.md §5）。需要时人工 diff，更新副本并改文件头注释，走 §3.5 验证后提交（vendor 权重变动后 `--audit` 可能列出新行）。
 
 ## 6. 已知边界
 
 - 导出格式与 `rime_dict_manager` 选项集以本机 librime 1.10.0 为准；升级后先复核。
+- librime 1.10.0 的 userdb 排序（源码与隔离实测，2026-10-16）：同码长时 userdb 词无条件排在全部系统词前，一次上屏即长期前置（衰减不会让它回落）；误上屏的词高亮后 Ctrl+Delete 删除，退回系统词位次。组句按权重比较，userdb 词权重由近期上屏次数决定（每 200 次上屏衰减到 1/e），新造词要在短期内多次上屏才进组句首选。静态权重只决定新机器 / userdb 未覆盖时的排序。
 - `tools/userdb-candidates` 排除集读取当前仓库词库；复现历史数据需 `--repo-root` 指向历史版本，否则已晋升词条会被排除。

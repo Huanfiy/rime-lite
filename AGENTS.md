@@ -26,6 +26,7 @@
 ./run.sh apikey                     # 查看当前配置（密钥脱敏）
 ./run.sh apikey set                 # 写入 / 轮换密钥（不回显、0600）
 ./run.sh candidates -o /tmp/candidates.tsv <userdb.txt>
+./run.sh candidates --audit         # 自建词条权重核查（D-32），只有表头即合规
 ```
 
 `tools/deploy`、`tools/userdb-candidates`、`tools/ai-config` 是底层实现，`run.sh` 只做路由与 systemd / fcitx5 编排。

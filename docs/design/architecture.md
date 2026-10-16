@@ -61,6 +61,7 @@
 | D-29 | 候补三槽定职（固定输出 3 行）：第 1 项转写；第 2 项另一种合理转写（同音 / 纠错 / 缩写展开）；第 3 项表情意图给 emoji，否则短续写。`context_commits` 默认 30（逐词上屏时 6 条仅十余字，令 `context_chars` 成为实际上限） |
 | D-30 | 停顿重排转正（2026-10-15，试用 3 天）：组词停顿 200ms、高亮在首页首项时，本地 LM（Qwen3-0.6B-Base，llama.cpp CPU）按本会话上屏上文给同跨度汉字候选打分，与 Rime 名次融合后把首选提到同跨度汉字首位。fcitx5 插件注入私有键桥接，不改 fcitx5-rime；零上云，云端候补仍纯触发（D-21 不变）。filters 白名单为 `pause_rank.filter` + `ai.suggest` + `uniquifier`。结构见 [pause-rank.md](pause-rank.md)，参数见 [services/pause-rank](../../services/pause-rank/README.md) |
 | D-31 | 音节内乱序容错（2026-10-15）：speller 以 `derive` 收录音节内相邻字母互换的拼写（如 `nihoa` → 你好），只收不撞合法音节的规则，规则以 `rime/pinyin.schema.yaml` 为准；`ai/ia`、`ei/ie`、`ou/uo`、`ui/iu` 互换后撞合法音节，不收。不启用 librime `enable_correction`（本机 1.10.0 实测为邻键替换，不处理互换，且改变正确输入的排序）。已知代价：部分简拼混输被完整拼写占先（`dagn` 由「大姑娘」变「当」）。跨音节乱序不处理，交 AI 候补第 2 项（D-29） |
+| D-32 | 自建词条（embedded / mydict）权重按同码竞争定（2026-10-16）：只对 vendor 层（base / 8105）同码词计算，静态排序落在第 2 位、不抢第 1，无竞争为 100；抢第 1 由人工审定。规则单点在 `tools/userdb-candidates`（`--audit` 核查现有词条），流程见 [lexicon-sop.md](lexicon-sop.md)。原统一 100 低于 base 双字词权重中位数 3333，有同音词时垫底，新机器上晋升基本失效 |
 
 未决事项：无阻塞项。语音见 [voice-daemon.md](../plan/voice-daemon.md)；AI M2 见 [ai-daemon.md](ai-daemon.md) §8；停顿重排已知问题见 [pause-rank.md](pause-rank.md) §6。运行参数走 daemon 配置，不动仓库。
 

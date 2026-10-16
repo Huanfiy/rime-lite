@@ -81,7 +81,7 @@ rime-lite/
 └── tools/
     ├── deploy               # 软链接切换
     ├── ai-config            # daemon 配置 / 密钥读写
-    └── userdb-candidates    # 晋升候选分析
+    └── userdb-candidates    # 晋升候选分析 / 自建词条权重核查
 ```
 
 运行态文件（`rime/build/`、`rime/*.userdb/`、`rime/sync/` 等）由 `.gitignore` 隔离，不进 Git。密钥只在 `~/.config/rime-candidate-daemon/config.json`。
