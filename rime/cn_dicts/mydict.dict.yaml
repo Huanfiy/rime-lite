@@ -5,6 +5,7 @@
 #           2026-09-04 追加 userdb 晋升词条。
 #           2026-09-15 追加 userdb 晋升词条。
 #           2026-10-15 追加 userdb 晋升词条。
+#           2026-10-16 按同码竞争规则(D-32)上调 9 条权重。
 # ---------------------------
 # Rime dictionary
 # encoding: utf-8
@@ -14,7 +15,7 @@
 
 ---
 name: mydict
-version: "2026-10-15"
+version: "2026-10-16"
 sort: by_weight
 use_preset_vocabulary: false
 ...
@@ -27,7 +28,7 @@ use_preset_vocabulary: false
 # ========== userdb 晋升 (2026-07-07) ==========
 落档	luo dang	100
 富芮坤	fu rui kun	100
-物奇	wu qi	100
+物奇	wu qi	32786
 概率性	gai lv xing	100
 实车	shi che	100
 根因	gen yin	100
@@ -36,19 +37,19 @@ use_preset_vocabulary: false
 对侧	dui ce	100
 罗小黑	luo xiao hei	100
 搬瓦工	ban wa gong	100
-点昀	dian yun	100
+点昀	dian yun	1008
 产线	chan xian	100
 大概率	da gai lv	100
 晟阳	sheng yang	100
 威哥	wei ge	100
-禅道	chan dao	100
+禅道	chan dao	2791
 顶仓	ding cang	100
 颜文字	yan wen zi	100
 下一版	xia yi ban	100
 全流程	quan liu cheng	100
 小版本	xiao ban ben	100
 未绑定	wei bang ding	100
-老范	lao fan	100
+老范	lao fan	1271
 苗总	miao zong	100
 萝莉控	luo li kong	100
 软件组	ruan jian zu	100
@@ -61,8 +62,8 @@ use_preset_vocabulary: false
 扇形图	shan xing tu	100
 手绘风	shou hui feng	100
 拆车	chai che	100
-拓竹	tuo zhu	100
-桐人	tong ren	100
+拓竹	tuo zhu	1641
+桐人	tong ren	74541
 童欢	tong huan	100
 纯软	chun ruan	100
 胡总	hu zong	100
@@ -89,7 +90,7 @@ use_preset_vocabulary: false
 我需要	wo xu yao	100
 我这个	wo zhe ge	100
 哪部分	na bu fen	100
-做下	zuo xia	100
+做下	zuo xia	20631
 写一份	xie yi fen	100
 哪一层	na yi ceng	100
 太臃肿	tai yong zhong	100
@@ -103,7 +104,7 @@ use_preset_vocabulary: false
 这一块	zhe yi kuai	100
 这两句	zhe liang ju	100
 你那边	ni na bian	100
-切为	qie wei	100
+切为	qie wei	11851
 我之前	wo zhi qian	100
 排查下	pai cha xia	100
 更优雅	geng you ya	100
@@ -132,7 +133,7 @@ use_preset_vocabulary: false
 其它	qi ta	100
 太抽象	tai chou xiang	100
 重买	chong mai	100
-重进	chong jin	100
+重进	chong jin	10851
 兑换码	dui huan ma	100
 刻意练习	ke yi lian xi	100
 动漫风	dong man feng	100

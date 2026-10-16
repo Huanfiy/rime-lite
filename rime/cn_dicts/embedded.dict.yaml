@@ -7,6 +7,7 @@
 #           2026-09-04 追加 userdb 晋升词条。
 #           2026-09-15 追加 userdb 晋升词条。
 #           2026-10-15 追加 userdb 晋升词条。
+#           2026-10-16 按同码竞争规则(D-32)上调 12 条权重。
 # ---------------------------
 # Rime dictionary
 # encoding: utf-8
@@ -19,7 +20,7 @@
 
 ---
 name: embedded
-version: "2026-10-15"
+version: "2026-10-16"
 sort: by_weight
 use_preset_vocabulary: false
 ...
@@ -111,7 +112,7 @@ CISC	cisc	55
 # ========== 执行器件 (高频) ==========
 蜂鸣器	feng ming qi	70
 继电器	ji dian qi	75
-舵机	duo ji	65
+舵机	duo ji	6261
 步进电机	bu jin dian ji	70
 直流电机	zhi liu dian ji	60
 交流电机	jiao liu dian ji	55
@@ -220,7 +221,7 @@ CISC	cisc	55
 # ========== 硬件设计 (高频) ==========
 电路板	dian lu ban	75
 原理图	yuan li tu	70
-布线	bu xian	65
+布线	bu xian	9191
 焊接	han jie	60
 
 # ========== 电子元器件 (高频) ==========
@@ -661,11 +662,11 @@ CISC	cisc	55
 热唤醒	re huan xing	100
 对端	dui duan	100
 落盘	luo pan	100
-透传	tou chuan	100
-片间	pian jian	100
-中键	zhong jian	100
+透传	tou chuan	2223
+片间	pian jian	490
+中键	zhong jian	15126
 大模型	da mo xing	100
-验签	yan qian	100
+验签	yan qian	1421
 工作流	gong zuo liu	100
 放卡	fang ka	100
 高阻态	gao zu tai	100
@@ -674,21 +675,21 @@ CISC	cisc	55
 片内	pian nei	100
 裸片	luo pian	100
 选卡	xuan ka	100
-出流	chu liu	100
+出流	chu liu	946
 双分区	shuang fen qu	100
 开流	kai liu	100
 掌静脉	zhang jing mai	100
 交互灯	jiao hu deng	100
 从机	cong ji	100
 加解串	jia jie chuan	100
-对时	dui shi	100
+对时	dui shi	20471
 开漏	kai lou	100
 无卡	wu ka	100
 防冲突	fang chong tu	100
 低优先级	di you xian ji	100
 倒排	dao pai	100
 加串器	jia chuan qi	100
-微帧	wei zhen	100
+微帧	wei zhen	6021
 扫卡	sao ka	100
 排针	pai zhen	100
 无服务器	wu fu wu qi	100
@@ -698,7 +699,7 @@ CISC	cisc	55
 电源树	dian yuan shu	100
 硬复位	ying fu wei	100
 红外灯	hong wai deng	100
-解算	jie suan	100
+解算	jie suan	1681
 主电源	zhu dian yuan	100
 云服务器	yun fu wu qi	100
 向量表	xiang liang biao	100
@@ -716,13 +717,13 @@ CISC	cisc	55
 本仓	ben cang	100
 小模型	xiao mo xing	100
 软架构	ruan jia gou	100
-双分	shuang fen	100
+双分	shuang fen	5571
 产测	chan ce	100
 本仓库	ben cang ku	100
 速刷	su shua	100
 预发布	yu fa bu	100
 子仓库	zi cang ku	100
-在环	zai huan	100
+在环	zai huan	791
 文件头	wen jian tou	100
 软需	ruan xu	100
 配网	pei wang	100
