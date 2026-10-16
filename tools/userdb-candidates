@@ -23,12 +23,20 @@
 #           命中领域关键词 → embedded；其余 → mydict
 #   flag:   疑似组句残留 → fragment?
 #
+# 权重规则（D-32，embedded / mydict 词条单点在此）：
+#   同码竞争只看 vendor 层（base / 8105）的其他词；建议权重 = max(100, 竞争词第 2 高权重 + 1)，
+#   即同码静态排序落在第 2 位、不抢第 1；无竞争或仅 1 个竞争词时为 100。
+#   只看 vendor 层保证规则幂等；自建词之间的先后、要抢第 1 的词由人工审定决定。
+#   weight 列为该规则的建议值，rivals 列为同码竞争词前 3 名（词:权重）。
+#
 # 用法:
 #   tools/userdb-candidates 导出1.txt [导出2.txt ...]      候选 TSV 打印到 stdout
 #   tools/userdb-candidates -o out.tsv 导出.txt            候选写入文件
 #   tools/userdb-candidates --min-count 5 导出.txt         调整合并计数阈值
 #   tools/userdb-candidates --repo-root <dir> 导出.txt     指定仓库根（复现历史
 #                                                          轮次 / 在仓库副本上运行）
+#   tools/userdb-candidates --audit                        核查 embedded / mydict 现有词条，
+#                                                          列出按建议值可提前同码位次的行
 #   漏斗统计（各环节计数）始终输出到 stderr。
 import argparse
 import os
@@ -51,6 +59,18 @@ EXCLUDE_TABLEDB = (
     "rime/en_priority.txt",
     "rime/custom_phrase.txt",
 )
+
+# 权重规则：竞争词来源（vendor 层）与核查对象（自建层）
+VENDOR_DICT_YAMLS = (
+    "rime/cn_dicts/base.dict.yaml",
+    "rime/cn_dicts/8105.dict.yaml",
+)
+OWN_DICT_YAMLS = (
+    "rime/cn_dicts/embedded.dict.yaml",
+    "rime/cn_dicts/mydict.dict.yaml",
+)
+BASE_WEIGHT = 100
+N_RIVALS_SHOWN = 3
 
 C_RE = re.compile(r"\bc=(-?\d+)\b")
 LATIN_DIGIT_RE = re.compile(r"[A-Za-z0-9]")
@@ -129,12 +149,14 @@ def parse_userdb(path):
     return entries, raw, dropped
 
 
-def parse_dict_yaml_words(path):
-    """dict.yaml：跳过 `...` 之前的 YAML 头，表体取第一列词。"""
-    words = set()
+def parse_dict_yaml(path):
+    """dict.yaml：跳过 `...` 之前的 YAML 头，逐行产出 (行号, 词, 拼音, 权重)。
+
+    拼音或权重列缺失时分别为 "" / 0。
+    """
     in_body = False
     with open(path, encoding="utf-8") as f:
-        for line in f:
+        for lineno, line in enumerate(f, 1):
             line = line.rstrip("\n")
             if not in_body:
                 if line.strip() == "...":
@@ -142,8 +164,17 @@ def parse_dict_yaml_words(path):
                 continue
             if not line.strip() or line.lstrip().startswith("#"):
                 continue
-            words.add(line.split("\t")[0].strip())
-    return words
+            parts = line.split("\t")
+            code = parts[1].strip() if len(parts) > 1 else ""
+            try:
+                weight = float(parts[2]) if len(parts) > 2 and parts[2].strip() else 0.0
+            except ValueError:
+                weight = 0.0
+            yield lineno, parts[0].strip(), code, weight
+
+
+def parse_dict_yaml_words(path):
+    return {word for _, word, _, _ in parse_dict_yaml(path)}
 
 
 def parse_tabledb_words(path):
@@ -171,6 +202,43 @@ def load_exclude_words(repo_root):
             sys.exit(f"错误: 排除集文件不存在: {path}")
         words |= parse_tabledb_words(path)
     return words
+
+
+def load_vendor_codes(repo_root):
+    """vendor 层同码表：拼音 → {词: 最高权重}。"""
+    by_code = defaultdict(dict)
+    for rel in VENDOR_DICT_YAMLS:
+        path = os.path.join(repo_root, rel)
+        if not os.path.isfile(path):
+            sys.exit(f"错误: vendor 词库不存在: {path}")
+        for _, word, code, weight in parse_dict_yaml(path):
+            same = by_code[code]
+            same[word] = max(same.get(word, 0.0), weight)
+    return by_code
+
+
+# ---------- 权重规则（D-32） ----------
+
+def rivals_of(word, code, vendor_codes):
+    """同码 vendor 竞争词（排除同词），按权重降序的 [(词, 权重)]。"""
+    same = vendor_codes.get(code, {})
+    return sorted(((w, x) for w, x in same.items() if w != word),
+                  key=lambda r: (-r[1], r[0]))
+
+
+def suggest_weight(rivals):
+    """规则建议权重：落在同码第 2 位、不抢第 1；不足 2 个竞争词时为 BASE_WEIGHT。"""
+    if len(rivals) < 2:
+        return BASE_WEIGHT
+    return max(BASE_WEIGHT, int(rivals[1][1]) + 1)
+
+
+def fmt_weight(x):
+    return str(int(x)) if float(x).is_integer() else str(x)
+
+
+def fmt_rivals(rivals):
+    return " ".join(f"{w}:{fmt_weight(x)}" for w, x in rivals[:N_RIVALS_SHOWN])
 
 
 # ---------- 判定 ----------
@@ -219,6 +287,63 @@ def source_label(path):
     return name
 
 
+# ---------- 自建层权重核查 ----------
+
+def audit(args):
+    """列出 embedded / mydict 中改用规则建议值后同码位次会提前的行。
+
+    有效权重 = 同词同码在各层的最高权重；位次只对 vendor 竞争词计算。
+    无竞争词时权重不影响位次，不列出。
+    """
+    vendor_codes = load_vendor_codes(args.repo_root)
+    own = []  # (位置, 词, 拼音, 权重)
+    for rel in OWN_DICT_YAMLS:
+        path = os.path.join(args.repo_root, rel)
+        if not os.path.isfile(path):
+            sys.exit(f"错误: 词库不存在: {path}")
+        for lineno, word, code, weight in parse_dict_yaml(path):
+            own.append((f"{os.path.basename(rel)}:{lineno}", word, code, weight))
+    own_max = defaultdict(float)
+    for _, word, code, weight in own:
+        own_max[(word, code)] = max(own_max[(word, code)], weight)
+
+    n_rivaled = 0
+    rows = []  # (位置, 词, 拼音, 权重, 现位次, 建议权重, 竞争词)
+    for where, word, code, weight in own:
+        rivals = rivals_of(word, code, vendor_codes)
+        if rivals:
+            n_rivaled += 1
+        target = suggest_weight(rivals)
+        effective = max(own_max[(word, code)],
+                        vendor_codes.get(code, {}).get(word, 0.0))
+        rank = 1 + sum(1 for _, x in rivals if x > effective)
+        new_rank = 1 + sum(1 for _, x in rivals if x > target)
+        if new_rank >= rank:
+            continue
+        rows.append((where, word, code, fmt_weight(weight), rank, target,
+                     new_rank, fmt_rivals(rivals)))
+    rows.sort(key=lambda r: (-r[4], r[0]))
+
+    header = ["where", "word", "pinyin", "weight", "rank", "suggested",
+              "new_rank", "rivals"]
+    out = open(args.output, "w", encoding="utf-8") if args.output else sys.stdout
+    try:
+        out.write("\t".join(header) + "\n")
+        for row in rows:
+            out.write("\t".join(str(x) for x in row) + "\n")
+    finally:
+        if args.output:
+            out.close()
+
+    err = sys.stderr
+    err.write("自建层权重核查（D-32）\n")
+    err.write("=" * 44 + "\n")
+    err.write(f"自建词条数: {len(own)}\n")
+    err.write(f"有同码 vendor 竞争词: {n_rivaled}\n")
+    err.write(f"按建议值可提前位次: {len(rows)}"
+              f"（现位次 >= 6: {sum(1 for r in rows if r[4] >= 6)}）\n")
+
+
 # ---------- 主流程 ----------
 
 def main():
@@ -227,8 +352,10 @@ def main():
         description="Rime userdb 晋升候选分析（只读）：从 userdb 导出文本机械筛选"
                     "晋升候选，bucket/flag 仅为启发式建议，人工审定后再入库。",
     )
-    ap.add_argument("userdb", nargs="+", metavar="userdb导出.txt",
+    ap.add_argument("userdb", nargs="*", metavar="userdb导出.txt",
                     help="userdb 导出文本路径（拼音<Tab>词<Tab>c=.. d=.. t=..），可多份")
+    ap.add_argument("--audit", action="store_true",
+                    help="改为核查 embedded / mydict 现有词条的权重（不读 userdb 导出）")
     ap.add_argument("-o", "--output", metavar="FILE",
                     help="候选 TSV 输出文件（默认打印到 stdout）")
     ap.add_argument("--min-count", type=int, default=3, metavar="N",
@@ -238,6 +365,13 @@ def main():
                          "（默认相对本脚本定位；用于历史复现或仓库副本）")
     args = ap.parse_args()
 
+    if args.audit:
+        if args.userdb:
+            ap.error("--audit 不读 userdb 导出，请去掉导出文件参数")
+        audit(args)
+        return
+    if not args.userdb:
+        ap.error("缺少 userdb 导出文件（或使用 --audit）")
     if args.min_count < 1:
         ap.error("--min-count 必须 >= 1")
 
@@ -260,13 +394,14 @@ def main():
             merged[(w, p)][idx] += c
 
     exclude_words = load_exclude_words(args.repo_root)
+    vendor_codes = load_vendor_codes(args.repo_root)
 
     # 漏斗筛选
     n_single_cjk = 0
     n_excluded = 0
     n_ascii_pinyin = 0
     n_threshold = 0
-    candidates = []  # (word, pinyin, c_total, *c_per_source, bucket, flag)
+    candidates = []  # (word, pinyin, c_total, *c_per_source, weight, rivals, bucket, flag)
     for (w, p), cs in merged.items():
         if len(w) == 1 and is_cjk(w):
             n_single_cjk += 1
@@ -281,13 +416,15 @@ def main():
         if c_total < args.min_count:
             n_threshold += 1
             continue
-        candidates.append((w, p, c_total, *cs, bucket_of(w), flag_of(w)))
+        rivals = rivals_of(w, p, vendor_codes)
+        candidates.append((w, p, c_total, *cs, suggest_weight(rivals),
+                           fmt_rivals(rivals), bucket_of(w), flag_of(w)))
 
     candidates.sort(key=lambda x: (-x[2], x[0]))
 
     # 候选 TSV → stdout 或 --output
     header = ["word", "pinyin", "c_total"] + [f"c_{lb}" for lb in labels] \
-        + ["bucket", "flag"]
+        + ["weight", "rivals", "bucket", "flag"]
     out = open(args.output, "w", encoding="utf-8") if args.output else sys.stdout
     try:
         out.write("\t".join(header) + "\n")
