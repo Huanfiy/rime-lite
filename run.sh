@@ -59,8 +59,9 @@ unit_installed() { systemctl --user cat "${1:-$UNIT_NAME}" >/dev/null 2>&1; }
 
 cmd_restart() {
   have fcitx5 || die "未找到 fcitx5"
-  fcitx5 -rd
-  echo "已请求重启 fcitx5。"
+  # -d 只 fork + setsid、不重定向 stdio；日志接入 journal，与 GNOME 自启同一标识
+  systemd-cat -t fcitx5.desktop fcitx5 -rd </dev/null
+  echo "已请求重启 fcitx5（日志: journalctl --user -t fcitx5.desktop）。"
 }
 
 cmd_verify() {
