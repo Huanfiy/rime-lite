@@ -74,5 +74,5 @@ score_i = log P_LM(cand_i | 上文) − W · ln(1 + i)      # i 为 Rime 原序�
 
 - **同跨度候选只有 2 个时，Rime 先验只有 ln2，LM 容易推翻强短语**。例如上文是驱动语境时，`nihao` 被改成「拟好」。试用期间 2 候选请求有 104 次，改动 10 次。可选方向：用 `cand.quality` 代替名次作先验、提高 `MARGIN`，或要求至少 3 个候选。
 - **候选在最后一次按键约 0.25s 后当面变动**。恰好在这一刻按空格时，上屏的可能与用户看到的不一致。
-- **冷请求较慢**：上文窗口前移（每 80 字一次）或切换会话时要整段重算，冷请求约 140–170ms。p95 打分耗时 106ms，高于 [local-ranker.md](../plans/local-ranker.md) 设定的 80ms 起始目标，实测见 [local-ranker-eval.md](../notes/local-ranker-eval.md)。
-- **未覆盖**：持久学习、领域适应、真实文本上下文，仍是 [local-ranker.md](../plans/local-ranker.md) 中的建议方案。
+- **冷请求较慢**：上文窗口前移（每 80 字一次）或切换会话时要整段重算，冷请求约 140–170ms。p95 打分耗时 106ms，高于早期设定的 80ms 起始目标，实测见 [local-ranker-eval.md](../notes/local-ranker-eval.md)。
+- **未覆盖**：持久学习、领域适应、真实文本上下文（原建议架构 `docs/plans/local-ranker.md` 已移出工作区，git 历史 `81c0f8b` 可查）。

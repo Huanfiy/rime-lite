@@ -61,9 +61,7 @@ rime-lite/
 ├── README.md
 ├── docs/
 │   ├── design/              # 现行架构、决策、SOP
-│   ├── notes/               # 实测数据等长期备忘
-│   ├── plan/                # 已评审待实施（落地后搬入 design）
-│   └── plans/               # 建议架构（未评审 / 部分实施）
+│   └── notes/               # 实测数据等长期备忘
 ├── rime/                # 部署单元 = Rime 用户目录内容
 │   ├── default.yaml
 │   ├── pinyin.schema.yaml

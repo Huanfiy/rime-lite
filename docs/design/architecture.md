@@ -22,7 +22,7 @@
 - 音节内字母乱序容错，如 `nihoa` → 你好（D-31）
 - 软链接切换激活工程（D-11）
 
-**不覆盖：** Emoji、`ext` / 腾讯词库、置顶 / 隐藏 / 降频规则层、双拼 / 反查 / 日期 / 计算器、fcitx5 以外平台。语音输入待实施，见 [voice-daemon.md](../plan/voice-daemon.md)。
+**不覆盖：** Emoji、`ext` / 腾讯词库、置顶 / 隐藏 / 降频规则层、双拼 / 反查 / 日期 / 计算器、语音输入、fcitx5 以外平台。
 
 ## 2. 决策记录
 
@@ -63,7 +63,7 @@
 | D-31 | 音节内乱序容错（2026-10-15）：speller 以 `derive` 收录音节内相邻字母互换的拼写（如 `nihoa` → 你好），只收不撞合法音节的规则，规则以 `rime/pinyin.schema.yaml` 为准；`ai/ia`、`ei/ie`、`ou/uo`、`ui/iu` 互换后撞合法音节，不收。不启用 librime `enable_correction`（本机 1.10.0 实测为邻键替换，不处理互换，且改变正确输入的排序）。已知代价：部分简拼混输被完整拼写占先（`dagn` 由「大姑娘」变「当」）。跨音节乱序不处理，交 AI 候补第 2 项（D-29） |
 | D-32 | 自建词条（embedded / mydict）权重按同码竞争定（2026-10-16）：只对 vendor 层（base / 8105）同码词计算，静态排序落在第 2 位、不抢第 1，无竞争为 100；抢第 1 由人工审定。规则单点在 `tools/userdb-candidates`（`--audit` 核查现有词条），流程见 [lexicon-sop.md](lexicon-sop.md)。原统一 100 低于 base 双字词权重中位数 3333，有同音词时垫底，新机器上晋升基本失效 |
 
-未决事项：无阻塞项。语音见 [voice-daemon.md](../plan/voice-daemon.md)；AI M2 见 [ai-daemon.md](ai-daemon.md) §8；停顿重排已知问题见 [pause-rank.md](pause-rank.md) §6。运行参数走 daemon 配置，不动仓库。
+未决事项：无阻塞项。AI M2 见 [ai-daemon.md](ai-daemon.md) §8；停顿重排已知问题见 [pause-rank.md](pause-rank.md) §6。运行参数走 daemon 配置，不动仓库。
 
 ## 3. 仓库结构要点
 
@@ -132,7 +132,7 @@
 | Emoji | vendor `opencc/` + `simplifier@emoji` | 未挂载（D-9） |
 | ext 扩展词库 | vendor `cn_dicts/ext` 追加 `import_tables` | 未挂载 |
 | octagram | 插件 + `.gram` + schema | 不走 AI 候补轨道（D-18） |
-| 语音 | 见 [voice-daemon.md](../plan/voice-daemon.md) | 待实施 |
+| 语音 | processor + translator ↔ UDS daemon（原计划 `docs/plan/voice-daemon.md` 已移出工作区，git 历史 `14dd597` 可查） | 未挂载 |
 
 ## 9–12. 已清理
 

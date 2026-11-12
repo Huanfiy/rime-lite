@@ -2,7 +2,7 @@
 
 | 项 | 内容 |
 | --- | --- |
-| 定位 | [local-ranker.md](../plans/local-ranker.md) P0 离线测评与停顿重排（D-30）真机试用的实测数据；结论与参数依据 |
+| 定位 | 本地重排 P0 离线测评（原方案 `docs/plans/local-ranker.md` 已移出工作区，git 历史 `81c0f8b` 可查）与停顿重排（D-30）真机试用的实测数据；结论与参数依据 |
 | 环境 | i7-14700，CPU 8 线程；Qwen3-0.6B-Base Q8_0；llama.cpp `7ab4ee7` |
 
 ## 1. P0 离线测评（2026-10-12）
