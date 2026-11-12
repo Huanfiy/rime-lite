@@ -11,7 +11,7 @@
 
 
 # 要比共享目录同名文件的 config_version 大才可生效
-config_version: '2026-08-25.1'
+config_version: '2026-11-12.1'
 
 
 # 方案列表
@@ -24,11 +24,10 @@ menu:
   page_size: 5
 
 
-# 方案选单
+# 方案选单（不绑 F4；仅 Control+Shift+grave）
 switcher:
   caption: 「方案选单」
   hotkeys:
-    - F4
     - Control+Shift+grave
   save_options:
     - ascii_punct
